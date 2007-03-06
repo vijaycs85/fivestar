@@ -231,7 +231,7 @@ function fivestar_widget_form($node) {
   if (strpos(drupal_get_js(), "jQuery('input.fivestar-submit').hide()") === FALSE) {
     drupal_add_js("jQuery(function(){jQuery('input.fivestar-submit').hide();});", 'inline');
   }
-  return drupal_get_form('fivestar_form_node_' . $node->nid, 'node', $node->nid);
+  return drupal_get_form('fivestar_form_node_' . $node->nid, 'node', $node->nid, variable_get('fivestar_style_'. $node->type, 'default'));
 }
 
 function fivestar_forms() {
@@ -244,7 +244,7 @@ function fivestar_forms() {
   }
 }
 
-function fivestar_form($content_type, $content_id) {
+function fivestar_form($content_type, $content_id, $style = 'default') {
   global $user;
   $current_avg = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'average');
   $current_count = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'count');
@@ -284,7 +284,6 @@ function fivestar_form($content_type, $content_id) {
     '#allow_clear' => variable_get('fivestar_unvote_'. (!empty($node) ? 'default' : $node->type), FALSE),
   );
 
-  $style = variable_get('fivestar_unvote_'. (!empty($node) ? 'default' : $node->type), 'default');
   switch ($style) {
     case 'compact':
       // We actually don't need anything more here.
