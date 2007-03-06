@@ -6,13 +6,6 @@
  * A simple n-star voting widget, usable in other forms.
  */
 
-if (module_exists('views')) {
-  include_once(drupal_get_path('module', 'fivestar') . '/fivestar_views.inc');
-}
-if (module_exists('content')) {
-  include_once(drupal_get_path('module', 'fivestar') . '/fivestar_field.inc');
-}
-
 function fivestar_menu($may_cache) {
   $items = array();
   if ($may_cache) {
@@ -25,6 +18,13 @@ function fivestar_menu($may_cache) {
   }
   else {
     drupal_add_css(drupal_get_path('module', 'fivestar') .'/theme/fivestar.css');
+
+    if (module_exists('views')) {
+      include_once(drupal_get_path('module', 'fivestar') . '/fivestar_views.inc');
+    }
+    if (module_exists('content')) {
+      include_once(drupal_get_path('module', 'fivestar') . '/fivestar_field.inc');
+    }
   }
   return $items;
 }
@@ -32,13 +32,36 @@ function fivestar_menu($may_cache) {
 function fivestar_form_alter($form_id, &$form) {
   if ($form_id == 'node_type_form' && isset($form['identity']['type'])) {
     $form['workflow']['fivestar'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Five Star ratings'),
+      '#collapsible' => TRUE,
+    );
+    $form['workflow']['fivestar']['fivestar'] = array(
       '#type' => 'checkbox',
       '#title' => t('Use Five Star rating'),
       '#default_value' => variable_get('fivestar_'. $form['#node_type']->type, 1),
       '#return_value' => 1,
       '#description' => t('Allow users to rate this content type with a five star voting widget.'),
     );
-    $form['workflow']['fivestar_position'] = array(
+    $form['workflow']['fivestar']['fivestar_unvote'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Allow users to undo their votes'),
+      '#default_value' => variable_get('fivestar_unvote_'. $form['#node_type']->type, 0),
+      '#return_value' => 1,
+    );
+
+    $form['workflow']['fivestar']['fivestar_style'] = array(
+      '#type' => 'select',
+      '#title' => t('Five Star display style'),
+      '#default_value' => variable_get('fivestar_style_'. $form['#node_type']->type, 'default'),
+      '#options' => array(
+        'compact' => t('Nothing but the stars'),
+        'default' => t('Stars and average'),
+        'dual' => t('Two sets of stars'),
+      ),
+    );
+
+    $form['workflow']['fivestar']['fivestar_position'] = array(
       '#type' => 'select',
       '#title' => t('Five Star widget location'),
       '#default_value' => variable_get('fivestar_position_'. $form['#node_type']->type, 'above'),
@@ -63,13 +86,15 @@ function fivestar_vote($type, $cid, $value) {
     $output .= '<result>';
     foreach ($result as $data) {
       $output .= '<'. $data->function .'>' . $data->value . '</'. $data->function .'>';
+      $summary[$data->function] = $data->value;
     }
+    $output .= '<summary>'. theme('fivestar_summary', $summary['average'], $summary['count']) .'</summary>';
     $output .= '</result>';
     
     $output .= '<vote>';
-    $output .= '<value>' . $value . '</value>';
-    $output .= '<type>' . $type . '</type>';
-    $output .= '<id>' . $cid . '</id>';
+    $output .= '<value>'. $value .'</value>';
+    $output .= '<type>'. $type .'</type>';
+    $output .= '<id>'. $cid .'</id>';
     $output .= '</vote>';
   }
   else {
@@ -233,6 +258,10 @@ function fivestar_form($content_type, $content_id) {
     $current_vote = 0;
   }
 
+  if ($content_type == 'node') {
+    $node = node_load($content_id);
+  }
+
   $form = array();
 
   $form['content_type'] = array(
@@ -252,8 +281,30 @@ function fivestar_form($content_type, $content_id) {
     '#default_value' => $current_vote->value,
     '#auto_submit' => TRUE,
     '#auto_submit_path' => 'fivestar/vote/' . $content_type . '/' . $content_id,
-    '#allow_clear' => variable_get('fivestar_allow_cancel', TRUE),
+    '#allow_clear' => variable_get('fivestar_unvote_'. (!empty($node) ? 'default' : $node->type), FALSE),
   );
+
+  $style = variable_get('fivestar_unvote_'. (!empty($node) ? 'default' : $node->type), 'default');
+  switch ($style) {
+    case 'compact':
+      // We actually don't need anything more here.
+      break;
+
+    case 'default':
+      $form['vote']['#title'] = t('Your vote');
+      $form['vote']['#description'] = theme('fivestar_summary', $current_avg->value, $current_count->value);
+      break;
+
+    case 'dual':
+      $form['vote']['#title'] = t('Your vote');
+      $form['average'] = array(
+        '#type' => 'item',
+        '#title' => t('Current rating'),
+        '#value' => theme('fivestar_static', $current_avg->value)
+      );
+
+      break;
+  }
   
   $form['submit'] = array(
     '#type' => 'submit',
@@ -278,7 +329,7 @@ function fivestar_elements() {
   $type['fivestar'] = array(
     '#input' => TRUE,
     '#stars' => 5,
-    '#allow_clear' => TRUE,
+    '#allow_clear' => FALSE,
     '#auto_submit' => FALSE,
     '#auto_submit_path' => '',
     '#process' => array('fivestar_expand' => array()),
@@ -329,7 +380,7 @@ function theme_fivestar_static($rating, $stars = 5) {
     $star_value = ceil((100/$stars) * $n);
     $next_star_value = ceil((100/$stars) * ($n+1));
     if ($rating > $star_value && $rating < $next_star_value) {
-      $percent = (1 - ($next_star_value - $rating) / ($next_star_value - $star_value)) * 100;
+      $percent = (1 - ($rating - $prev_star_value) / ($star_value - $prev_star_value)) * 100;
       $output .= '<div class="star"><span class="on" style="width: '.$percent.'%">' . $n . '</span></div>';
     }
     elseif ($rating >= $star_value) {
@@ -341,6 +392,15 @@ function theme_fivestar_static($rating, $stars = 5) {
   }
   $output .= '</div>';
   return $output;
+}
+
+function theme_fivestar_summary($rating, $votes = 0, $stars = 5) {
+  if ($votes == 0) {
+    return t('No votes yet');
+  }
+  $stars = round(($rating * $stars) / 100, 1);
+  $vote_text = format_plural($votes, t('vote'), t('votes'));
+  return t('Average: !stars (!votes !vote_text)', array('!stars' => $stars, '!votes' => $votes, '!vote_text' => $vote_text));
 }
 
 function fivestar_expand($element) {

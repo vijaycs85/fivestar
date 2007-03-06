@@ -163,6 +163,7 @@
        returnObj.vote.id = $("id",$(data)).text();
        returnObj.vote.type = $("type",$(data)).text();
        returnObj.vote.value = $("value",$(data)).text();
+       returnObj.vote.summary = $("summary",$(data)).text();
        
        // Look for the fivestarResult function and call if available
        if (window.fivestarResult) {
