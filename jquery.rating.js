@@ -160,17 +160,36 @@
        returnObj.vote = new Object();
        returnObj.result.count = $("count",$(data)).text();
        returnObj.result.average = $("average",$(data)).text();
+       returnObj.result.summary = $("summary",$(data)).text();
        returnObj.vote.id = $("id",$(data)).text();
        returnObj.vote.type = $("type",$(data)).text();
        returnObj.vote.value = $("value",$(data)).text();
-       returnObj.vote.summary = $("summary",$(data)).text();
        
-       // Look for the fivestarResult function and call if available
-       if (window.fivestarResult) {
-         fivestarResult(returnObj);
-       }
+        if (window.fivestarResult) {
+          fivestarResult(returnObj);
+        }
+        else {
+          fivestarDefaultResult(returnObj);
+        }
      }
-    
+
+    /**
+     * Standard handler to update the average rating when a user changes their
+     * vote. This behavior can be overridden by implementing a fivestarResult
+     * function in your own module or theme.
+     * @param object voteResult
+     * Object containing the following properties from the vote result:
+     * voteResult.result.count The current number of votes for this item
+     * voteResult.result.average The current average of all votes for this item
+     * voteResult.result.summary The textual description of the 
+     * voteResult.vote.id The id of the item the vote was placed on (such as the nid)
+     * voteResult.vote.type The type of the item the vote was placed on (such as 'node')
+     * voteResult.vote.value The value of the new vote saved
+     */
+    function fivestarDefaultResult(voteResult) {
+      $('div#fivestar-summary-'+voteResult.vote.id).html(voteResult.result.summary);
+    }
+
     /**
      * Set up the plugin
      */

@@ -12,3 +12,8 @@ The Five Star voting module adds a clean, attractive voting widget to nodes in D
  * An easy-to-use Form API element type for use in other modules
 
 Fivestar was designed by Nate Haug and Jeff Eaton of Lullabot.
+
+Note: Aggressive caching will complain that fivestar doesn't work, but it actually does. To improve
+performance, the module implements hook_init() -- and the caching advisor screen uses that as the
+only metric to determine whether a module will work with the caching system. Activate it without fear,
+friends -- Fivestar will continue to hum happily along.

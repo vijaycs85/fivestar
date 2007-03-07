@@ -16,9 +16,20 @@ function fivestar_menu($may_cache) {
       'access'   => user_access('rate content'),
     );
   }
-  else {
-    drupal_add_css(drupal_get_path('module', 'fivestar') .'/theme/fivestar.css');
+  return $items;
+}
 
+/**
+ * Implementation of hook_init().
+ * Not that this will cause Drupal to post a warning on the admin screen
+ * when agressive caching is activated. Like CCK, Fivestar's use of hook_init
+ * IS compatible with agressive caching, we just need a way to annouce that.
+ */
+function fivestar_init() {
+  // ensure we are not serving a cached page
+  if (function_exists('drupal_set_content')) {
+    // we don't do this in hook_menu to ensure the files are already included when
+    // views_menu is executed
     if (module_exists('views')) {
       include_once(drupal_get_path('module', 'fivestar') . '/fivestar_views.inc');
     }
@@ -26,8 +37,8 @@ function fivestar_menu($may_cache) {
       include_once(drupal_get_path('module', 'fivestar') . '/fivestar_field.inc');
     }
   }
-  return $items;
 }
+
 
 function fivestar_form_alter($form_id, &$form) {
   if ($form_id == 'node_type_form' && isset($form['identity']['type'])) {
@@ -36,13 +47,14 @@ function fivestar_form_alter($form_id, &$form) {
       '#title' => t('Five Star ratings'),
       '#collapsible' => TRUE,
     );
+
     $form['workflow']['fivestar']['fivestar'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use Five Star rating'),
+      '#title' => t('Enable Five Star rating'),
       '#default_value' => variable_get('fivestar_'. $form['#node_type']->type, 1),
       '#return_value' => 1,
-      '#description' => t('Allow users to rate this content type with a five star voting widget.'),
     );
+
     $form['workflow']['fivestar']['fivestar_unvote'] = array(
       '#type' => 'checkbox',
       '#title' => t('Allow users to undo their votes'),
@@ -61,21 +73,32 @@ function fivestar_form_alter($form_id, &$form) {
       ),
     );
 
-    $form['workflow']['fivestar']['fivestar_position'] = array(
+    $form['workflow']['fivestar']['fivestar_position_teaser'] = array(
       '#type' => 'select',
-      '#title' => t('Five Star widget location'),
-      '#default_value' => variable_get('fivestar_position_'. $form['#node_type']->type, 'above'),
+      '#title' => t('Widget location (teaser)'),
+      '#default_value' => variable_get('fivestar_position_teaser_'. $form['#node_type']->type, 'hidden'),
+      '#options' => array(
+        'above' => t('Above the teaser body'),
+        'below' => t('Below the teaser body'),
+        'hidden' => t('Hidden'),
+      ),
+    );
+
+   $form['workflow']['fivestar']['fivestar_position'] = array(
+      '#type' => 'select',
+      '#title' => t('Widget location (full node)'),
+      '#default_value' => variable_get('fivestar_position_'. $form['#node_type']->type, 'below'),
       '#options' => array(
         'above' => t('Above the node body'),
         'below' => t('Below the node body'),
-        'hidden' => t('Hidden -- my theme will display it'),
+        'hidden' => t('Hidden'),
       ),
     );
   }
 }
 
 function fivestar_perm() {
-  return array('rate content', 'use PHP for fivestar target');
+  return array('rate content', 'view ratings', 'use PHP for fivestar target');
 }
 
 function fivestar_vote($type, $cid, $value) {
@@ -200,8 +223,14 @@ function _fivestar_validate_target($type, $id) {
 function fivestar_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'view':
-      if ($teaser == FALSE && $node->in_preview == FALSE && user_access('rate content') && variable_get('fivestar_' . $node->type, 0)) {
-        switch (variable_get('fivestar_position_' . $node->type, 'above')) {
+      if ($node->in_preview == FALSE && variable_get('fivestar_' . $node->type, 0)) {
+        if ($teaser) {
+          $position = variable_get('fivestar_position_teaser_'. $node->type, 'above');
+        }
+        else {
+          $position = variable_get('fivestar_position_'. $node->type, 'above');
+        }
+        switch ($position) {
           case 'above':
             $node->content['fivestar_widget'] = array(
               '#value' => fivestar_widget_form($node),
@@ -282,6 +311,7 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
     '#auto_submit' => TRUE,
     '#auto_submit_path' => 'fivestar/vote/' . $content_type . '/' . $content_id,
     '#allow_clear' => variable_get('fivestar_unvote_'. (!empty($node) ? 'default' : $node->type), FALSE),
+    '#content_id' => $content_id,
   );
 
   switch ($style) {
@@ -350,8 +380,14 @@ function fivestar_elements() {
  * values are associative arrays in the normal $options format.
  */
 function theme_fivestar($element) {
+  drupal_add_css(drupal_get_path('module', 'fivestar') .'/theme/fivestar.css');
   $element['#children'] = '<div class="fivestar-widget container-inline">'. $element['#children'] .'</div>';
   if ($element['#title'] || $element['#description']) {
+    if (isset($element['#description'])) {
+      $element['#children'] .= '<div id="fivestar-summary-' . $element['#content_id'] . '" class="description">';
+      $element['#children'] .= $element['#description'] .'</div>';
+    }
+    unset($element['#description']);
     unset($element['#id']);
     return theme('form_element', $element, $element['#children']);
   }
@@ -373,6 +409,7 @@ function theme_fivestar($element) {
  * 
  */
 function theme_fivestar_static($rating, $stars = 5) {
+  drupal_add_css(drupal_get_path('module', 'fivestar') .'/theme/fivestar.css');
   $output = '';
   $output .= '<div class="fivestar-widget-static">';
   for ($n=1; $n <= $stars; $n++) {
