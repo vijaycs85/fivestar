@@ -6,6 +6,11 @@
  * A simple n-star voting widget, usable in other forms.
  */
 
+/**
+ * Implementation of hook_menu.
+ * Provides a callback url where votes can be submitted by the client-side
+ * javascript.
+ */
 function fivestar_menu($may_cache) {
   $items = array();
   if ($may_cache) {
@@ -39,7 +44,20 @@ function fivestar_init() {
   }
 }
 
+/**
+ * Implementation of hook_perm (permissions).
+ * Exposes permissions for rating content, viewing aggregate ratings, and using PHP
+ * snippets when configuring fivestar CCK fields.
+ */
+function fivestar_perm() {
+  return array('rate content', 'view ratings', 'use PHP for fivestar target');
+}
 
+/**
+ * Implementation of hook_form_alter
+ * Adds fivestar enaable and position to the node-type configuration form.
+ * 
+ */
 function fivestar_form_alter($form_id, &$form) {
   if ($form_id == 'node_type_form' && isset($form['identity']['type'])) {
     $form['workflow']['fivestar'] = array(
@@ -97,10 +115,19 @@ function fivestar_form_alter($form_id, &$form) {
   }
 }
 
-function fivestar_perm() {
-  return array('rate content', 'view ratings', 'use PHP for fivestar target');
-}
 
+/**
+ * Callback function for fivestar/vote path
+ * @param type
+ *   A content-type to log the vote to. 'node' is the most common.
+ * @param cid
+ *   A content id to log the vote to. This would be a node ID, a comment ID, etc.
+ * @param value
+ *   A value from 1-100, representing the vote cast for the content.
+ * @return
+ *  An XML chunk containing the results of the vote, for use by the client-side
+ *  javascript code.
+ */
 function fivestar_vote($type, $cid, $value) {
   $result = _fivestar_cast_vote($type, $cid, $value);
   if (count($result)) {
@@ -127,6 +154,10 @@ function fivestar_vote($type, $cid, $value) {
   exit($output);
 }
 
+/**
+ * Internal function to handle vote casting, flood control, XSS, IP based
+ * voting, etc...
+ */
 function _fivestar_cast_vote($type, $cid, $value) {
   global $user;
 
@@ -170,7 +201,7 @@ function _fivestar_cast_vote($type, $cid, $value) {
         return votingapi_recalculate_results($type, $cid);
       }
     }
-    // If the vote ISN'T zero, check for existing botes in the database.
+    // If the vote ISN'T zero, check for existing votes in the database.
     else {
       if ($uid) {
         // If the user is logged in, we'll look for votes from that uid.
@@ -201,6 +232,14 @@ function _fivestar_cast_vote($type, $cid, $value) {
   }
 }
 
+/**
+ * Internal function to check that node-type accepts votes
+ * 
+ * @param text $type type of target (currently only node is supported)
+ * @param text $id identifier within the type (in this case node-type)
+ * 
+ * @return boolean
+ */
 function _fivestar_validate_target($type, $id) {
   switch ($type) {
     case 'node':
@@ -220,6 +259,11 @@ function _fivestar_validate_target($type, $id) {
   }
 }
 
+/**
+ * Implementation of hook_nodeapi()
+ * 
+ * Adds the fievestar widget to the node view.
+ */
 function fivestar_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'view':
@@ -263,6 +307,11 @@ function fivestar_widget_form($node) {
   return drupal_get_form('fivestar_form_node_' . $node->nid, 'node', $node->nid, variable_get('fivestar_style_'. $node->type, 'default'));
 }
 
+/**
+ * Implementation of hook_forms. This is necessary when multiple fivestar
+ * forms appear on the same page, each requiring a separate form_id, but all
+ * using the same underlying callbacks.
+ */
 function fivestar_forms() {
   $args = func_get_args();
   if (strpos($args[0][0], 'fivestar_form') !== FALSE) {
@@ -273,6 +322,11 @@ function fivestar_forms() {
   }
 }
 
+/**
+ * Create the fivestar form for the current item
+ * Note that this is not an implementation of hook_form(). We should probably
+ * change the function to reflext that.
+ */
 function fivestar_form($content_type, $content_id, $style = 'default') {
   global $user;
   $current_avg = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'average');
@@ -348,12 +402,20 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
   return $form;
 }
 
+/**
+ * Submit handler for the above form
+ */
 function fivestar_form_submit($form_id, $form_values) {
   if ($form_id == 'fivestar_form_' . $form_values['content_type'] . '_' . $form_values['content_id']) {
     _fivestar_cast_vote($form_values['content_type'], $form_values['content_id'], $form_values['vote']);
   }
 }
 
+/**
+ * Implementation of hook_elements
+ * 
+ * Defines 'fivestar' form element type
+ */
 function fivestar_elements() {
   $type['fivestar'] = array(
     '#input' => TRUE,
@@ -439,6 +501,9 @@ function theme_fivestar_summary($rating, $votes = 0, $stars = 5) {
   return t('Average: !stars (!votes !vote_text)', array('!stars' => $stars, '!votes' => $votes, '!vote_text' => $vote_text));
 }
 
+/**
+ * Process callback for fivestar_element -- see fivestar_element()
+ */
 function fivestar_expand($element) {
   if (isset($element['#vote_count'])) {
     $element['vote_count'] =  array(
