@@ -33,11 +33,6 @@ function fivestar_menu($may_cache) {
 function fivestar_init() {
   // ensure we are not serving a cached page
   if (function_exists('drupal_set_content')) {
-    // we don't do this in hook_menu to ensure the files are already included when
-    // views_menu is executed
-    if (module_exists('views')) {
-      include_once(drupal_get_path('module', 'fivestar') . '/fivestar_views.inc');
-    }
     if (module_exists('content')) {
       include_once(drupal_get_path('module', 'fivestar') . '/fivestar_field.inc');
     }
@@ -544,4 +539,19 @@ function fivestar_expand($element) {
   }
   
   return $element;
+}
+
+function fivestar_votingapi_views_formatters($details = array()) {
+  if ($details['value_type'] == 'percent') {
+    return array('fivestar_views_value_display_handler' => t('Fivestar rating'));
+  }
+}
+
+function fivestar_views_value_display_handler($op, $filter, $value, &$query) {
+  if ($value === NULL) {
+    return $value;
+  }
+  else {
+    return theme('fivestar_static', $value);
+  }
 }
