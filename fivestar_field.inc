@@ -26,7 +26,7 @@ function fivestar_field_settings($op, $field) {
         '#type' => 'select',
         '#title' => t('Number of Options'),
         '#options' => drupal_map_assoc(array(1,2,3,4,5,6,7,8,9,10)),
-        '#default_value' => $widget['stars'] ? $widget['stars'] : 5,
+        '#default_value' => $field['stars'] ? $field['stars'] : 5,
         '#description' => t('The number of stars or radio buttons to display.'),
       );
       $form['target'] = array(
