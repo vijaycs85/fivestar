@@ -75,6 +75,13 @@ function fivestar_form_alter($form_id, &$form) {
       '#return_value' => 1,
     );
 
+    $form['workflow']['fivestar']['fivestar_stars'] = array(
+      '#type' => 'select',
+      '#title' => t('Number of stars'),
+      '#options' => drupal_map_assoc(array(1,2,3,4,5,6,7,8,9,10)),
+      '#default_value' => variable_get('fivestar_stars_'. $form['#node_type']->type, 5),
+    );
+
     $form['workflow']['fivestar']['fivestar_style'] = array(
       '#type' => 'select',
       '#title' => t('Five Star display style'),
@@ -126,6 +133,11 @@ function fivestar_form_alter($form_id, &$form) {
 function fivestar_vote($type, $cid, $value) {
   $result = _fivestar_cast_vote($type, $cid, $value);
   if (count($result)) {
+    if ($type == 'node') {
+      $node = node_load($cid);
+    }
+    $stars = variable_get('fivestar_stars_'. (!isset($node) ? 'default' : $node->type), 5);
+    
     $output = '';
     $output .= '<?xml version="1.0" encoding="UTF-8"?>';
     $output .= '<result>';
@@ -133,7 +145,7 @@ function fivestar_vote($type, $cid, $value) {
       $output .= '<'. $data->function .'>' . $data->value . '</'. $data->function .'>';
       $summary[$data->function] = $data->value;
     }
-    $output .= '<summary>'. theme('fivestar_summary', $summary['average'], $summary['count']) .'</summary>';
+    $output .= '<summary>'. theme('fivestar_summary', $summary['average'], $summary['count'], $stars) .'</summary>';
     $output .= '</result>';
     
     $output .= '<vote>';
@@ -340,6 +352,8 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
     $node = node_load($content_id);
   }
 
+  $stars = variable_get('fivestar_stars_'. (!isset($node) ? 'default' : $node->type), 5);
+
   $form = array();
 
   $form['content_type'] = array(
@@ -354,12 +368,13 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
 
   $form['vote'] = array(
     '#type' => 'fivestar',
+    '#stars' => $stars,
     '#vote_count' => $current_count->value,
     '#vote_average' => $current_avg->value,
     '#default_value' => $current_vote->value,
     '#auto_submit' => TRUE,
     '#auto_submit_path' => 'fivestar/vote/' . $content_type . '/' . $content_id,
-    '#allow_clear' => variable_get('fivestar_unvote_'. (!empty($node) ? 'default' : $node->type), FALSE),
+    '#allow_clear' => variable_get('fivestar_unvote_'. (!isset($node) ? 'default' : $node->type), FALSE),
     '#content_id' => $content_id,
   );
 
@@ -370,7 +385,7 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
 
     case 'default':
       $form['vote']['#title'] = t('Your vote');
-      $form['vote']['#description'] = theme('fivestar_summary', $current_avg->value, $current_count->value);
+      $form['vote']['#description'] = theme('fivestar_summary', $current_avg->value, $current_count->value, $stars);
       break;
 
     case 'dual':
@@ -378,7 +393,7 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
       $form['average'] = array(
         '#type' => 'item',
         '#title' => t('Current rating'),
-        '#value' => theme('fivestar_static', $current_avg->value)
+        '#value' => theme('fivestar_static', $current_avg->value, $stars)
       );
 
       break;
