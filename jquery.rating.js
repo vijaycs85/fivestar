@@ -201,8 +201,10 @@
         });
         return $(stack);
     }
-	// fix ie6 background flicker problem.
-	if ($.browser.msie == true) {
-		document.execCommand('BackgroundImageCache', false, true);
-	}
+  // fix ie6 background flicker problem.
+  if ($.browser.msie == true) {
+    try {
+      document.execCommand('BackgroundImageCache', false, true);
+    } catch(err) {}
+  }
 })(jQuery)
