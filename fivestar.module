@@ -345,7 +345,7 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
     // If the user is anonymous, we never both loading their existing votes.
     // Not only would it be hit-or-miss, it would break page caching. Safer to always
     // show the 'fresh' version to anon users.
-    $current_vote = 0;
+    $current_vote->value = 0;
   }
 
   if ($content_type == 'node') {
