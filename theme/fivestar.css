@@ -9,12 +9,17 @@ div.fivestar-widget-static {
   display: block;
 }
 
+div.fivestar-widget-static br {
+  clear: left;
+}
+
 div.fivestar-widget-static .star {
   float: left;
   width: 17px;
   height: 15px;
   overflow: hidden;
   text-indent: -999em;
+  background: url(star.gif) no-repeat 0 0px;
 }
 
 div.fivestar-widget-static .star span.on {
