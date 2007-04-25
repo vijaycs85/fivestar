@@ -78,12 +78,14 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
         if ($field['php']) {
           $items[$delta]['target'] = drupal_eval($item['target']);
         }
-        $target_node = node_load($items[$delta]['target']);
-        if ($item['rating'] == 0) {
-          votingapi_unset_vote('node', $target_node->nid);
-        }
-        else {
-          _fivestar_cast_vote('node', $target_node->nid, $item['rating']);
+        if (is_numeric($items[$delta]['target'])) {
+          $target_node = node_load($items[$delta]['target']);
+          if ($item['rating'] == 0) {
+            votingapi_unset_vote('node', $target_node->nid);
+          }
+          else {
+            _fivestar_cast_vote('node', $target_node->nid, $item['rating']);
+          }
         }
       }
       break;
