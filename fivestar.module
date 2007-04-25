@@ -140,7 +140,7 @@ function fivestar_vote($type, $cid, $value) {
     
     $output = '';
     $output .= '<?xml version="1.0" encoding="UTF-8"?>';
-    $output .= '<result>';
+    $output .= '<xml><result>';
     foreach ($result as $data) {
       $output .= '<'. $data->function .'>' . $data->value . '</'. $data->function .'>';
       $summary[$data->function] = $data->value;
@@ -152,12 +152,12 @@ function fivestar_vote($type, $cid, $value) {
     $output .= '<value>'. $value .'</value>';
     $output .= '<type>'. $type .'</type>';
     $output .= '<id>'. $cid .'</id>';
-    $output .= '</vote>';
+    $output .= '</vote></xml>';
   }
   else {
     $output = 'false';
   }
-
+  header("Content-Type: text/xml");
   exit($output);
 }
 

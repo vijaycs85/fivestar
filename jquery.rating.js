@@ -158,13 +158,12 @@
        var returnObj = new Object();
        returnObj.result = new Object();
        returnObj.vote = new Object();
-       returnObj.result.count = $("count",$(data)).text();
-       returnObj.result.average = $("average",$(data)).text();
-       returnObj.result.summary = $("summary",$(data)).text();
-       returnObj.vote.id = $("id",$(data)).text();
-       returnObj.vote.type = $("type",$(data)).text();
-       returnObj.vote.value = $("value",$(data)).text();
-       
+       returnObj.result.count = $("count",data).text();
+       returnObj.result.average = $("average",data).text();
+       returnObj.result.summary = $("summary",data).text();
+       returnObj.vote.id = $("id",data).text();
+       returnObj.vote.type = $("type",data).text();
+       returnObj.vote.value = $("value",data).text();
         if (window.fivestarResult) {
           fivestarResult(returnObj);
         }
