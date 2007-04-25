@@ -64,7 +64,7 @@ function fivestar_form_alter($form_id, &$form) {
     $form['workflow']['fivestar']['fivestar'] = array(
       '#type' => 'checkbox',
       '#title' => t('Enable Five Star rating'),
-      '#default_value' => variable_get('fivestar_'. $form['#node_type']->type, 1),
+      '#default_value' => variable_get('fivestar_'. $form['#node_type']->type, 0),
       '#return_value' => 1,
     );
 
