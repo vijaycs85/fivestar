@@ -304,13 +304,6 @@ function fivestar_nodeapi(&$node, $op, $teaser, $page) {
 }
 
 function fivestar_widget_form($node) {
-  if (strpos(drupal_get_js(), 'jquery.rating.js') === FALSE) {
-    drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
-    drupal_add_js("jQuery(function(){jQuery('div.fivestar-widget').rating();});", 'inline');
-  }
-  if (strpos(drupal_get_js(), "jQuery('input.fivestar-submit').hide()") === FALSE) {
-    drupal_add_js("jQuery(function(){jQuery('input.fivestar-submit').hide();});", 'inline');
-  }
   return drupal_get_form('fivestar_form_node_' . $node->nid, 'node', $node->nid, variable_get('fivestar_style_'. $node->type, 'default'));
 }
 
@@ -515,6 +508,16 @@ function theme_fivestar_summary($rating, $votes = 0, $stars = 5) {
  * Process callback for fivestar_element -- see fivestar_element()
  */
 function fivestar_expand($element) {
+  // Add necessary javascript. The current javascript is checked to prevent the
+  // inline javascript from being duplicated.
+  if (strpos(drupal_get_js(), 'jquery.rating.js') === FALSE) {
+    drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
+    drupal_add_js("jQuery(function(){jQuery('div.fivestar-widget').rating();});", 'inline');
+  }
+  if (strpos(drupal_get_js(), "jQuery('input.fivestar-submit').hide()") === FALSE) {
+    drupal_add_js("jQuery(function(){jQuery('input.fivestar-submit').hide();});", 'inline');
+  }
+
   if (isset($element['#vote_count'])) {
     $element['vote_count'] =  array(
       '#type' => 'hidden',
