@@ -537,15 +537,18 @@ function fivestar_expand($element) {
     );
   }
   
-  for ($i = ($element['#allow_clear'] == TRUE) ? 0 : 1; $i <= $element['#stars']; $i++) {
+  for ($i = 0; $i <= $element['#stars']; $i++) {
     $this_value = ceil($i * 100/$element['#stars']);
     $next_value = ceil(($i+1) * 100/$element['#stars']);
-    
-    $element['vote'][$i]['#type'] = 'radio';
-    $element['vote'][$i]['#return_value'] = $this_value;
-    $element['vote'][$i]['#attributes'] = $element['#attributes'];
-    $element['vote'][$i]['#parents'] = $element['#parents'];
-    $element['vote'][$i]['#spawned'] = TRUE;
+
+    //Display clear button only if allowed
+    if (($element['#allow_clear'] == TRUE) || ($i > 0)){    
+      $element['vote'][$i]['#type'] = 'radio';
+      $element['vote'][$i]['#return_value'] = $this_value;
+      $element['vote'][$i]['#attributes'] = $element['#attributes'];
+      $element['vote'][$i]['#parents'] = $element['#parents'];
+      $element['vote'][$i]['#spawned'] = TRUE;
+    }
     
     // If a default value is not exactly on a radio value, round up to the next one
     if ($element['#default_value'] > $this_value && $element['#default_value'] <= $next_value) {
