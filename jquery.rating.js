@@ -33,7 +33,7 @@
             averageIndex = 0,
             averagePercent = 0;
         // Set default rating
-        $obj.find("input[@type='radio']").each(function () { if (this.checked) { averageIndex = this.value; } }).end();
+        $("input[@type='radio']", $obj).each(function () { if (this.checked) { averageIndex = this.value; } });
         
         $widget.end();
         
@@ -82,18 +82,18 @@
             averageIndex = 0;
             averagePercent = 0;
             // Save the value in a hidden field
-            $obj.find("input[@type='radio']").each(function () { this.checked = (this.value ==  averageIndex) ? true : false; }).end();
+            $("input[@type='radio']", $obj).each(function () { this.checked = (this.value ==  averageIndex) ? true : false; });
             // Submit the form if needed
-            $obj.find("input.fivestar-path").each(function () { $.get(this.value + '/' + averageIndex, null, voteHook); }).end();
+            $("input.fivestar-path", $obj).each(function () { $.get(this.value + '/' + averageIndex, null, voteHook); });
             return false;
         });
         $stars.click(function(){
             averageIndex = Math.ceil(($stars.index(this) + 1) * (100/$stars.size()));
             averagePercent = 0;
             // Save the value in a hidden field
-            $obj.find("input[@type='radio']").each(function () { this.checked = (this.value ==  averageIndex) ? true : false; }).end();
+            $("input[@type='radio']", $obj).each(function () { this.checked = (this.value ==  averageIndex) ? true : false; });
             // Submit the form if needed
-            $obj.find("input.fivestar-path").each(function () { $.get(this.value + '/' + averageIndex, null, voteHook); }).end();
+            $("input.fivestar-path", $obj).each(function () { $.get(this.value + '/' + averageIndex, null, voteHook); });
             return false;
         });
         
@@ -133,7 +133,7 @@
         var $container = $(document.createElement('div')).attr({
             "class": 'fivestar-widget clear-block'
         });
-        var $radios = $widget.find("input[@type='radio']");
+        var $radios = $("input[@type='radio']", $widget);
         var size = $radios.size() - 1;
         var cancel = 1;
         for (var i = 0, radio; radio = $radios[i]; i++){
@@ -147,7 +147,7 @@
             $container.append($div[0]);                    
         }
         // Attach the new widget and hide the existing widget
-        $widget.end().hide().after($container);
+        $widget.hide().after($container);
         return $container;
     }
     
