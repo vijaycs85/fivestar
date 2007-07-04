@@ -28,14 +28,12 @@
      */
     var buildRating = function($obj){
         var $widget = buildInterface($obj),
-            $stars = $($widget.children('.star')),
-            $cancel = $($widget.end().children('.cancel')),
+            $stars = $('.star', $widget),
+            $cancel = $('.cancel', $widget),
             averageIndex = 0,
             averagePercent = 0;
         // Set default rating
         $("input[@type='radio']", $obj).each(function () { if (this.checked) { averageIndex = this.value; } });
-        
-        $widget.end();
         
         // hover events.
         // and focus events added
@@ -192,13 +190,13 @@
     /**
      * Set up the plugin
      */
-    $.fn.rating = function(){
-        var stack = [];
-        this.each(function(){
-            var ret = buildRating($(this));
-            stack = $.merge(ret, stack);
-        });
-        return $(stack);
+    $.fn.rating = function() {
+      var stack = [];
+      this.each(function() {
+          var ret = buildRating($(this));
+          stack.push(ret);
+      });
+      return stack;
     }
   // fix ie6 background flicker problem.
   if ($.browser.msie == true) {
