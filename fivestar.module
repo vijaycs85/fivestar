@@ -6,6 +6,20 @@
  * A simple n-star voting widget, usable in other forms.
  */
 
+function fivestar_help($section) {
+  switch ($section) {
+    case 'admin/settings/fivestar':
+      $output = t('This page is used to configure site-wide features of the fivestar module. To setup fivestar to rate content:');
+      $steps = array(
+        t('Configure site-wide settings for fivestar below.'),
+        t('Go to <a href="!types">admin/content/types</a> and edit the type you would like to rate.', array('!types' => url('admin/content/types'))),
+        t('On the settings page for the content type, a set of options is available for fivestar, where you can enabled rating for that type and set rating options.'),
+      );
+      $output .= theme('item_list', $steps, NULL, 'ol');
+  }
+  return $output;
+}
+
 /**
  * Implementation of hook_menu.
  * Provides a callback url where votes can be submitted by the client-side
@@ -14,6 +28,20 @@
 function fivestar_menu($may_cache) {
   $items = array();
   if ($may_cache) {
+    $items[] = array(
+      'path'     => 'admin/settings/fivestar',
+      'title'    => t('Fivestar'),
+      'callback' => 'drupal_get_form',
+      'callback arguments' => array('fivestar_settings'),
+      'type'     => MENU_NORMAL_ITEM,
+      'access'   => user_access('administer site configuration'),
+    );
+    $items[] = array(
+      'path'     => 'fivestar/preview',
+      'callback' => 'fivestar_preview_page',
+      'type'     => MENU_CALLBACK,
+      'access'   => user_access('administer site configuration'),
+    );
     $items[] = array(
       'path'     => 'fivestar/vote',
       'callback' => 'fivestar_vote',
@@ -117,6 +145,83 @@ function fivestar_form_alter($form_id, &$form) {
   }
 }
 
+/**
+ * Callback function for admin/settings/fivestar. Display the settings form.
+ */
+function fivestar_settings() {
+  $form = array();
+  $form['fivestar_widget'] = array (
+    '#type' => 'radios',
+    '#title' => t('Widget display'),
+    '#options' => array('default' => t('Default')) + module_invoke_all('fivestar_widgets'),
+    '#default_value' => variable_get('fivestar_widget', 'default'),
+    '#description' => t('Choose a widget set to be used on your site.'),
+    '#attributes' => array('class' => 'fivestar-widgets clear-block'),
+  );
+  return system_settings_form($form);
+}
+
+function theme_fivestar_settings($form) {
+  fivestar_add_css();
+  drupal_set_title('Fivestar Settings');
+
+  // Default preview.
+  $form['fivestar_widget']['default']['#description'] = 'Default '. t('Preview') .':<br /><iframe class="fivestar-preview" scrolling="no" src="'. url('fivestar/preview') .'"></iframe>';
+
+  // Preview for each widget.
+  $widget_number = 0;
+  foreach (element_children($form['fivestar_widget']) as $widget_key) {
+    if ($widget_key != 'default') {
+      $form['fivestar_widget'][$widget_key]['#description'] = $form['fivestar_widget'][$widget_key]['#title'] .' '. t('Preview') .':<br /><iframe class="fivestar-preview" scrolling="no" src="'. url('fivestar/preview/'. $widget_number) .'"></iframe>';
+      $widget_number++;
+    }
+  }
+  return drupal_render($form);
+}
+
+/**
+ * Callback function for fivestar/preview. Outputs an entire page containing a
+ * preview of the passed in fivestar widget format.
+ */
+function fivestar_preview_page($widget_number = NULL) {
+  $widgets = module_invoke_all('fivestar_widgets');
+  $css_files = array_keys($widgets);
+  if (isset($css_files[$widget_number])) {
+    fivestar_add_css($css_files[$widget_number]);
+  }
+  else {
+    fivestar_add_css('default');
+  }
+  print theme('fivestar_preview_page');
+  exit;
+}
+
+function theme_fivestar_preview_page() {
+
+  $form = array();
+  $form['vote'] = array(
+    '#type' => 'fivestar',
+    '#stars' => 5,
+    '#auto_submit' => FALSE,
+    '#allow_clear' => TRUE,
+  );
+
+  $form = form_builder('upload_js', $form);
+
+  $output = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
+  $output .= '<html xmlns="http://www.w3.org/1999/xhtml">';
+  $output .= '<head>';
+  $output .= ' <title>'. t('Fivestar Preview') .'</title>';
+  $output .= drupal_get_html_head();
+  $output .= drupal_get_css();
+  $output .= drupal_get_js();
+  $output .= ' </head>';
+  $output .= ' <body style="background-color: #fff; color: #000;">';
+  $output .= drupal_render($form);
+  $output .= '</body></html>';
+
+  return $output;
+}
 
 /**
  * Callback function for fivestar/vote path
@@ -266,6 +371,29 @@ function _fivestar_validate_target($type, $id) {
   }
 }
 
+
+/**
+ * Implementation of hook_fivestar_widgets.
+ * 
+ * This hook allows other modules to create additional custom widgets for
+ * the fivestar module.
+ * 
+ * @return array
+ *   An array of key => value pairs suitable for inclusion as the #options in a
+ *   select or radios form element. Each key must be the location of a css
+ *   file for a five star widget. Each value should be the name of the widget.
+ */
+function fivestar_fivestar_widgets() {
+  $widgets_directory = drupal_get_path('module', 'fivestar') .'/widgets';
+  $files = file_scan_directory($widgets_directory, '\.css$');
+
+  $widgets = array();
+  foreach ($files as $file) {
+    $widgets[$file->filename] = drupal_ucfirst($file->name);
+  }
+  return $widgets;
+}
+
 /**
  * Implementation of hook_nodeapi()
  * 
@@ -398,6 +526,11 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
     '#attributes' => array('class' => 'fivestar-submit'),
   );
 
+  // Add javascript to hide the submit button.
+  if (strpos(drupal_get_js(), "jQuery('input.fivestar-submit').hide()") === FALSE) {
+    drupal_add_js("jQuery(function(){jQuery('input.fivestar-submit').hide();});", 'inline');
+  }
+
   $form['#attributes']['class'] = 'fivestar-widget';
   $form['#base'] = 'fivestar_form';
   $form['#redirect'] = FALSE;
@@ -445,7 +578,9 @@ function fivestar_elements() {
  * values are associative arrays in the normal $options format.
  */
 function theme_fivestar($element) {
-  drupal_add_css(drupal_get_path('module', 'fivestar') .'/theme/fivestar.css');
+  // Add necessary CSS.
+  fivestar_add_css();
+
   $element['#children'] = '<div class="fivestar-widget container-inline">'. $element['#children'] .'</div>';
   if ($element['#title'] || $element['#description']) {
     if (isset($element['#description'])) {
@@ -474,7 +609,9 @@ function theme_fivestar($element) {
  * 
  */
 function theme_fivestar_static($rating, $stars = 5) {
-  drupal_add_css(drupal_get_path('module', 'fivestar') .'/theme/fivestar.css');
+  // Add necessary CSS.
+  fivestar_add_css();
+
   $output = '';
   $output .= '<div class="fivestar-widget-static clear-block">';
   for ($n=1; $n <= $stars; $n++) {
@@ -505,6 +642,23 @@ function theme_fivestar_summary($rating, $votes = 0, $stars = 5) {
 }
 
 /**
+ * Fetch the necessary CSS files to render the fivestar widget.
+ */
+function fivestar_add_css($widget_css = NULL) {
+  // Add fivestar CSS.
+  drupal_add_css(drupal_get_path('module', 'fivestar') .'/fivestar.css');
+
+  // Add widget specific CSS.
+  if (!isset($widget_css)) {
+    $widget_css = variable_get('fivestar_widget', 'default');
+  }
+
+  if ($widget_css != 'default') {
+    drupal_add_css($widget_css, 'module');
+  }
+}
+
+/**
  * Process callback for fivestar_element -- see fivestar_element()
  */
 function fivestar_expand($element) {
@@ -513,9 +667,6 @@ function fivestar_expand($element) {
   if (strpos(drupal_get_js(), 'jquery.rating.js') === FALSE) {
     drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
     drupal_add_js("jQuery(function(){jQuery('div.fivestar-widget').rating();});", 'inline');
-  }
-  if (strpos(drupal_get_js(), "jQuery('input.fivestar-submit').hide()") === FALSE) {
-    drupal_add_js("jQuery(function(){jQuery('input.fivestar-submit').hide();});", 'inline');
   }
 
   if (isset($element['#vote_count'])) {

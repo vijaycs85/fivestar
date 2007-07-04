@@ -3,6 +3,7 @@
 The Five Star voting module adds a clean, attractive voting widget to nodes in Drupal 5. It features:
 
  * jQuery rollover effects and AJAX no-reload voting
+ * Customizable star sets
  * Graceful degradation to an HTML rating form when JavaScript is turned off
  * Per-nodetype configurability
  * Support for anonymous voters
@@ -38,19 +39,27 @@ without fear, friends -- Fivestar will continue to hum happily along.
 
 Configuration
 -------------
-There is no global settings page for Fivestar. It's configuration is spread
-between the content type settings page and access permissions. To configure:
+The configuration for Fivestar is spread between the content type settings page,
+Fivestar site settings page, and access permissions. To configure:
 
-1) Activate voting on each content type. For example, if you want Fivestar to
+1) Configure the site-wide setting for Fivestar, Administer -> Settings ->
+   Fivestar.
+
+2) Activate voting on each content type. For example, if you want Fivestar to
    appear on story nodes, use Administer -> Content Management ->
    Content Types -> Story, and check the "Enable Five Star rating" box under
    the "Five Star ratings" heading. Repeat for each content type desired.
 
-2) Enable anonymous voting.
+3) Enable anonymous voting.
    If you want to allow anonymous voting, you'll need to set permissions for
    that. Use Administer -> User Management -> Access Control, and check the
    "rate content" and "view ratings" checkboxes for the roles you'd like.
    You'll find these permission items under the "fivestar module" heading.
+
+Contributing
+------------
+Have a sweet set of stars you'd like to contribute to the Fivestar module?
+Post them to the Fivestar issue queue: http://drupal.org/project/issues/fivestar
 
 Support
 -------
