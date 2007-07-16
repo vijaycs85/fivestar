@@ -63,7 +63,7 @@ Post them to the Fivestar issue queue: http://drupal.org/project/issues/fivestar
 
 Support
 -------
-If you experience a problem with cck_imagefield or have a problem, file a
+If you experience a problem with fivestar or have a problem, file a
 request or issue on the fivestar queue at
 http://drupal.org/project/issues/fivestar. DO NOT POST IN THE FORUMS. Posting in
 the issue queues is a direct line of communication with the module authors.
