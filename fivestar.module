@@ -73,7 +73,7 @@ function fivestar_init() {
  * snippets when configuring fivestar CCK fields.
  */
 function fivestar_perm() {
-  return array('rate content', 'view ratings', 'use PHP for fivestar target');
+  return array('rate content', 'use PHP for fivestar target');
 }
 
 /**
