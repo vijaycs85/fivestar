@@ -75,7 +75,7 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
     case 'insert':
     case 'update':
       foreach($items as $delta => $item) {
-        if ($field['php']) {
+        if ($field['php'] && !empty($item['target'])) {
           $items[$delta]['target'] = drupal_eval($item['target']);
         }
         if (is_numeric($items[$delta]['target'])) {
