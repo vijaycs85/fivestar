@@ -89,6 +89,16 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
         }
       }
       break;
+    case 'delete':
+      foreach($items as $delta => $item) {
+        if ($field['php'] && !empty($item['target'])) {
+          $items[$delta]['target'] = drupal_eval($item['target']);
+        }
+        if (is_numeric($items[$delta]['target'])) {
+          votingapi_unset_vote('node', $items[$delta]['target']);
+        }
+      }
+      break;
   }
 }
       
