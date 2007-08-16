@@ -83,34 +83,39 @@ function fivestar_perm() {
  */
 function fivestar_form_alter($form_id, &$form) {
   if ($form_id == 'node_type_form' && isset($form['identity']['type'])) {
-    $form['workflow']['fivestar'] = array(
+    // Goofy hack to get the buttons at the end of the array.
+    $form['workflow']['#weight'] += 1;
+    $form['submit']['#weight'] += 1;
+    $form['delete']['#weight'] += 1;
+
+    $form['fivestar'] = array(
       '#type' => 'fieldset',
       '#title' => t('Five Star ratings'),
       '#collapsible' => TRUE,
     );
 
-    $form['workflow']['fivestar']['fivestar'] = array(
+    $form['fivestar']['fivestar'] = array(
       '#type' => 'checkbox',
       '#title' => t('Enable Five Star rating'),
       '#default_value' => variable_get('fivestar_'. $form['#node_type']->type, 0),
       '#return_value' => 1,
     );
 
-    $form['workflow']['fivestar']['fivestar_unvote'] = array(
+    $form['fivestar']['fivestar_unvote'] = array(
       '#type' => 'checkbox',
       '#title' => t('Allow users to undo their votes'),
       '#default_value' => variable_get('fivestar_unvote_'. $form['#node_type']->type, 0),
       '#return_value' => 1,
     );
 
-    $form['workflow']['fivestar']['fivestar_stars'] = array(
+    $form['fivestar']['fivestar_stars'] = array(
       '#type' => 'select',
       '#title' => t('Number of stars'),
       '#options' => drupal_map_assoc(array(1,2,3,4,5,6,7,8,9,10)),
       '#default_value' => variable_get('fivestar_stars_'. $form['#node_type']->type, 5),
     );
 
-    $form['workflow']['fivestar']['fivestar_style'] = array(
+    $form['fivestar']['fivestar_style'] = array(
       '#type' => 'select',
       '#title' => t('Five Star display style'),
       '#default_value' => variable_get('fivestar_style_'. $form['#node_type']->type, 'default'),
@@ -121,7 +126,7 @@ function fivestar_form_alter($form_id, &$form) {
       ),
     );
 
-    $form['workflow']['fivestar']['fivestar_position_teaser'] = array(
+    $form['fivestar']['fivestar_position_teaser'] = array(
       '#type' => 'select',
       '#title' => t('Widget location (teaser)'),
       '#default_value' => variable_get('fivestar_position_teaser_'. $form['#node_type']->type, 'hidden'),
@@ -132,7 +137,7 @@ function fivestar_form_alter($form_id, &$form) {
       ),
     );
 
-   $form['workflow']['fivestar']['fivestar_position'] = array(
+   $form['fivestar']['fivestar_position'] = array(
       '#type' => 'select',
       '#title' => t('Widget location (full node)'),
       '#default_value' => variable_get('fivestar_position_'. $form['#node_type']->type, 'below'),
