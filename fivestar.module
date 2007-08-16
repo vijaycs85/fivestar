@@ -642,7 +642,7 @@ function theme_fivestar_summary($rating, $votes = 0, $stars = 5) {
     return t('No votes yet');
   }
   $stars = round(($rating * $stars) / 100, 1);
-  $vote_text = format_plural($votes, t('vote'), t('votes'));
+  $vote_text = format_plural($votes, 'vote', 'votes');
   return t('Average: !stars (!votes !vote_text)', array('!stars' => $stars, '!votes' => $votes, '!vote_text' => $vote_text));
 }
 
