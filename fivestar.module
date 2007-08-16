@@ -622,16 +622,19 @@ function theme_fivestar_static($rating, $stars = 5) {
   for ($n=1; $n <= $stars; $n++) {
     $star_value = ceil((100/$stars) * $n);
     $prev_star_value = ceil((100/$stars) * ($n-1));
+    $zebra = ($n % 2 == 0) ? 'even' : 'odd';
+    $output .= '<div class="star star-'. $n .' star-'. $zebra .'">';
     if ($rating < $star_value && $rating > $prev_star_value) {
       $percent = (($rating - $prev_star_value) / ($star_value - $prev_star_value)) * 100;
-      $output .= '<div class="star"><span class="on" style="width: '.$percent.'%">' . $n . '</span></div>';
+      $output .= '<span class="on" style="width: '.$percent.'%">' . $n . '</span>';
     }
     elseif ($rating >= $star_value) {
-      $output .= '<div class="star"><span class="on">' . $n . '</span></div>';
+      $output .= '<span class="on">' . $n . '</span>';
     }
     else {
-      $output .= '<div class="star"><span class="off">' . $n . '</span></div>';
+      $output .= '<span class="off">' . $n . '</span>';
     }
+    $output .= '</div>';
   }
   $output .= '</div>';
   return $output;
@@ -729,6 +732,18 @@ function fivestar_views_value_display_handler($op, $filter, $value, &$query) {
     return $value;
   }
   else {
+    // Determine number of stars to display
+    if (is_numeric($query->options)) {
+      $stars = $query->options;
+    }
+    elseif (isset($query->node_type)) {
+      $stars = variable_get('fivestar_stars_'. $query->node_type, 5);
+    }
+    else {
+      $mysql = "SELECT type FROM {node} WHERE nid=%d";
+      $type = db_result(db_query($mysql, $query->nid));
+      $stars = variable_get('fivestar_stars_'. (!isset($type) ? 'default' : $type), 5);
+    }
     return theme('fivestar_static', $value);
   }
 }

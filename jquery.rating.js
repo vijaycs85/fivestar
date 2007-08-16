@@ -140,7 +140,9 @@
               $div = $('<div class="cancel"><a href="#0" title="Cancel Rating">Cancel Rating</a></div>');
             }
             else {
-              $div = $('<div class="star"><a href="#' + radio.value + '" title="Give it ' + (i + cancel) + '/'+ (size + cancel) +'">' + radio.value + '</a></div>');
+			  var zebra = (i + cancel) % 2 == 0 ? 'even' : 'odd';
+			  var count = i + cancel;
+              $div = $('<div class="star star-' + count + ' star-' + zebra + '"><a href="#' + radio.value + '" title="Give it ' + count + '/'+ (size + cancel) +'">' + radio.value + '</a></div>');
             }
             $container.append($div[0]);                    
         }
