@@ -456,9 +456,9 @@ function fivestar_forms() {
 }
 
 /**
- * Create the fivestar form for the current item
+ * Create the fivestar form for the current item.
  * Note that this is not an implementation of hook_form(). We should probably
- * change the function to reflext that.
+ * change the function to reflect that.
  */
 function fivestar_form($content_type, $content_id, $style = 'default') {
   global $user;
