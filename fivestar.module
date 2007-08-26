@@ -462,6 +462,8 @@ function fivestar_forms() {
  */
 function fivestar_form($content_type, $content_id, $style = 'default') {
   global $user;
+  static $js_added = FALSE;
+
   $current_avg = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'average');
   $current_count = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'count');
   if ($user->uid) {
@@ -532,7 +534,8 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
   );
 
   // Add javascript to hide the submit button.
-  if (strpos(drupal_get_js(), "jQuery('input.fivestar-submit').hide()") === FALSE) {
+  if (!$js_added) {
+    $js_added = TRUE;
     drupal_add_js("jQuery(function(){jQuery('input.fivestar-submit').hide();});", 'inline');
   }
 
@@ -670,9 +673,12 @@ function fivestar_add_css($widget_css = NULL) {
  * Process callback for fivestar_element -- see fivestar_element()
  */
 function fivestar_expand($element) {
+  static $js_added = FALSE;
+
   // Add necessary javascript. The current javascript is checked to prevent the
   // inline javascript from being duplicated.
-  if (strpos(drupal_get_js(), 'jquery.rating.js') === FALSE) {
+  if (!$js_added) {
+    $js_added = TRUE;
     drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
     drupal_add_js("jQuery(function(){jQuery('div.fivestar-widget').rating();});", 'inline');
   }
