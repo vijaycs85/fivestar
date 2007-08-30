@@ -146,14 +146,6 @@ function fivestar_widget($op, &$node, $field, &$items) {
     case 'form':
       $form = array();
       
-      if ($field['widget']['type'] == 'stars') {
-        // Check if the scripts have already been added
-        if ($test = strpos(drupal_get_js(), 'jquery.rating.js') === FALSE) {
-          drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
-          drupal_add_js("jQuery(function(){jQuery('div.fivestar-widget').rating();});", 'inline');
-        }
-      }
-      
       $form[$field['field_name']] = array('#tree' => TRUE);
       $form[$field['field_name']][0]['rating'] = array(
         '#type' => 'fivestar',
@@ -164,6 +156,7 @@ function fivestar_widget($op, &$node, $field, &$items) {
         '#description' => $field['widget']['description'],
         '#weight' => $field['widget']['weight'],
         '#auto_submit' => false,
+        '#widget' => $field['widget']['type'],
       );
       $form[$field['field_name']][0]['target'] = array(
         '#type' => 'value',
