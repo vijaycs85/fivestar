@@ -1,15 +1,14 @@
 /**
- * Star Rating - jQuery plugin
+ * Modified Star Rating - jQuery plugin
  *
  * Copyright (c) 2006 Wil Stuckey
  *
  * Original source available: http://sandbox.wilstuckey.com/jquery-ratings/
- * Extensively modified by Lullabot
+ * Extensively modified by Lullabot: http://www.lullabot.com
  *
  * Dual licensed under the MIT and GPL licenses:
  *   http://www.opensource.org/licenses/mit-license.php
  *   http://www.gnu.org/licenses/gpl.html
- *
  */
 
 /**
@@ -21,7 +20,7 @@
  * @type jQuery 
  *
  */
-(function($){ //create local scope
+(function($){ // Create local scope.
     /**
      * Takes the form element, builds the rating interface and attaches the proper events.
      * @param {Object} $obj
@@ -32,11 +31,10 @@
             $cancel = $('.cancel', $widget),
             averageIndex = 0,
             averagePercent = 0;
-        // Set default rating
+        // Set default rating.
         $("input[@type='radio']", $obj).each(function () { if (this.checked) { averageIndex = this.value; } });
         
-        // hover events.
-        // and focus events added
+        // Add hover and focus events.
         $stars
             .mouseover(function(){
                 event.drain();
@@ -55,7 +53,7 @@
                 event.reset();
             });
         
-        // cancel button events
+        // Cancel button events.
         $cancel
             .mouseover(function(){
                 event.drain();
@@ -74,35 +72,35 @@
                 $(this).removeClass('on')
             });
         
-        // click events.
+        // Click events.
         $cancel.click(function(){
             event.drain();
             averageIndex = 0;
             averagePercent = 0;
-            // Save the value in a hidden field
+            // Save the value in a hidden field.
             $("input[@type='radio']", $obj).each(function () { this.checked = (this.value ==  averageIndex) ? true : false; });
-            // Submit the form if needed
+            // Submit the form if needed.
             $("input.fivestar-path", $obj).each(function () { $.get(this.value + '/' + averageIndex, null, voteHook); });
             return false;
         });
         $stars.click(function(){
             averageIndex = Math.ceil(($stars.index(this) + 1) * (100/$stars.size()));
             averagePercent = 0;
-            // Save the value in a hidden field
+            // Save the value in a hidden field.
             $("input[@type='radio']", $obj).each(function () { this.checked = (this.value ==  averageIndex) ? true : false; });
-            // Submit the form if needed
+            // Submit the form if needed.
             $("input.fivestar-path", $obj).each(function () { $.get(this.value + '/' + averageIndex, null, voteHook); });
             return false;
         });
         
         var event = {
-            fill: function(el){ // fill to the current mouse position.
+            fill: function(el){ // Fill to the current mouse position.
                 var index = $stars.index(el) + 1;
                 $stars
                     .children('a').css('width', '100%').end()
                     .lt(index).addClass('hover').end();
             },
-            drain: function() { // drain all the stars.
+            drain: function() { // Drain all the stars.
                 $stars
 					.filter('.on').removeClass('on').end()
 					.filter('.hover').removeClass('hover').end();
@@ -152,7 +150,8 @@
     }
     
     /**
-     * Checks for the presence of a javascript hook 'fivestarResult' to be called upon completion of a AJAX vote request
+     * Checks for the presence of a javascript hook 'fivestarResult' to be
+     * called upon completion of a AJAX vote request.
      */
      var voteHook = function(data) {
        var returnObj = new Object();
@@ -200,10 +199,19 @@
       });
       return stack;
     }
-  // fix ie6 background flicker problem.
+
+  // Fix ie6 background flicker problem.
   if ($.browser.msie == true) {
     try {
       document.execCommand('BackgroundImageCache', false, true);
     } catch(err) {}
   }
-})(jQuery)
+
+})(jQuery);
+
+if (Drupal.jsEnabled) {
+  $(document).ready(function() {
+    $('div.fivestar-widget').rating();
+    $('input.fivestar-submit').hide();
+  });
+}
