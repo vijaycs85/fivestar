@@ -34,7 +34,7 @@ function fivestar_field_settings($op, $field) {
         '#title' => t('Node ID'),
         '#default_value' => $field['target'] ? $field['target'] : '',
         '#description' => t(
-          'A single node ID on which this field will register the vote. If no ID is specified, the vote will be registered on the created node.'
+          'A single node ID on which this field will register the vote. If no NID is specified, the field\'s value will be saved, but no vote will be registered with the Voting API.'
         ),
       );
       $form['multiple'] = array(); // Multiple not supported
