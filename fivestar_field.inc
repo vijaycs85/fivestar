@@ -12,7 +12,7 @@
  */
 function fivestar_field_info() {
   return array(
-    'fivestar' => array('label' => 'Fivestar Rating'),
+    'fivestar' => array('label' => t('Fivestar Rating')),
   );
 }
 
@@ -108,11 +108,11 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
 function fivestar_widget_info() {
   return array(
     'radios' => array(
-      'label' => 'Radio Buttons',
+      'label' => t('Radio Buttons'),
       'field types' => array('fivestar'),
     ),
     'stars' => array(
-      'label' => 'Stars',
+      'label' => t('Stars'),
       'field types' => array('fivestar'),
     ),
   );
@@ -128,7 +128,7 @@ function fivestar_widget_settings($op, $widget) {
       $form['allow_clear'] = array(
         '#type' => 'select',
         '#title' => t('Allow Clearing'),
-        '#options' => array(1 => 'True', 0 => 'False'),
+        '#options' => array(1 => t('True'), 0 => t('False')),
         '#default_value' => $widget['allow_clear'] ? $widget['allow_clear'] : 1,
         '#description' => t("Display a button to clear the user's current vote."),
       );
@@ -172,15 +172,15 @@ function fivestar_widget($op, &$node, $field, &$items) {
 function fivestar_field_formatter_info() {
   return array(
     'default' => array(
-      'label' => 'As Stars',
+      'label' => t('As Stars'),
       'field types' => array('fivestar'),
     ),
     'rating' => array(
-      'label' => 'Rating (i.e. 4.2/5)',
+      'label' => t('Rating (i.e. 4.2/5)'),
       'field types' => array('fivestar'),
     ),
     'percentage' => array(
-      'label' => 'Percentage (i.e. 92)',
+      'label' => t('Percentage (i.e. 92)'),
       'field types' => array('fivestar'),
     ),
   );
