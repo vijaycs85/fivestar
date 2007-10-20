@@ -168,7 +168,7 @@ function fivestar_settings() {
 
 function theme_fivestar_settings($form) {
   fivestar_add_css();
-  drupal_set_title('Fivestar Settings');
+  drupal_set_title(t('Fivestar Settings'));
 
   // Default preview.
   $form['fivestar_widget']['default']['#description'] = 'Default '. t('Preview') .':<br /><iframe class="fivestar-preview" scrolling="no" src="'. url('fivestar/preview') .'"></iframe>';
