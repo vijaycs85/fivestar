@@ -109,13 +109,13 @@
                 $stars.lt(Math.floor(averageIndex/100 * $stars.size())).addClass('on').end();
                 var percent = (averagePercent) ? averagePercent * 10 : 0;
                 if (percent > 0) {
-                    $stars.eq(averageIndex).addClass('on').children('a').css('width', percent + "%").end().end()
+                    $stars.eq(averageIndex).addClass('on').children('a').css('width', percent + "%").end().end();
                 }
             }
-        }        
+        };
         event.reset();
         return $widget;
-    }
+    };
     
     /**
      * Accepts jQuery object containing a single fivestar widget.
@@ -147,7 +147,7 @@
         // Attach the new widget and hide the existing widget
         $widget.hide().after($container);
         return $container;
-    }
+    };
     
     /**
      * Checks for the presence of a javascript hook 'fivestarResult' to be
@@ -169,7 +169,7 @@
         else {
           fivestarDefaultResult(returnObj);
         }
-     }
+     };
 
     /**
      * Standard handler to update the average rating when a user changes their
@@ -186,7 +186,7 @@
      */
     function fivestarDefaultResult(voteResult) {
       $('div#fivestar-summary-'+voteResult.vote.id).html(voteResult.result.summary);
-    }
+    };
 
     /**
      * Set up the plugin
@@ -198,7 +198,7 @@
           stack.push(ret);
       });
       return stack;
-    }
+    };
 
   // Fix ie6 background flicker problem.
   if ($.browser.msie == true) {
@@ -206,7 +206,6 @@
       document.execCommand('BackgroundImageCache', false, true);
     } catch(err) {}
   }
-
 })(jQuery);
 
 if (Drupal.jsEnabled) {
