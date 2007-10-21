@@ -498,7 +498,12 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
   }
 
   if ($content_type == 'node') {
-    $node = node_load($content_id);
+    if (is_numeric($content_id)) {
+      $node = node_load($content_id);
+    }
+    else {
+      return array();
+    }
   }
 
   $stars = variable_get('fivestar_stars_'. (!isset($node) ? 'default' : $node->type), 5);
