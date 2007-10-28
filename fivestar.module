@@ -651,6 +651,7 @@ function theme_fivestar_static($rating, $stars = 5) {
 
   $output = '';
   $output .= '<div class="fivestar-widget-static clear-block">';
+  $numeric_rating = $rating/(100/$stars);
   for ($n=1; $n <= $stars; $n++) {
     $star_value = ceil((100/$stars) * $n);
     $prev_star_value = ceil((100/$stars) * ($n-1));
@@ -658,15 +659,16 @@ function theme_fivestar_static($rating, $stars = 5) {
     $output .= '<div class="star star-'. $n .' star-'. $zebra .'">';
     if ($rating < $star_value && $rating > $prev_star_value) {
       $percent = (($rating - $prev_star_value) / ($star_value - $prev_star_value)) * 100;
-      $output .= '<span class="on" style="width: '.$percent.'%">' . $n . '</span>';
+      $output .= '<span class="on" style="width: '.$percent.'%">';
     }
     elseif ($rating >= $star_value) {
-      $output .= '<span class="on">' . $n . '</span>';
+      $output .= '<span class="on">';
     }
     else {
-      $output .= '<span class="off">' . $n . '</span>';
+      $output .= '<span class="off">';
     }
-    $output .= '</div>';
+    if ($n == 1)$output .= $numeric_rating;
+    $output .= '</span></div>';
   }
   $output .= '</div>';
   return $output;
@@ -736,6 +738,12 @@ function fivestar_expand($element) {
     //Display clear button only if allowed
     if (($element['#allow_clear'] == TRUE) || ($i > 0)){    
       $element['vote'][$i]['#type'] = 'radio';
+      if($i == 0) {
+      	$element['vote'][$i]['#title'] = t('Clear');
+      }
+      else {
+      	$element['vote'][$i]['#title'] = $i;
+      }
       $element['vote'][$i]['#return_value'] = $this_value;
       $element['vote'][$i]['#attributes'] = $element['#attributes'];
       $element['vote'][$i]['#parents'] = $element['#parents'];
