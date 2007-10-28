@@ -155,13 +155,20 @@ function fivestar_form_alter($form_id, &$form) {
  */
 function fivestar_settings() {
   $form = array();
-  $form['fivestar_widget'] = array (
+  $form['fivestar_widget'] = array(
     '#type' => 'radios',
     '#title' => t('Widget display'),
     '#options' => array('default' => t('Default')) + module_invoke_all('fivestar_widgets'),
     '#default_value' => variable_get('fivestar_widget', 'default'),
     '#description' => t('Choose a widget set to be used on your site.'),
     '#attributes' => array('class' => 'fivestar-widgets clear-block'),
+  );
+  $form['fivestar_anonymous_vote_interval'] = array(
+    '#type' => 'select',
+    '#title' => t('Anonymous vote interval'),
+    '#options' => array(0 => t('Immediately')) + drupal_map_assoc(array(300, 900, 1800, 3600, 10800, 21600, 32400, 43200, 86400, 172800, 345600, 604800), 'format_interval') + array(-1 => t('Never')),
+    '#default_value' => variable_get('fivestar_anonymous_vote_interval', 86400),
+    '#description' => t('Anonymous users may add another vote after this interval. Because the same IP addresses may be used by different people, allowing the same IP to vote again several days later may yeild more votes.'),
   );
   return system_settings_form($form);
 }
@@ -297,6 +304,7 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = 'vote') {
       $hostname = $_SERVER['REMOTE_ADDR'];
     }
   }
+  $anon_interval = variable_get('fivestar_anonymous_vote_interval', 86400);
 
   // sanity-check the incoming values.
   if (is_numeric($cid) && is_numeric($value)) {
@@ -307,15 +315,16 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = 'vote') {
     // If the vote value is 0, blindly nuke any votes for this content by the user.
     if ($value == 0) {
       if ($uid) {
-        // If the user is logged in, we'll look for votes from that uid.
-        $sql = "DELETE FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d";
-        db_query($sql, $type, $cid, $uid);
+        // If the user is logged in, we'll delete votes from that uid.
+        $sql = "DELETE FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag='%s'";
+        db_query($sql, $type, $cid, $uid, $tag);
         return votingapi_recalculate_results($type, $cid);
       }
       else {
-        // Otherwise, we'll look for votes from the same IP address in the past day.
-        $sql = "DELETE FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND hostname='%s' AND timestamp > %d";
-        db_query($sql, $type, $cid, $uid, $hostname,  time() - (60 * 60 * 24));
+        // Otherwise, we'll delete votes from the same IP address within the anonymous interval.
+        $sql = "DELETE FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag='%s' AND hostname='%s'";
+        $sql .= $anon_interval != -1 ? " AND timestamp > %d" : '';
+        db_query($sql, $type, $cid, $uid, $tag, $hostname, time() - $anon_interval);
         return votingapi_recalculate_results($type, $cid);
       }
     }
@@ -327,16 +336,16 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = 'vote') {
         $result = db_query($sql, $type, $cid, $uid, $tag);
       }
       else {
-        // Otherwise, we'll look for votes from the same IP address in the past day.
-        $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag = '%s' AND hostname='%s' AND timestamp > %d";
-        $result = db_query($sql, $type, $cid, $uid, $tag, $hostname, time() - (60 * 60 * 24));
+        // Otherwise, we'll look for votes from the same IP address within the anonymous interval.
+        $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag = '%s' AND hostname='%s'";
+        $sql .= $anon_interval != -1 ? " AND timestamp > %d" : '';
+        $result = db_query($sql, $type, $cid, $uid, $tag, $hostname, time() - $anon_interval);
       }
     }
 
     // If the old vote exists, either delete it (if the new one is zero)
     // or change it. If it doesn't exist and the vote is non-zero, cast
     // it and recalculate.
-
     if ($old_vote = db_fetch_object($result)) {
       votingapi_change_vote($old_vote, $value);
     }
@@ -492,7 +501,7 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
     $current_vote = votingapi_get_vote($content_type, $content_id, 'percent', 'vote', $user->uid);
   }
   else {
-    // If the user is anonymous, we never both loading their existing votes.
+    // If the user is anonymous, we never bother loading their existing votes.
     // Not only would it be hit-or-miss, it would break page caching. Safer to always
     // show the 'fresh' version to anon users.
     $current_vote->value = 0;
