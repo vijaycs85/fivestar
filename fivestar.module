@@ -297,11 +297,9 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = 'vote') {
   }
   else {
     $uid = 0;
+    $hostname = $_SERVER['REMOTE_ADDR'];
     if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-      $hostname = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    }
-    else {
-      $hostname = $_SERVER['REMOTE_ADDR'];
+      $hostname .= '-'. $_SERVER['HTTP_X_FORWARDED_FOR'];
     }
   }
   $anon_interval = variable_get('fivestar_anonymous_vote_interval', 86400);
