@@ -49,9 +49,17 @@ function fivestar_field_settings($op, $field) {
           '#value' => 1,
         );
       }
+
+      $form['axis'] = array(
+        '#type' => 'textfield',
+        '#title' => 'Voting Axis',
+        '#description' => t('The axis this rating will affect. Enter a property on which that this rating will affect, such as <em>quality</em>, <em>satisfaction</em>, <em>overall</em>, etc. If no axis is entered, the default axis <em>vote</em> will be used. Warning: changing this value will not update existing votes to the new axis.'),
+        '#default_value' => $field['axis'],
+      );
+
       return $form;
     case 'save':
-      return array('stars', 'target', 'php');
+      return array('stars', 'target', 'php', 'axis');
     case 'database columns':
       $columns = array(
         'target' => array('type' => 'int', 'default' => 'NULL'),
@@ -78,13 +86,15 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
         if ($field['php'] && !empty($item['target'])) {
           $items[$delta]['target'] = drupal_eval($item['target']);
         }
+
         if (is_numeric($items[$delta]['target'])) {
           $target_node = node_load($items[$delta]['target']);
           if ($item['rating'] == 0) {
             votingapi_unset_vote('node', $target_node->nid);
           }
+          
           else {
-            _fivestar_cast_vote('node', $target_node->nid, $item['rating']);
+            _fivestar_cast_vote('node', $target_node->nid, $item['rating'], $items[$delta]['axis']);
           }
         }
       }
@@ -162,6 +172,10 @@ function fivestar_widget($op, &$node, $field, &$items) {
         '#type' => 'value',
         '#value' => $field['target'],
       );
+      $form[$field['field_name']][0]['axis'] = array(
+        '#type' => 'value',
+        '#value' => $field['axis'],
+        );
       return $form;
   }
 }

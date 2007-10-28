@@ -240,8 +240,9 @@ function theme_fivestar_preview_page() {
  *  An XML chunk containing the results of the vote, for use by the client-side
  *  javascript code.
  */
-function fivestar_vote($type, $cid, $value) {
-  $result = _fivestar_cast_vote($type, $cid, $value);
+function fivestar_vote($type, $cid, $value, $tag = 'vote') {
+
+  $result = _fivestar_cast_vote($type, $cid, $value, $tag);
 
   if ($type == 'node') {
     $node = node_load($cid);
@@ -255,10 +256,10 @@ function fivestar_vote($type, $cid, $value) {
   if (count($result)) {
     foreach ($result as $data) {
       $output .= '<'. $data->function .'>' . $data->value . '</'. $data->function .'>';
-      $summary[$data->function] = $data->value;
+      $summary[$data->tag][$data->function] = $data->value;
     }
   }
-  $output .= '<summary>'. theme('fivestar_summary', $summary['average'], $summary['count'], $stars) .'</summary>';
+  $output .= '<summary>'. theme('fivestar_summary', $summary[$tag]['average'], $summary[$tag]['count'], $stars) .'</summary>';
   $output .= '</result>';
 
   $output .= '<vote>';
@@ -275,7 +276,7 @@ function fivestar_vote($type, $cid, $value) {
  * Internal function to handle vote casting, flood control, XSS, IP based
  * voting, etc...
  */
-function _fivestar_cast_vote($type, $cid, $value) {
+function _fivestar_cast_vote($type, $cid, $value, $tag = 'vote') {  
   global $user;
 
   // Bail out if the user's trying to vote on an invalid object.
@@ -322,13 +323,13 @@ function _fivestar_cast_vote($type, $cid, $value) {
     else {
       if ($uid) {
         // If the user is logged in, we'll look for votes from that uid.
-        $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d";
-        $result = db_query($sql, $type, $cid, $uid);
+        $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag = '%s'";
+        $result = db_query($sql, $type, $cid, $uid, $tag);
       }
       else {
         // Otherwise, we'll look for votes from the same IP address in the past day.
-        $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND hostname='%s' AND timestamp > %d";
-        $result = db_query($sql, $type, $cid, $uid, $hostname, time() - (60 * 60 * 24));
+        $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag = '%s' AND hostname='%s' AND timestamp > %d";
+        $result = db_query($sql, $type, $cid, $uid, $tag, $hostname, time() - (60 * 60 * 24));
       }
     }
 
@@ -340,7 +341,7 @@ function _fivestar_cast_vote($type, $cid, $value) {
       votingapi_change_vote($old_vote, $value);
     }
     elseif ($value != 0) {
-      votingapi_add_vote($type, $cid, $value, 'percent', 'vote', $uid);
+      votingapi_add_vote($type, $cid, $value, 'percent', $tag, $uid);
     }
     return votingapi_recalculate_results($type, $cid);
   }
