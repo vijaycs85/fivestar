@@ -29,8 +29,37 @@
         var $widget = buildInterface($obj),
             $stars = $('.star', $widget),
             $cancel = $('.cancel', $widget),
+            $form = $obj.parents('form:first'),
             averageIndex = 0,
             averagePercent = 0;
+
+        // Record star display.
+        if ($form.is('.fivestar-user-stars')) {
+          var starDisplay = 'user';
+        }
+        else if ($form.is('.fivestar-average-stars')) {
+          var starDisplay = 'average';
+        }
+        else if ($form.is('.fivestar-combo-stars')) {
+          var starDisplay = 'combo';
+        }
+        else {
+          var starDisplay = 'none';
+        }
+        // Recore text display.
+        if ($form.is('.fivestar-user-text')) {
+          var textDisplay = 'user';
+        }
+        else if ($form.is('.fivestar-average-text')) {
+          var textDisplay = 'average';
+        }
+        else if ($form.is('.fivestar-combo-text')) {
+          var textDisplay = 'combo';
+        }
+        else {
+          var textDisplay = 'none';
+        }
+
         // Set default rating.
         $("input[@type='radio']", $obj).each(function () { if (this.checked) { averageIndex = this.value; } });
         
@@ -80,7 +109,7 @@
             // Save the value in a hidden field.
             $("input[@type='radio']", $obj).each(function () { this.checked = (this.value ==  averageIndex) ? true : false; });
             // Submit the form if needed.
-            $("input.fivestar-path", $obj).each(function () { $.get(this.value + '/' + averageIndex, null, voteHook); });
+            $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + averageIndex, success: voteHook }); });
             return false;
         });
         $stars.click(function(){
@@ -89,7 +118,7 @@
             // Save the value in a hidden field.
             $("input[@type='radio']", $obj).each(function () { this.checked = (this.value ==  averageIndex) ? true : false; });
             // Submit the form if needed.
-            $("input.fivestar-path", $obj).each(function () { $.get(this.value + '/' + averageIndex, null, voteHook); });
+            $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + averageIndex, success: voteHook }); });
             return false;
         });
         
@@ -102,8 +131,8 @@
             },
             drain: function() { // Drain all the stars.
                 $stars
-					.filter('.on').removeClass('on').end()
-					.filter('.hover').removeClass('hover').end();
+                    .filter('.on').removeClass('on').end()
+                    .filter('.hover').removeClass('hover').end();
             },
             reset: function(){ // Reset the stars to the default index.
                 $stars.lt(Math.floor(averageIndex/100 * $stars.size())).addClass('on').end();
@@ -113,6 +142,38 @@
                 }
             }
         };
+
+        /**
+         * Checks for the presence of a javascript hook 'fivestarResult' to be
+         * called upon completion of a AJAX vote request.
+         */
+        var voteHook = function(data) {
+          var returnObj = {
+            result: {
+              count: $("result > count", data).text(),
+              average: $("result > average", data).text(),
+              summary: { average: $("summary average", data).text(), user: $("summary user", data).text(), combo: $("summary combo", data).text() }
+            },
+            vote: {
+              id: $("vote id", data).text(),
+              type: $("vote type", data).text(),
+              value: $("vote value", data).text()
+            },
+            display: {
+              stars: starDisplay,
+              text: textDisplay
+            }
+          };
+          // Check for a custom callback.
+          if (window.fivestarResult) {
+            fivestarResult(returnObj);
+          }
+          // Use the default.
+          else {
+            fivestarDefaultResult(returnObj);
+          }
+        };
+
         event.reset();
         return $widget;
     };
@@ -138,38 +199,16 @@
               $div = $('<div class="cancel"><a href="#0" title="Cancel Rating">Cancel Rating</a></div>');
             }
             else {
-			  var zebra = (i + cancel) % 2 == 0 ? 'even' : 'odd';
-			  var count = i + cancel;
+              var zebra = (i + cancel) % 2 == 0 ? 'even' : 'odd';
+              var count = i + cancel;
               $div = $('<div class="star star-' + count + ' star-' + zebra + '"><a href="#' + radio.value + '" title="Give it ' + count + '/'+ (size + cancel) +'">' + radio.value + '</a></div>');
             }
             $container.append($div[0]);                    
         }
-        // Attach the new widget and hide the existing widget
-        $widget.hide().after($container);
+        // Attach the new widget and hide the existing widget.
+        $widget.after($container).hide();
         return $container;
     };
-    
-    /**
-     * Checks for the presence of a javascript hook 'fivestarResult' to be
-     * called upon completion of a AJAX vote request.
-     */
-     var voteHook = function(data) {
-       var returnObj = new Object();
-       returnObj.result = new Object();
-       returnObj.vote = new Object();
-       returnObj.result.count = $("count",data).text();
-       returnObj.result.average = $("average",data).text();
-       returnObj.result.summary = $("summary",data).text();
-       returnObj.vote.id = $("id",data).text();
-       returnObj.vote.type = $("type",data).text();
-       returnObj.vote.value = $("value",data).text();
-        if (window.fivestarResult) {
-          fivestarResult(returnObj);
-        }
-        else {
-          fivestarDefaultResult(returnObj);
-        }
-     };
 
     /**
      * Standard handler to update the average rating when a user changes their
@@ -177,15 +216,18 @@
      * function in your own module or theme.
      * @param object voteResult
      * Object containing the following properties from the vote result:
-     * voteResult.result.count The current number of votes for this item
-     * voteResult.result.average The current average of all votes for this item
-     * voteResult.result.summary The textual description of the 
+     * voteResult.result.count The current number of votes for this item.
+     * voteResult.result.average The current average of all votes for this item.
+     * voteResult.result.summary.average The textual description of the average.
+     * voteResult.result.summary.user The textual description of the user's current vote.
      * voteResult.vote.id The id of the item the vote was placed on (such as the nid)
      * voteResult.vote.type The type of the item the vote was placed on (such as 'node')
      * voteResult.vote.value The value of the new vote saved
+     * voteResult.display.stars The type of star display we're using. Either 'average', 'user', or 'combo'.
+     * voteResult.display.text The type of text display we're using. Either 'average', 'user', or 'combo'.
      */
     function fivestarDefaultResult(voteResult) {
-      $('div#fivestar-summary-'+voteResult.vote.id).html(voteResult.result.summary);
+      $('div#fivestar-summary-'+voteResult.vote.id).html(voteResult.result.summary[voteResult.display.text]);
     };
 
     /**

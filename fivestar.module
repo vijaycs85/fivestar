@@ -118,11 +118,22 @@ function fivestar_form_alter($form_id, &$form) {
     $form['fivestar']['fivestar_style'] = array(
       '#type' => 'select',
       '#title' => t('Five Star display style'),
-      '#default_value' => variable_get('fivestar_style_'. $form['#node_type']->type, 'default'),
+      '#default_value' => variable_get('fivestar_style_'. $form['#node_type']->type, 'average_combo'),
       '#options' => array(
-        'compact' => t('Nothing but the stars'),
-        'default' => t('Stars and average'),
-        'dual' => t('Two sets of stars'),
+        t('Stars as Average Rating') => array(
+          'average' => t('Average: Include user rating as text'),
+          'average_combo' => t('Average Combo: Include both user and average as text'),
+          'average_compact' => t('Average Compact: No text'),
+        ),
+        t('Stars as User Rating') => array(
+          'default' => t('User: Include average rating as text'),
+          'user_combo' => t('User Combo: Include both user and average as text'),
+          'compact' => t('User Compact: No text'),
+        ),
+        t('Special') => array(
+          'smart_combo' => t('Smart: Stars as user rating (prefered) or average.'),
+          'dual' => t('Dual Stars: Both user and average rating as stars'),
+        ),
       ),
     );
 
@@ -262,11 +273,17 @@ function fivestar_vote($type, $cid, $value, $tag = 'vote') {
 
   if (count($result)) {
     foreach ($result as $data) {
-      $output .= '<'. $data->function .'>' . $data->value . '</'. $data->function .'>';
-      $summary[$data->tag][$data->function] = $data->value;
+      if ($data->tag == $tag) {
+        $output .= '<'. $data->function .'>' . $data->value . '</'. $data->function .'>';
+        $summary[$data->tag][$data->function] = $data->value;
+      }
     }
   }
-  $output .= '<summary>'. theme('fivestar_summary', $summary[$tag]['average'], $summary[$tag]['count'], $stars) .'</summary>';
+  $output .= '<summary>';
+  $output .= '<average>'. theme('fivestar_summary', NULL, $summary[$tag]['average'], $summary[$tag]['count'], $stars) .'</average>';
+  $output .= '<user>'. theme('fivestar_summary', $value, NULL, $summary[$tag]['count'], $stars) .'</user>';
+  $output .= '<combo>'. theme('fivestar_summary', $value, $summary[$tag]['average'], $summary[$tag]['count'], $stars) .'</combo>';
+  $output .= '</summary>';
   $output .= '</result>';
 
   $output .= '<vote>';
@@ -467,7 +484,7 @@ function fivestar_block($op = 'list', $delta = 0, $edit = array()) {
 }
 
 function fivestar_widget_form($node) {
-  return drupal_get_form('fivestar_form_node_' . $node->nid, 'node', $node->nid, variable_get('fivestar_style_'. $node->type, 'default'));
+  return drupal_get_form('fivestar_form_node_' . $node->nid, 'node', $node->nid, variable_get('fivestar_style_'. $node->type, 'average_combo'));
 }
 
 /**
@@ -496,13 +513,13 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
   $current_avg = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'average');
   $current_count = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'count');
   if ($user->uid) {
-    $current_vote = votingapi_get_vote($content_type, $content_id, 'percent', 'vote', $user->uid);
+    $user_vote = votingapi_get_vote($content_type, $content_id, 'percent', 'vote', $user->uid);
   }
   else {
     // If the user is anonymous, we never bother loading their existing votes.
     // Not only would it be hit-or-miss, it would break page caching. Safer to always
     // show the 'fresh' version to anon users.
-    $current_vote->value = 0;
+    $user_vote->value = 0;
   }
 
   if ($content_type == 'node') {
@@ -516,7 +533,11 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
 
   $stars = variable_get('fivestar_stars_'. (!isset($node) ? 'default' : $node->type), 5);
 
-  $form = array();
+  $form = array(
+    '#attributes' => array('class' => 'fivestar-widget'),
+    '#base' => 'fivestar_form',
+    '#redirect' => FALSE,
+  );
 
   $form['content_type'] = array(
     '#type' => 'hidden',
@@ -533,7 +554,7 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
     '#stars' => $stars,
     '#vote_count' => $current_count->value,
     '#vote_average' => $current_avg->value,
-    '#default_value' => $current_vote->value,
+    '#default_value' => $user_vote->value,
     '#auto_submit' => TRUE,
     '#auto_submit_path' => 'fivestar/vote/' . $content_type . '/' . $content_id,
     '#allow_clear' => variable_get('fivestar_unvote_'. (!isset($node) ? 'default' : $node->type), FALSE),
@@ -542,22 +563,56 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
 
   switch ($style) {
     case 'compact':
-      // We actually don't need anything more here.
+      $form['#attributes']['class'] .= ' fivestar-user-stars';
+      break;
+
+    case 'average_compact':
+      $form['vote']['#default_value'] = $current_avg->value;
+      $form['vote']['#attributes']['#class'] .= ' fivestar-average-stars';
       break;
 
     case 'default':
       $form['vote']['#title'] = t('Your vote');
-      $form['vote']['#description'] = theme('fivestar_summary', $current_avg->value, $current_count->value, $stars);
+      $form['vote']['#description'] = theme('fivestar_summary', NULL, $current_avg->value, $current_count->value, $stars);
+      $form['#attributes']['class'] .= ' fivestar-user-stars fivestar-average-text';
+      break;
+
+    case 'user_combo':
+      $form['vote']['#default_value'] = $user_vote->value;
+      $form['vote']['#title'] = t('Your vote');
+      $form['vote']['#description'] = theme('fivestar_summary', $user_vote->value, $current_avg->value, $current_count->value, $stars);
+      $form['#attributes']['class'] .= ' fivestar-user-stars fivestar-combo-text';
+      break;
+
+    case 'average':
+      $form['vote']['#default_value'] = $current_avg->value;
+      $form['vote']['#title'] = t('Average');
+      $form['vote']['#description'] = theme('fivestar_summary', $user_vote->value, NULL, $current_count->value, $stars);
+      $form['#attributes']['class'] .= ' fivestar-average-stars fivestar-user-text';
+      break;
+
+    case 'average_combo':
+      $form['vote']['#default_value'] = $current_avg->value;
+      $form['vote']['#title'] = t('Average');
+      $form['vote']['#description'] = theme('fivestar_summary', $user_vote->value, $current_avg->value, $current_count->value, $stars);
+      $form['#attributes']['class'] .= ' fivestar-average-stars fivestar-combo-text';
+      break;
+
+    case 'smart_combo':
+      $form['vote']['#default_value'] = $user_vote->value ? $user_vote->value : $current_avg->value;
+      $form['vote']['#title'] = $user_vote->value ? t('Your vote') : t('Average');
+      $form['vote']['#description'] = theme('fivestar_summary', $user_vote->value, $current_avg->value, $current_count->value, $stars);
+      $form['#attributes']['class'] .= ' '. ($user_vote->value ? 'fivestar-user-stars' : 'fivestar-average-stars') .' fivestar-combo-text';
       break;
 
     case 'dual':
       $form['vote']['#title'] = t('Your vote');
+      $form['#attributes']['class'] .= ' fivestar-combo-stars';
       $form['average'] = array(
         '#type' => 'item',
         '#title' => t('Current rating'),
         '#value' => theme('fivestar_static', $current_avg->value, $stars)
       );
-
       break;
   }
   
@@ -566,10 +621,6 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
     '#value' => t('Submit rating'),
     '#attributes' => array('class' => 'fivestar-submit'),
   );
-
-  $form['#attributes']['class'] = 'fivestar-widget';
-  $form['#base'] = 'fivestar_form';
-  $form['#redirect'] = FALSE;
 
   return $form;
 }
@@ -674,13 +725,33 @@ function theme_fivestar_static($rating, $stars = 5) {
   return $output;
 }
 
-function theme_fivestar_summary($rating, $votes = 0, $stars = 5) {
+function theme_fivestar_summary($user_rating, $average_rating, $votes = 0, $stars = 5) {
   if ($votes == 0) {
-    return t('No votes yet');
+    return '<div class="fivestar-summary-empty">'. t('No votes yet') .'</div>';
   }
-  $stars = round(($rating * $stars) / 100, 1);
+
+  $output = '';
+  if ($user_rating) {
+    $div_class = 'user';
+    $user_stars = round(($user_rating * $stars) / 100, 1);
+    $output .= '<span class="user-rating">'. t('Your Rating: <span>!stars</span>', array('!stars' => $user_rating ? $user_stars : t('None'))) .'</span>';
+  }
+  if ($user_rating && $average_rating) {
+    $output .= ' ';
+  }
+  if ($average_rating) {
+    $div_class = 'average';
+    $average_stars = round(($average_rating * $stars) / 100, 1);
+    $output .= '<span class="average-rating">'. t('Average: <span>!stars</span>', array('!stars' => $average_stars)) .'</span>';
+  }
+  if ($user_rating && $average_rating) {
+    $div_class = 'combo';
+  }
+
   $vote_text = format_plural($votes, 'vote', 'votes');
-  return t('Average: !stars (!votes !vote_text)', array('!stars' => $stars, '!votes' => $votes, '!vote_text' => $vote_text));
+  $output .= ' <span class="total-votes">'. t('(<span>!votes</span> !vote_text)', array('!votes' => $votes, '!vote_text' => $vote_text)) .'</span>';
+  $output = '<div class="fivestar-summary-'. $div_class .'">'. $output .'</div>';
+  return $output;
 }
 
 /**
