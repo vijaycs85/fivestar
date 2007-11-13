@@ -187,9 +187,7 @@
      * 
      */
     var buildInterface = function($widget){
-        var $container = $(document.createElement('div')).attr({
-            "class": 'fivestar-widget clear-block'
-        });
+        var $container = $('<div class="fivestar-widget clear-block"></div>');
         var $radios = $("input[@type='radio']", $widget);
         var size = $radios.size() - 1;
         var cancel = 1;
@@ -205,6 +203,7 @@
             }
             $container.append($div[0]);                    
         }
+        $container.addClass('fivestar-widget-' + (size + cancel));
         // Attach the new widget and hide the existing widget.
         $widget.after($container).hide();
         return $container;
