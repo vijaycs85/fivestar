@@ -44,7 +44,7 @@ function fivestar_menu($may_cache) {
     );
     $items[] = array(
       'path'     => 'fivestar/preview/node',
-      'callback' => 'fivestar_preview_node',
+      'callback' => 'fivestar_preview',
       'type'     => MENU_CALLBACK,
       'access'   => user_access('administer content types'),
     );
@@ -70,6 +70,9 @@ function fivestar_init() {
     if (module_exists('content')) {
       include_once(drupal_get_path('module', 'fivestar') . '/fivestar_field.inc');
     }
+  }
+  if (module_exists('comment')) {
+    include_once(drupal_get_path('module', 'fivestar') . '/fivestar_comment.inc');
   }
 }
 
@@ -98,7 +101,10 @@ function fivestar_form_alter($form_id, &$form) {
       '#type' => 'fieldset',
       '#title' => t('Fivestar ratings'),
       '#collapsible' => TRUE,
+      '#collapsed' => !variable_get('fivestar_'. $form['#node_type']->type, 0),
       '#description' => t('To rate this content, enable Fivestar rating below. These settings will be used for both comments (if available) and direct rating.'),
+      '#theme' => 'fivestar_node_type_form',
+      '#attributes' => array('id' => 'fivestar-node-type-form'),
     );
 
     $form['fivestar']['fivestar'] = array(
@@ -106,6 +112,7 @@ function fivestar_form_alter($form_id, &$form) {
       '#title' => t('Enable Fivestar rating'),
       '#default_value' => variable_get('fivestar_'. $form['#node_type']->type, 0),
       '#return_value' => 1,
+      '#weight' => -5,
     );
 
     $form['fivestar']['fivestar_stars'] = array(
@@ -113,6 +120,7 @@ function fivestar_form_alter($form_id, &$form) {
       '#title' => t('Number of stars'),
       '#options' => drupal_map_assoc(array(1,2,3,4,5,6,7,8,9,10)),
       '#default_value' => variable_get('fivestar_stars_'. $form['#node_type']->type, 5),
+      '#weight' => -4,
     );
 
     $form['fivestar']['direct'] = array(
@@ -120,7 +128,7 @@ function fivestar_form_alter($form_id, &$form) {
       '#title' => t('Direct rating widget'),
       '#collapsible' => FALSE,
       '#description' => t('These settings allow you to display a rating widget to your users while they are viewing content of this type. Rating will immediately register a vote for that piece of content.'),
-      '#theme' => 'fivestar_node_widget_settings',
+      '#weight' => 2,
     );
 
     $form['fivestar']['direct']['fivestar_style'] = array(
@@ -173,32 +181,97 @@ function fivestar_form_alter($form_id, &$form) {
         'hidden' => t('Hidden'),
       ),
     );
+
+    $form['fivestar']['direct']['fivestar_direct_preview'] = array(
+      '#type' => 'item',
+      '#title' => t('Direct rating widget preview'),
+      '#value' => theme('fivestar_preview', $form['fivestar']['fivestar_style']['#default_value'], $form['fivestar']['fivestar_stars']['#default_value'], $form['fivestar']['fivestar_unvote']['#default_value']),
+    );
+    if (!$form['fivestar']['fivestar']['#default_value']) {
+      $form['fivestar']['direct']['fivestar_direct_preview']['#value'] = theme('fivestar_preview_wrapper', '');
+    }
+    else {
+      $form['fivestar']['direct']['fivestar_direct_preview']['#value'] = theme('fivestar_preview_wrapper', $form['fivestar']['direct']['fivestar_direct_preview']);
+    }
+  }
+
+  // Add comment form modifications.
+  if (module_exists('comment')) {
+    fivestar_comment_form_alter($form_id, $form);
   }
 }
 
 /**
  * Theme function to add the Fivestar preview to the node type form.
  */
-function theme_fivestar_node_widget_settings($form) {
+function theme_fivestar_node_type_form($form) {
   drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
   drupal_add_js(drupal_get_path('module', 'fivestar') .'/fivestar-admin.js');
   drupal_add_js(array('fivestar' => array('preview_url' => url('fivestar/preview'))), 'setting');
   fivestar_add_css();
 
   $output = '';
-  $output .= '<div>';
-  $output .= '<div id="fivestar-node-type-form">';
-  $output .= drupal_render($form);
-  $output .= '</div>';
-  $output .= '<div id="fivestar-preview">';
-  if ($form['fivestar']['#default_value']) {
-    $output .= theme('fivestar_preview_node', $form['fivestar_style']['#default_value'], $form['fivestar_stars']['#default_value'], $form['fivestar_unvote']['#default_value']);
+  $output .= drupal_render($form['fivestar']);
+  $output .= drupal_render($form['fivestar_stars']);
+
+  // Comment settings form.
+  if (module_exists('comment')) {
+    $comment = '';
+    $comment .= '<div id="fivestar-comment-form">';
+    $comment .= drupal_render($form['comment']['fivestar_comment']);
+    $comment .= '</div>';
+    $comment .= '<div id="fivestar-comment-preview">';
+    $comment .= drupal_render($form['comment']['fivestar_comment_preview']);
+    $comment .= '</div>';
+  
+    $form['comment']['#children'] = $comment;
+    $output .= drupal_render($form['comment']);
   }
-  $output .= '</div>';
-  $output .= '</div>';
+
+  // Node settings form.
+  $direct = '';
+  $direct .= '<div id="fivestar-direct-form">';
+  $direct .= drupal_render($form['direct']['fivestar_style']);
+  $direct .= drupal_render($form['direct']['fivestar_unvote']);
+  $direct .= drupal_render($form['direct']['fivestar_position_teaser']);
+  $direct .= drupal_render($form['direct']['fivestar_position']);
+  $direct .= '</div>';
+  $direct .= '<div id="fivestar-direct-preview">';
+  $direct .= drupal_render($form['direct']['fivestar_direct_preview']);
+  $direct .= '</div>';
+
+  $form['direct']['#children'] = $direct;
+  $output .= drupal_render($form['direct']);
+
+  // Any remaining cruft (should be empty).
+  $output .= drupal_render($form);
   return $output;
 }
 
+/**
+ * Implementation of hook_node_types().
+ */
+function fivestar_node_type($op, $info) {
+  $type = $info->type;
+  $variables = array('fivestar', 'fivestar_unvote', 'fivestar_style', 'fivestar_stars', 'fivestar_comment', 'fivestar_position', 'fivestar_position_teaser');
+
+  // Be responsible and cleanup unneeded variables.
+  if ($op == 'delete') {
+    foreach ($variables as $variable) {
+      variable_del($variable .'_'. $type);
+    }
+  }
+  // When changing the type name, update the variables.
+  elseif ($op == 'update' && !empty($info->old_type) && $info->old_type != $info->type) {
+    foreach ($variables as $variable) {
+      $value = variable_get($variable .'_'. $type, -1);
+      if ($value != -1) {
+        variable_del($variable .'_'. $type);
+        variable_set($variable .'_'. $type, $value);
+      }
+    }
+  }
+}
 
 /**
  * Callback function for admin/settings/fivestar. Display the settings form.
@@ -289,13 +362,13 @@ function theme_fivestar_preview_page() {
  * Callback function for fivestar/preview/node. Outputs a JSON page containing
  * a Fivestar preview of a node rating widget.
  */
-function fivestar_preview_node($style, $stars, $unvote) {
-  $output = theme('fivestar_preview_node', $style, $stars, $unvote);
+function fivestar_preview($style, $stars, $unvote) {
+  $output = theme('fivestar_preview', $style, $stars, $unvote);
   drupal_set_header('Content-Type: text/javascript; charset=utf-8');
   print drupal_to_js(array('status' => TRUE, 'data' => $output));
 }
 
-function theme_fivestar_preview_node($style, $stars, $unvote) {
+function theme_fivestar_preview($style = NULL, $stars = NULL, $unvote = NULL, $title = NULL) {
   $values = array(
     'average' => 50,
     'user' => 80,
@@ -307,9 +380,14 @@ function theme_fivestar_preview_node($style, $stars, $unvote) {
     'style' => $style,
     'content_type' => 'node',
     'content_id' => 0,
+    'title' => $title,
   );
-  
+
   return drupal_get_form('fivestar_custom_widget', $values, $settings);
+}
+
+function theme_fivestar_preview_wrapper($content) {
+  return '<div class="fivestar-preview">'. $content .'</div>';
 }
 
 /**
@@ -366,7 +444,7 @@ function fivestar_vote($type, $cid, $value, $tag = 'vote') {
  * Internal function to handle vote casting, flood control, XSS, IP based
  * voting, etc...
  */
-function _fivestar_cast_vote($type, $cid, $value, $tag = 'vote') {  
+function _fivestar_cast_vote($type, $cid, $value, $tag = 'vote', $uid = NULL) {  
   global $user;
 
   // Bail out if the user's trying to vote on an invalid object.
@@ -375,14 +453,16 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = 'vote') {
   }
 
   // Prep variables for anonymous vs. registered voting
-  if ($user->uid) {
-    $uid = $user->uid;
-  }
-  else {
-    $uid = 0;
-    $hostname = $_SERVER['REMOTE_ADDR'];
-    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-      $hostname .= '-'. $_SERVER['HTTP_X_FORWARDED_FOR'];
+  if (!isset($uid)) {
+    if ($user->uid) {
+      $uid = $user->uid;
+    }
+    else {
+      $uid = 0;
+      $hostname = $_SERVER['REMOTE_ADDR'];
+      if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $hostname .= '-'. $_SERVER['HTTP_X_FORWARDED_FOR'];
+      }
     }
   }
   $anon_interval = variable_get('fivestar_anonymous_vote_interval', 86400);
@@ -611,6 +691,7 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
     'style' => isset($node) ? 'average_combo' : variable_get('fivestar_style_'. $node->type, 'average_combo'),
     'content_type' => $content_type,
     'content_id' => $content_id,
+    'autosubmit' => TRUE,
   );
 
   return fivestar_custom_widget($values, $settings);  
@@ -639,10 +720,11 @@ function fivestar_custom_widget($values, $settings) {
     '#vote_count' => $values['count'],
     '#vote_average' => $values['average'],
     '#default_value' => $values['user'],
-    '#auto_submit' => TRUE,
+    '#auto_submit' => isset($settings['autosubmit']) ? $settings['autosubmit'] : TRUE,
     '#auto_submit_path' => 'fivestar/vote/' . $settings['content_type'] . '/' . $settings['content_id'],
     '#allow_clear' => $settings['allow_clear'],
     '#content_id' => $settings['content_id'],
+    '#required' => isset($settings['required']) ? $settings['required'] : FALSE,
   );
 
   switch ($settings['style']) {
@@ -698,6 +780,11 @@ function fivestar_custom_widget($values, $settings) {
         '#value' => theme('fivestar_static', $values['average'], $settings['stars'])
       );
       break;
+  }
+
+  // Set an over-ridding title if passed in.
+  if (isset($settings['title'])) {
+    $form['vote']['#title'] = $settings['title'];
   }
   
   $form['submit'] = array(

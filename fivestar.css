@@ -82,10 +82,20 @@ div.fivestar-widgets div.form-item {
 }
 
 /* Fivestar Node Type Preview */
-#fivestar-node-type-form {
+#fivestar-comment-form,
+#fivestar-direct-form {
   float: left;
 }
-#fivestar-preview {
+#fivestar-comment-preview,
+#fivestar-direct-preview {
   float: left;
-  margin-left: 40px;
+  margin-left: 100px;
+}
+#fivestar-node-type-form fieldset {
+  background: transparent;
+}
+.fivestar-preview {
+  margin: 10px 0;
+  padding: 10px 10px 0 10px;
+  border: 1px solid #CCC;
 }
