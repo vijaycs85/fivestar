@@ -80,3 +80,12 @@ iframe.fivestar-preview {
 div.fivestar-widgets div.form-item {
   float: left;
 }
+
+/* Fivestar Node Type Preview */
+#fivestar-node-type-form {
+  float: left;
+}
+#fivestar-preview {
+  float: left;
+  margin-left: 40px;
+}
