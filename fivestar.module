@@ -444,8 +444,9 @@ function fivestar_vote($type, $cid, $value, $tag = 'vote') {
  * Internal function to handle vote casting, flood control, XSS, IP based
  * voting, etc...
  */
-function _fivestar_cast_vote($type, $cid, $value, $tag = 'vote', $uid = NULL) {  
+function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL) {
   global $user;
+  $tag = empty($tag) ? 'vote' : $tag;
 
   // Bail out if the user's trying to vote on an invalid object.
   if (!_fivestar_validate_target($type, $cid)) {
@@ -872,7 +873,7 @@ function theme_fivestar_static($rating, $stars = 5) {
   fivestar_add_css();
 
   $output = '';
-  $output .= '<div class="fivestar-widget-static clear-block">';
+  $output .= '<div class="fivestar-widget-static fivestar-widget-static-'. $stars .' clear-block">';
   $numeric_rating = $rating/(100/$stars);
   for ($n=1; $n <= $stars; $n++) {
     $star_value = ceil((100/$stars) * $n);

@@ -22,6 +22,7 @@ function fivestar_field_info() {
 function fivestar_field_settings($op, $field) {
   switch ($op) {
     case 'form':
+      $form['multiple'] = array(); // Multiple not supported
       $form['stars'] = array(
         '#type' => 'select',
         '#title' => t('Number of Options'),
@@ -29,16 +30,26 @@ function fivestar_field_settings($op, $field) {
         '#default_value' => $field['stars'] ? $field['stars'] : 5,
         '#description' => t('The number of stars or radio buttons to display.'),
       );
+
+      if (module_exists('nodecomment')) {
+        $form['dynamic_target'] = array(
+          '#title' => t('Use Node Comment Parent as Target'),
+          '#type' => 'checkbox',
+          '#default_value' => $field['dynamic_target'],
+          '#return_value' => 'comment_target_nid',
+          '#description' => t('Use this option to easily make a Fivestar field affect the comment parent for nodes of this content type.')
+        );
+      }
+
       $form['target'] = array(
         '#type' => 'textarea',
-        '#title' => t('Node ID'),
+        '#title' => t('Target Node ID'),
         '#default_value' => $field['target'] ? $field['target'] : '',
         '#description' => t(
           'A single node ID on which this field will register the vote. If no NID is specified, the field\'s value will be saved, but no vote will be registered with the Voting API.'
         ),
       );
-      $form['multiple'] = array(); // Multiple not supported
-      
+
       if (user_access('use PHP for fivestar target')) {
         $form['target']['#description'] .= ' ' . t(
           ' Return the target node ID or use plain text. Enter PHP code between <em>&lt;?php ?&gt;</em>. Note that executing incorrect PHP-code can break your Drupal site.'
@@ -59,7 +70,7 @@ function fivestar_field_settings($op, $field) {
 
       return $form;
     case 'save':
-      return array('stars', 'target', 'php', 'axis');
+      return array('stars', 'dynamic_target', 'target', 'php', 'axis');
     case 'database columns':
       $columns = array(
         'target' => array('type' => 'int', 'default' => 'NULL'),
@@ -83,18 +94,19 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
     case 'insert':
     case 'update':
       foreach($items as $delta => $item) {
-        if ($field['php'] && !empty($item['target'])) {
+        if ($field['dynamic_target'] && !empty($node->$field['dynamic_target'])) {
+          $items[$delta]['target'] = $node->$field['dynamic_target'];
+        }
+        elseif ($field['php'] && !empty($item['target'])) {
           $items[$delta]['target'] = drupal_eval($item['target']);
         }
 
         if (is_numeric($items[$delta]['target'])) {
-          $target_node = node_load($items[$delta]['target']);
           if ($item['rating'] == 0) {
-            votingapi_unset_vote('node', $target_node->nid);
+            votingapi_unset_vote('node', $items[$delta]['target']);
           }
-          
           else {
-            _fivestar_cast_vote('node', $target_node->nid, $item['rating'], $items[$delta]['axis']);
+            _fivestar_cast_vote('node', $items[$delta]['target'], $item['rating'], $items[$delta]['axis']);
           }
         }
       }
