@@ -25,6 +25,11 @@ if (Drupal.jsEnabled) {
     // All the form elements except the enable checkbox.
     $options = $('#fivestar-node-type-form input:not(#edit-fivestar), #fivestar-node-type-form select');
 
+    // Disable the settings if not enabled.
+    if (!$enable.attr('checked')) {
+      $options.attr('disabled', 'disabled');
+    }
+
     // Add event handler for enable checkbox.
     $enable.change(function() {
       if ($(this).attr('checked')) {
