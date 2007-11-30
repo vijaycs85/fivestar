@@ -136,10 +136,10 @@ function fivestar_form_alter($form_id, &$form) {
       '#title' => t('Star display style'),
       '#default_value' => variable_get('fivestar_style_'. $form['#node_type']->type, 'average'),
       '#options' => array(
-        'average' => t('Average: Stars display current average'),
-        'user'    => t('User: Stars display user\'s current vote'),
-        'smart'   => t('Smart: User\'s vote if available, average otherwise'),
-        'dual'    => t('Dual: Both average and user vote as separate stars'),
+        'average' => t('Display average vote value'),
+        'user'    => t('Display user\'s vote value'),
+        'smart'   => t('User\'s vote if available, average otherwise'),
+        'dual'    => t('Both user\'s and average vote'),
       ),
     );
 
@@ -149,10 +149,10 @@ function fivestar_form_alter($form_id, &$form) {
       '#default_value' => variable_get('fivestar_text_'. $form['#node_type']->type, 'dual'),
       '#options' => array(
         'none'    => t('Display no text beneath stars'),
-        'average' => t('Average: Current average in text'),
-        'user'    => t('User: User\'s current vote in text'),
-        'smart'   => t('Smart: User\'s if available, average otherwise'),
-        'dual'    => t('Dual: Both average and user vote if available'),
+        'average' => t('Current average in text'),
+        'user'    => t('User\'s current vote in text'),
+        'smart'   => t('User\'s vote if available, average otherwise'),
+        'dual'    => t('Both average and user vote if available'),
       ),
     );
 
@@ -660,7 +660,7 @@ function fivestar_block($op = 'list', $delta = 0, $edit = array()) {
 }
 
 function fivestar_widget_form($node) {
-  return drupal_get_form('fivestar_form_node_' . $node->nid, 'node', $node->nid, variable_get('fivestar_style_'. $node->type, 'average'));
+  return drupal_get_form('fivestar_form_node_' . $node->nid, 'node', $node->nid);
 }
 
 /**
@@ -683,8 +683,17 @@ function fivestar_forms() {
  * Note that this is not an implementation of hook_form(). We should probably
  * change the function to reflect that.
  */
-function fivestar_form($content_type, $content_id, $style = 'default') {
+function fivestar_form($content_type, $content_id) {
   global $user;
+
+  if ($content_type == 'node') {
+    if (is_numeric($content_id)) {
+      $node = node_load($content_id);
+    }
+    else {
+      return array();
+    }
+  }
 
   $current_avg = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'average');
   $current_count = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'count');
@@ -698,15 +707,6 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
     $user_vote->value = 0;
   }
 
-  if ($content_type == 'node') {
-    if (is_numeric($content_id)) {
-      $node = node_load($content_id);
-    }
-    else {
-      return array();
-    }
-  }
-
   $values = array(
     'average' => $current_avg->value,
     'user' => $user_vote->value,
@@ -714,14 +714,14 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
   );
 
   $settings = array(
-    'stars' => variable_get('fivestar_stars_'. (!isset($node) ? 'default' : $node->type), 5),
-    'allow_clear' => variable_get('fivestar_unvote_'. (!isset($node) ? 'default' : $node->type), FALSE),
-    'style' => !isset($node) ? 'average' : variable_get('fivestar_style_'. $node->type, 'average'),
-    'text' => !isset($node) ? 'combo' : variable_get('fivestar_style_'. $node->type, 'combo'),
+    'stars' => variable_get('fivestar_stars_'. $node->type, 5),
+    'allow_clear' => variable_get('fivestar_unvote_'. $node->type, FALSE),
+    'style' => variable_get('fivestar_style_'. $node->type, 'average'),
+    'text' => variable_get('fivestar_text_'. $node->type, 'combo'),
     'content_type' => $content_type,
     'content_id' => $content_id,
     'autosubmit' => TRUE,
-    'title' => variable_get('fivestar_title_'. (!isset($node) ? 'default' : $node->type), 1) ? NULL : FALSE,
+    'title' => variable_get('fivestar_title_'. $node->type, 1) ? NULL : FALSE,
   );
 
   return fivestar_custom_widget($values, $settings);  
@@ -1019,10 +1019,10 @@ function fivestar_expand($element) {
     if (($element['#allow_clear'] == TRUE) || ($i > 0)){    
       $element['vote'][$i]['#type'] = 'radio';
       if($i == 0) {
-      	$element['vote'][$i]['#title'] = t('Clear');
+        $element['vote'][$i]['#title'] = t('Clear');
       }
       else {
-      	$element['vote'][$i]['#title'] = $i;
+        $element['vote'][$i]['#title'] = $i;
       }
       $element['vote'][$i]['#return_value'] = $this_value;
       $element['vote'][$i]['#attributes'] = $element['#attributes'];
