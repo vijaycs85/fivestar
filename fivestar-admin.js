@@ -17,13 +17,14 @@ if (Drupal.jsEnabled) {
     // Setup dynamic form elements.
     $enable = $('#edit-fivestar');
     $unvote = $('#edit-fivestar-unvote');
-    $stars = $('#edit-fivestar-stars');
-    $style = $('#edit-fivestar-style');
+    $stars  = $('#edit-fivestar-stars');
+    $style  = $('#edit-fivestar-style');
+    $text   = $('#edit-fivestar-text');
 
     // Add event handler for enable checkbox.
     $enable.change(function() {
       if ($(this).attr('checked')) {
-        nodePreview.enable($unvote.attr('checked') ? 1 : 0, $stars.val(), $style.val());
+        nodePreview.enable($unvote.attr('checked') ? 1 : 0, $stars.val(), $style.val(), $text.val());
 
         if (commentPreview) {
           var commentSetting = 0;
@@ -33,7 +34,7 @@ if (Drupal.jsEnabled) {
             }
           });
           if (commentSetting != 0) {
-            commentPreview.enable(commentSetting == 1 ? 1 : 0, $stars.val(), 'compact');
+            commentPreview.enable(commentSetting == 1 ? 1 : 0, $stars.val(), 'compact', 'none');
           }
         }
       }
@@ -49,9 +50,10 @@ if (Drupal.jsEnabled) {
     $unvote.change(function() { nodePreview.setValue('unvote', $(this).attr('checked') ? 1 : 0); });
     $stars.change(function() { nodePreview.setValue('stars', this.value); });
     $style.change(function() { nodePreview.setValue('style', this.value); });
+    $text.change(function() { nodePreview.setValue('text', this.value); });
     // Initialize the preview.
     if ($enable.attr('checked')) {
-      nodePreview.enable($unvote.attr('checked') ? 1 : 0, $stars.val(), $style.val());
+      nodePreview.enable($unvote.attr('checked') ? 1 : 0, $stars.val(), $style.val(), $text.val());
     }
 
     // Setup comment preview handlers and initialize.
@@ -95,17 +97,19 @@ var fivestarPreview = function(previewElement) {
   this.unvote = 0;
   this.stars = 5;
   this.style = '';
+  this.text = '';
 };
 
 /**
  * Enable the preview functionality and show the preview.
  */
-fivestarPreview.prototype.enable = function(unvote, stars, style) {
+fivestarPreview.prototype.enable = function(unvote, stars, style, text) {
   if (!this.enabled) {
     this.enabled = true;
     this.unvote = unvote;
     this.stars = stars;
     this.style = style;
+    this.text = text;
     $(this.preview).show();
     this.update();
   }
@@ -147,7 +151,7 @@ fivestarPreview.prototype.update = function() {
 
     $.ajax({
       dateType: 'json',
-      url: Drupal.settings.fivestar.preview_url + '/node/' + this.style + '/' + this.stars + '/' + this.unvote,
+      url: Drupal.settings.fivestar.preview_url + '/node/' + this.style + '/' + this.text + '/' + this.stars + '/' + this.unvote,
       success: updateSuccess,
     });
   }

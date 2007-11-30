@@ -54,3 +54,37 @@ function fivestar_update_1() {
 
   return $ret;
 }
+
+/**
+ * Convert previous fivestar widget settings to new format.
+ */
+function fivestar_update_2() {
+  $types = node_get_types('names');
+  foreach ($types as $key => $name) {
+    $style = variable_get('fivestar_style_'. $key, 'default');
+    $enabled = variable_get('fivestar_'. $key, FALSE);
+    // Split the display style into two variables for stars and text.
+    if ($enabled) {
+      switch ($style) {
+        case 'default':
+          variable_set('fivestar_style_'. $key, 'user');
+          variable_set('fivestar_text_'. $key, 'average');
+          break;
+        case 'compact':
+          variable_set('fivestar_style_'. $key, 'user');
+          variable_set('fivestar_text_'. $key, 'none');
+          break;
+        case 'dual':
+          variable_set('fivestar_text_'. $key, 'none');
+          break;
+      }
+    }
+    // We no longer save any settings if Fivestar is disabled.
+    else {
+      variable_del('fivestar_unvote_'. $key);
+      variable_del('fivestar_style_'. $key);
+      variable_del('fivestar_position_'. $key);
+      variable_del('fivestar_position_teaser_'. $key);
+    }
+  }
+}

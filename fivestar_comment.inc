@@ -29,7 +29,7 @@ function fivestar_comment_form_alter($form_id, &$form) {
     $form['fivestar']['comment']['fivestar_comment_preview'] = array(
       '#type' => 'item',
       '#title' => t('Comment widget preview'),
-      '#value' => theme('fivestar_preview', 'compact', $form['fivestar']['fivestar_stars']['#default_value'], $form['fivestar']['comment']['fivestar_comment']['#default_value'] == 1 ? 1 : 0),
+      '#value' => theme('fivestar_preview', 'compact', 'none', $form['fivestar']['fivestar_stars']['#default_value'], $form['fivestar']['comment']['fivestar_comment']['#default_value'] == 1 ? 1 : 0),
     );
     if (!$form['fivestar']['fivestar']['#default_value'] || !$form['fivestar']['comment']['#default_value']) {
       $form['fivestar']['comment']['fivestar_comment_preview']['#value'] = theme('fivestar_preview_wrapper', '');
