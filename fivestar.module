@@ -138,8 +138,8 @@ function fivestar_form_alter($form_id, &$form) {
       '#options' => array(
         'average' => t('Average: Stars display current average'),
         'user'    => t('User: Stars display user\'s current vote'),
-        'smart'   => t('Smart: Current vote if available, average otherwise'),
-        'dual'    => t('Dual: Both average and current vote as separate stars'),
+        'smart'   => t('Smart: User\'s vote if available, average otherwise'),
+        'dual'    => t('Dual: Both average and user vote as separate stars'),
       ),
     );
 
@@ -151,9 +151,16 @@ function fivestar_form_alter($form_id, &$form) {
         'none'    => t('Display no text beneath stars'),
         'average' => t('Average: Current average in text'),
         'user'    => t('User: User\'s current vote in text'),
-        'smart'   => t('Smart: Current vote if available, average otherwise'),
-        'dual'    => t('Dual: Both average and current vote if available.'),
+        'smart'   => t('Smart: User\'s if available, average otherwise'),
+        'dual'    => t('Dual: Both average and user vote if available'),
       ),
+    );
+
+    $form['fivestar']['direct']['fivestar_title'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Show widget title'),
+      '#default_value' => variable_get('fivestar_title_'. $form['#node_type']->type, 1),
+      '#return_value' => 1,
     );
 
     $form['fivestar']['direct']['fivestar_unvote'] = array(
@@ -188,7 +195,7 @@ function fivestar_form_alter($form_id, &$form) {
     $form['fivestar']['direct']['fivestar_direct_preview'] = array(
       '#type' => 'item',
       '#title' => t('Direct rating widget preview'),
-      '#value' => theme('fivestar_preview', $form['fivestar']['fivestar_style']['#default_value'], $form['fivestar']['fivestar_text']['#default_value'], $form['fivestar']['fivestar_stars']['#default_value'], $form['fivestar']['fivestar_unvote']['#default_value']),
+      '#value' => theme('fivestar_preview', $form['fivestar']['fivestar_style']['#default_value'], $form['fivestar']['fivestar_text']['#default_value'], $form['fivestar']['fivestar_stars']['#default_value'], $form['fivestar']['fivestar_unvote']['#default_value'], $form['fivestar']['fivestar_title']['#default_value']),
     );
     if (!$form['fivestar']['fivestar']['#default_value']) {
       $form['fivestar']['direct']['fivestar_direct_preview']['#value'] = theme('fivestar_preview_wrapper', '');
@@ -238,6 +245,7 @@ function theme_fivestar_node_type_form($form) {
   $direct .= '<div id="fivestar-direct-form">';
   $direct .= drupal_render($form['direct']['fivestar_style']);
   $direct .= drupal_render($form['direct']['fivestar_text']);
+  $direct .= drupal_render($form['direct']['fivestar_title']);
   $direct .= drupal_render($form['direct']['fivestar_unvote']);
   $direct .= drupal_render($form['direct']['fivestar_position_teaser']);
   $direct .= drupal_render($form['direct']['fivestar_position']);
@@ -382,8 +390,8 @@ function theme_fivestar_preview_page() {
  * Callback function for fivestar/preview/node. Outputs a JSON page containing
  * a Fivestar preview of a node rating widget.
  */
-function fivestar_preview($style, $text, $stars, $unvote) {
-  $output = theme('fivestar_preview', $style, $text, $stars, $unvote);
+function fivestar_preview($style, $text, $stars, $unvote, $title = NULL) {
+  $output = theme('fivestar_preview', $style, $text, $stars, $unvote, $title ? NULL : FALSE);
   drupal_set_header('Content-Type: text/javascript; charset=utf-8');
   print drupal_to_js(array('status' => TRUE, 'data' => $output));
 }
@@ -407,8 +415,8 @@ function theme_fivestar_preview($style = NULL, $text = NULL, $stars = NULL, $unv
   return drupal_get_form('fivestar_custom_widget', $values, $settings);
 }
 
-function theme_fivestar_preview_wrapper($content) {
-  return '<div class="fivestar-preview">'. $content .'</div>';
+function theme_fivestar_preview_wrapper($content, $type = 'direct') {
+  return '<div class="fivestar-preview fivestar-preview-'. $type .'">'. $content .'</div>';
 }
 
 /**
@@ -713,6 +721,7 @@ function fivestar_form($content_type, $content_id, $style = 'default') {
     'content_type' => $content_type,
     'content_id' => $content_id,
     'autosubmit' => TRUE,
+    'title' => variable_get('fivestar_title_'. (!isset($node) ? 'default' : $node->type), 1) ? NULL : FALSE,
   );
 
   return fivestar_custom_widget($values, $settings);  
@@ -804,8 +813,16 @@ function fivestar_custom_widget($values, $settings) {
   }
 
   // Set an over-ridding title if passed in.
+  // An empty title won't change the default, a string will set a new title,
+  // and title === FALSE will unset the title entirely.
   if (isset($settings['title'])) {
-    $form['vote']['#title'] = $settings['title'];
+    if ($settings['title'] !== FALSE) {
+      $form['vote']['#title'] = $settings['title'];
+    }
+    else {
+      unset($form['vote']['#title']);
+      unset($form['average']['#title']);
+    }
   }
   
   $form['submit'] = array(

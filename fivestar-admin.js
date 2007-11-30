@@ -17,14 +17,18 @@ if (Drupal.jsEnabled) {
     // Setup dynamic form elements.
     $enable = $('#edit-fivestar');
     $unvote = $('#edit-fivestar-unvote');
+    $title  = $('#edit-fivestar-title');
     $stars  = $('#edit-fivestar-stars');
     $style  = $('#edit-fivestar-style');
     $text   = $('#edit-fivestar-text');
 
+    // All the form elements except the enable checkbox.
+    $options = $('#fivestar-node-type-form input:not(#edit-fivestar), #fivestar-node-type-form select');
+
     // Add event handler for enable checkbox.
     $enable.change(function() {
       if ($(this).attr('checked')) {
-        nodePreview.enable($unvote.attr('checked') ? 1 : 0, $stars.val(), $style.val(), $text.val());
+        nodePreview.enable($unvote.attr('checked') ? 1 : 0, $stars.val(), $style.val(), $text.val(), $title.attr('checked') ? 1 : 0);
 
         if (commentPreview) {
           var commentSetting = 0;
@@ -34,26 +38,29 @@ if (Drupal.jsEnabled) {
             }
           });
           if (commentSetting != 0) {
-            commentPreview.enable(commentSetting == 1 ? 1 : 0, $stars.val(), 'compact', 'none');
+            commentPreview.enable(commentSetting == 1 ? 1 : 0, $stars.val(), 'user', 'none');
           }
         }
+        $options.attr('disabled', false);
       }
       else {
         nodePreview.disable();
         if (commentPreview) {
           commentPreview.disable();
         }
+        $options.attr('disabled', 'disabled');
       }
     });
 
     // Setup node preview handlers.
     $unvote.change(function() { nodePreview.setValue('unvote', $(this).attr('checked') ? 1 : 0); });
+    $title.change(function() { nodePreview.setValue('title', $(this).attr('checked') ? 1 : 0); });
     $stars.change(function() { nodePreview.setValue('stars', this.value); });
     $style.change(function() { nodePreview.setValue('style', this.value); });
     $text.change(function() { nodePreview.setValue('text', this.value); });
     // Initialize the preview.
     if ($enable.attr('checked')) {
-      nodePreview.enable($unvote.attr('checked') ? 1 : 0, $stars.val(), $style.val(), $text.val());
+      nodePreview.enable($unvote.attr('checked') ? 1 : 0, $stars.val(), $style.val(), $text.val(), $title.attr('checked') ? 1 : 0);
     }
 
     // Setup comment preview handlers and initialize.
@@ -64,7 +71,7 @@ if (Drupal.jsEnabled) {
         if ($(this).attr('checked') && $enable.attr('checked')) {
           if (this.value != 0) {
             commentPreview.setValue('unvote', this.value == 1 ? 1 : 0);
-            commentPreview.enable(this.value == 1 ? 1 : 0, $stars.val(), 'compact');
+            commentPreview.enable(this.value == 1 ? 1 : 0, $stars.val(), 'user', 'none', 0);
           }
           else {
             commentPreview.disable();
@@ -80,7 +87,7 @@ if (Drupal.jsEnabled) {
         }
       });
       if ($enable.attr('checked') && commentSetting > 0) {
-        commentPreview.enable(commentSetting == 1 ? 1 : 0, $stars.val(), 'compact');
+        commentPreview.enable(commentSetting == 1 ? 1 : 0, $stars.val(), 'user', 'none', 0);
       }
     }
   });
@@ -95,6 +102,7 @@ var fivestarPreview = function(previewElement) {
   this.preview = previewElement;
   this.enabled = false;
   this.unvote = 0;
+  this.title = 1;
   this.stars = 5;
   this.style = '';
   this.text = '';
@@ -103,10 +111,11 @@ var fivestarPreview = function(previewElement) {
 /**
  * Enable the preview functionality and show the preview.
  */
-fivestarPreview.prototype.enable = function(unvote, stars, style, text) {
+fivestarPreview.prototype.enable = function(unvote, stars, style, text, title) {
   if (!this.enabled) {
     this.enabled = true;
     this.unvote = unvote;
+    this.title = title;
     this.stars = stars;
     this.style = style;
     this.text = text;
@@ -151,7 +160,7 @@ fivestarPreview.prototype.update = function() {
 
     $.ajax({
       dateType: 'json',
-      url: Drupal.settings.fivestar.preview_url + '/node/' + this.style + '/' + this.text + '/' + this.stars + '/' + this.unvote,
+      url: Drupal.settings.fivestar.preview_url + '/node/' + this.style + '/' + this.text + '/' + this.stars + '/' + this.unvote + '/' + this.title,
       success: updateSuccess,
     });
   }
