@@ -87,4 +87,5 @@ function fivestar_update_2() {
       variable_del('fivestar_position_teaser_'. $key);
     }
   }
+  return array();
 }
