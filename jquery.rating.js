@@ -127,7 +127,7 @@
                 var index = $stars.index(el) + 1;
                 $stars
                     .children('a').css('width', '100%').end()
-                    .lt(index).addClass('hover').end();
+                    .filter(':lt(' + index + ')').addClass('hover').end();
             },
             drain: function() { // Drain all the stars.
                 $stars
@@ -135,7 +135,7 @@
                     .filter('.hover').removeClass('hover').end();
             },
             reset: function(){ // Reset the stars to the default index.
-                $stars.lt(Math.floor(averageIndex/100 * $stars.size())).addClass('on').end();
+                $stars.filter(':lt(' + Math.floor(averageIndex/100 * $stars.size()) + ')').addClass('on').end();
                 var percent = (averagePercent) ? averagePercent * 10 : 0;
                 if (percent > 0) {
                     $stars.eq(averageIndex).addClass('on').children('a').css('width', percent + "%").end().end();
