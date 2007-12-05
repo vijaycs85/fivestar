@@ -1058,10 +1058,9 @@ function fivestar_views_value_display_handler($op, $filter, $value, &$query) {
       $stars = variable_get('fivestar_stars_'. $query->node_type, 5);
     }
     else {
-      $mysql = "SELECT type FROM {node} WHERE nid=%d";
-      $type = db_result(db_query($mysql, $query->nid));
+      $type = db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $query->nid));
       $stars = variable_get('fivestar_stars_'. (!isset($type) ? 'default' : $type), 5);
     }
-    return theme('fivestar_static', $value);
+    return theme('fivestar_static', $value, $stars);
   }
 }
