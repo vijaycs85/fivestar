@@ -201,7 +201,7 @@ function fivestar_form_alter($form_id, &$form) {
       $form['fivestar']['direct']['fivestar_direct_preview']['#value'] = theme('fivestar_preview_wrapper', '');
     }
     else {
-      $form['fivestar']['direct']['fivestar_direct_preview']['#value'] = theme('fivestar_preview_wrapper', $form['fivestar']['direct']['fivestar_direct_preview']);
+      $form['fivestar']['direct']['fivestar_direct_preview']['#value'] = theme('fivestar_preview_wrapper', $form['fivestar']['direct']['fivestar_direct_preview']['#value']);
     }
 
     $form['#submit']['fivestar_node_type_form_submit'] = array();
@@ -412,7 +412,12 @@ function theme_fivestar_preview($style = NULL, $text = NULL, $stars = NULL, $unv
     'title' => $title,
   );
 
-  return drupal_get_form('fivestar_custom_widget', $values, $settings);
+  $form = drupal_get_form('fivestar_custom_widget', $values, $settings);
+  // This regex is sadly necessary because having duplicate form_tokens or
+  // form_id elements can cause the content type form to choke. Forms inside of
+  // forms is also frowned upon, so this removes the wrapping form tag as well.
+  $form = preg_replace('/(<\/?form.*?>)|(<input.*?name="(form_token|form_id)".*?\/>)/', '', $form);
+  return $form;
 }
 
 function theme_fivestar_preview_wrapper($content, $type = 'direct') {
@@ -759,20 +764,20 @@ function fivestar_custom_widget($values, $settings) {
   switch ($settings['text']) {
     case 'user':
       $form['vote']['#description'] = theme('fivestar_summary', $values['user'], NULL, $values['count'], $settings['stars']);
-      $form['#attributes']['class'] .= ' fivestar-user-text';
+      $form['vote']['#attributes']['class'] .= ' fivestar-user-text';
       break;
     case 'average':
       $form['vote']['#description'] = theme('fivestar_summary', NULL, $values['average'], $values['count'], $settings['stars']);
-      $form['#attributes']['class'] .= ' fivestar-average-text';
+      $form['vote']['#attributes']['class'] .= ' fivestar-average-text';
       break;
     case 'smart':
       $form['vote']['#description'] = theme('fivestar_summary', $values['user'], $values['user'] ? NULL : $values['average'], $values['count'], $settings['stars']);
-      $form['#attributes']['class'] .= ' '. ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars') .' fivestar-combo-text';
-      $form['#attributes']['class'] .= $values['user'] ? ' fivestar-average-text' : ' fivestar-average-text';
+      $form['vote']['#attributes']['class'] .= ' '. ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars') .' fivestar-combo-text';
+      $form['vote']['#attributes']['class'] .= $values['user'] ? ' fivestar-average-text' : ' fivestar-average-text';
       break;
     case 'dual':
       $form['vote']['#description'] = theme('fivestar_summary', $values['user'], $values['average'], $values['count'], $settings['stars']);
-      $form['#attributes']['class'] .= ' fivestar-combo-text';
+      $form['vote']['#attributes']['class'] .= ' fivestar-combo-text';
       break;
   }
 
@@ -780,17 +785,17 @@ function fivestar_custom_widget($values, $settings) {
     case 'average':
       $form['vote']['#title'] = t('Average');
       $form['vote']['#default_value'] = $values['average'];
-      $form['#attributes']['class'] .= ' fivestar-average-stars';
+      $form['vote']['#attributes']['class'] .= ' fivestar-average-stars';
       break;
     case 'user':
       $form['vote']['#title'] = t('Your vote');
       $form['vote']['#default_value'] = $values['user'];
-      $form['#attributes']['class'] .= ' fivestar-user-stars';
+      $form['vote']['#attributes']['class'] .= ' fivestar-user-stars';
       break;
     case 'smart':
       $form['vote']['#title'] = $values['user'] ? t('Your vote') : t('Average');
       $form['vote']['#default_value'] = $values['user'] ? $values['user'] : $values['average'];
-      $form['#attributes']['class'] .= ' '. ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars');
+      $form['vote']['#attributes']['class'] .= ' '. ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars');
       break;
     case 'dual':
       $form['vote']['#title'] = t('Your vote');
@@ -878,7 +883,7 @@ function theme_fivestar($element) {
   // Add necessary CSS.
   fivestar_add_css();
 
-  $element['#children'] = '<div class="fivestar-widget container-inline">'. $element['#children'] .'</div>';
+  $element['#children'] = '<div class="fivestar-widget container-inline '. $element['#attributes']['class'] .'">'. $element['#children'] .'</div>';
   if ($element['#title'] || $element['#description']) {
     if (isset($element['#description'])) {
       $element['#children'] .= '<div id="fivestar-summary-' . $element['#content_id'] . '" class="description">';

@@ -26,34 +26,34 @@
      * @param {Object} $obj
      */
     var buildRating = function($obj){
+        console.log($obj);
         var $widget = buildInterface($obj),
             $stars = $('.star', $widget),
             $cancel = $('.cancel', $widget),
-            $form = $obj.parents('form:first'),
             averageIndex = 0,
             averagePercent = 0;
 
         // Record star display.
-        if ($form.is('.fivestar-user-stars')) {
+        if ($obj.is('.fivestar-user-stars')) {
           var starDisplay = 'user';
         }
-        else if ($form.is('.fivestar-average-stars')) {
+        else if ($obj.is('.fivestar-average-stars')) {
           var starDisplay = 'average';
         }
-        else if ($form.is('.fivestar-combo-stars')) {
+        else if ($obj.is('.fivestar-combo-stars')) {
           var starDisplay = 'combo';
         }
         else {
           var starDisplay = 'none';
         }
         // Recore text display.
-        if ($form.is('.fivestar-user-text')) {
+        if ($obj.is('.fivestar-user-text')) {
           var textDisplay = 'user';
         }
-        else if ($form.is('.fivestar-average-text')) {
+        else if ($obj.is('.fivestar-average-text')) {
           var textDisplay = 'average';
         }
-        else if ($form.is('.fivestar-combo-text')) {
+        else if ($obj.is('.fivestar-combo-text')) {
           var textDisplay = 'combo';
         }
         else {

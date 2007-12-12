@@ -31,11 +31,11 @@ function fivestar_comment_form_alter($form_id, &$form) {
       '#title' => t('Comment widget preview'),
       '#value' => theme('fivestar_preview', 'compact', 'none', $form['fivestar']['fivestar_stars']['#default_value'], $form['fivestar']['comment']['fivestar_comment']['#default_value'] == 1 ? 1 : 0),
     );
-    if (!$form['fivestar']['fivestar']['#default_value'] || !$form['fivestar']['comment']['#default_value']) {
+    if (!$form['fivestar']['fivestar']['#default_value'] || !$form['fivestar']['comment']['fivestar_comment']['#default_value']) {
       $form['fivestar']['comment']['fivestar_comment_preview']['#value'] = theme('fivestar_preview_wrapper', '', 'comment');
     }
     else {
-      $form['fivestar']['comment']['fivestar_comment_preview']['#value'] = theme('fivestar_preview_wrapper', $form['fivestar']['comment']['fivestar_comment_preview'], 'comment');
+      $form['fivestar']['comment']['fivestar_comment_preview']['#value'] = theme('fivestar_preview_wrapper', $form['fivestar']['comment']['fivestar_comment_preview']['#value'], 'comment');
     }
   }
 

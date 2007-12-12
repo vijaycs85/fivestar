@@ -96,7 +96,5 @@ div.fivestar-widgets div.form-item {
 }
 .fivestar-preview {
   border: 1px solid #CCC;
-}
-.fivestar-preview #fivestar-custom-widget {
-  margin: 10px;
+  padding: 10px;
 }
