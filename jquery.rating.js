@@ -26,7 +26,6 @@
      * @param {Object} $obj
      */
     var buildRating = function($obj){
-        console.log($obj);
         var $widget = buildInterface($obj),
             $stars = $('.star', $widget),
             $cancel = $('.cancel', $widget),
