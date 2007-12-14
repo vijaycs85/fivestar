@@ -158,7 +158,7 @@ fivestarPreview.prototype.update = function() {
         response = Drupal.parseJson(response);
       }
       $(self.preview).html(response.data).hide();
-      $('div.fivestar-widget', self.preview).rating();
+      $('div.fivestar-form-item', self.preview).rating();
       $('input.fivestar-submit', self.preview).hide();
       $(self.preview).show();
     };
