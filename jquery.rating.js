@@ -29,7 +29,7 @@
         var $widget = buildInterface($obj),
             $stars = $('.star', $widget),
             $cancel = $('.cancel', $widget),
-            averageIndex = 0,
+            averageIndex = $("select", $obj).val();
             averagePercent = 0;
 
         // Record star display.
@@ -59,9 +59,6 @@
           var textDisplay = 'none';
         }
 
-        // Set default rating.
-        $("input[@type='radio']", $obj).each(function () { if (this.checked) { averageIndex = this.value; } });
-        
         // Add hover and focus events.
         $stars
             .mouseover(function(){
@@ -106,7 +103,7 @@
             averageIndex = 0;
             averagePercent = 0;
             // Save the value in a hidden field.
-            $("input[@type='radio']", $obj).each(function () { this.checked = (this.value ==  averageIndex) ? true : false; });
+            $("select", $obj).val(averageIndex);
             // Submit the form if needed.
             $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + averageIndex, success: voteHook }); });
             return false;
@@ -115,12 +112,12 @@
             averageIndex = Math.ceil(($stars.index(this) + 1) * (100/$stars.size()));
             averagePercent = 0;
             // Save the value in a hidden field.
-            $("input[@type='radio']", $obj).each(function () { this.checked = (this.value ==  averageIndex) ? true : false; });
+            $("select", $obj).val(averageIndex);
             // Submit the form if needed.
             $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + averageIndex, success: voteHook }); });
             return false;
         });
-        
+
         var event = {
             fill: function(el){ // Fill to the current mouse position.
                 var index = $stars.index(el) + 1;
@@ -187,18 +184,18 @@
      */
     var buildInterface = function($widget){
         var $container = $('<div class="fivestar-widget clear-block"></div>');
-        var $radios = $("input[@type='radio']", $widget);
-        var size = $radios.size() - 1;
+        var $options = $("select option", $widget);
+        var size = $('option', $widget).size() - 1;
         var cancel = 1;
-        for (var i = 0, radio; radio = $radios[i]; i++){
-            if (radio.value == "0") {
+        for (var i = 0, option; option = $options[i]; i++){
+            if (option.value == "0") {
               cancel = 0;
-              $div = $('<div class="cancel"><a href="#0" title="Cancel Rating">Cancel Rating</a></div>');
+              $div = $('<div class="cancel"><a href="#0" title="' + option.text + '">' + option.text + '</a></div>');
             }
             else {
               var zebra = (i + cancel) % 2 == 0 ? 'even' : 'odd';
               var count = i + cancel;
-              $div = $('<div class="star star-' + count + ' star-' + zebra + '"><a href="#' + radio.value + '" title="Give it ' + count + '/'+ (size + cancel) +'">' + radio.value + '</a></div>');
+              $div = $('<div class="star star-' + count + ' star-' + zebra + '"><a href="#' + option.value + '" title="' + option.text + '">' + option.text + '</a></div>');
             }
             $container.append($div[0]);                    
         }
@@ -225,7 +222,7 @@
      * voteResult.display.text The type of text display we're using. Either 'average', 'user', or 'combo'.
      */
     function fivestarDefaultResult(voteResult) {
-      $('div#fivestar-summary-'+voteResult.vote.id).html(voteResult.result.summary[voteResult.display.text]);
+      $('div.fivestar-summary-'+voteResult.vote.id).html(voteResult.result.summary[voteResult.display.text]);
     };
 
     /**
@@ -250,7 +247,7 @@
 
 if (Drupal.jsEnabled) {
   $(document).ready(function() {
-    $('div.fivestar-widget').rating();
+    $('div.fivestar-form-item').rating();
     $('input.fivestar-submit').hide();
   });
 }

@@ -3,6 +3,10 @@ form.fivestar-widget {
   clear: both;
   display: block;
 }
+form.fivestar-widget select,
+form.fivestar-widget input {
+  margin: 0;
+}
 
 /* Static View-only Star Version */
 div.fivestar-widget-static {
