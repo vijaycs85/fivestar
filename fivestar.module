@@ -137,9 +137,9 @@ function fivestar_form_alter($form_id, &$form) {
       '#default_value' => variable_get('fivestar_style_'. $form['#node_type']->type, 'average'),
       '#options' => array(
         'average' => t('Display average vote value'),
-        'user'    => t('Display user\'s vote value'),
-        'smart'   => t('User\'s vote if available, average otherwise'),
-        'dual'    => t('Both user\'s and average vote'),
+        'user'    => t('Display user vote value'),
+        'smart'   => t('User vote if available, average otherwise'),
+        'dual'    => t('Both user and average vote'),
       ),
     );
 
@@ -150,9 +150,9 @@ function fivestar_form_alter($form_id, &$form) {
       '#options' => array(
         'none'    => t('Display no text beneath stars'),
         'average' => t('Current average in text'),
-        'user'    => t('User\'s current vote in text'),
-        'smart'   => t('User\'s vote if available, average otherwise'),
-        'dual'    => t('Both average and user vote if available'),
+        'user'    => t('User current vote in text'),
+        'smart'   => t('User vote if available, average otherwise'),
+        'dual'    => t('Both user and average vote'),
       ),
     );
 
@@ -172,23 +172,27 @@ function fivestar_form_alter($form_id, &$form) {
 
     $form['fivestar']['direct']['fivestar_position_teaser'] = array(
       '#type' => 'select',
-      '#title' => t('Widget location (teaser)'),
+      '#title' => t('Teaser display'),
       '#default_value' => variable_get('fivestar_position_teaser_'. $form['#node_type']->type, 'hidden'),
       '#options' => array(
-        'above' => t('Above the teaser body'),
-        'below' => t('Below the teaser body'),
-        'hidden' => t('Hidden'),
+        'above' => t('Rating widget above the teaser'),
+        'below' => t('Rating widget below the teaser'),
+        'above_static' => t('Static display above the teaser'),
+        'below_static' => t('Static display below the teaser'),
+        'hidden' => t('<Hidden>'),
       ),
     );
 
    $form['fivestar']['direct']['fivestar_position'] = array(
       '#type' => 'select',
-      '#title' => t('Widget location (full node)'),
+      '#title' => t('Full node display'),
       '#default_value' => variable_get('fivestar_position_'. $form['#node_type']->type, 'below'),
       '#options' => array(
         'above' => t('Above the node body'),
         'below' => t('Below the node body'),
-        'hidden' => t('Hidden'),
+        'above_static' => t('Static display above the node body'),
+        'below_static' => t('Static display below the node body'),
+        'hidden' => t('<Hidden>'),
       ),
     );
 
@@ -407,16 +411,16 @@ function theme_fivestar_preview($style = NULL, $text = NULL, $stars = NULL, $unv
     'allow_clear' => $unvote,
     'style' => $style,
     'text' => $text,
-    'content_type' => 'node',
-    'content_id' => 0,
     'title' => $title,
+    'autosubmit' => FALSE,
   );
 
   $form = drupal_get_form('fivestar_custom_widget', $values, $settings);
   // This regex is sadly necessary because having duplicate form_tokens or
   // form_id elements can cause the content type form to choke. Forms inside of
   // forms is also frowned upon, so this removes the wrapping form tag as well.
-  $form = preg_replace('/(<\/?form.*?>)|(<input.*?name="(form_token|form_id)".*?\/>)/', '', $form);
+  $form = str_replace(array('<form', '</form>'), array('<div', '</div>'), $form);
+  $form = preg_replace('/( method=".*?")|( action=".*?")|(<input.*?name="(form_token|form_id)".*?\/>)/', '', $form);
   return $form;
 }
 
@@ -622,15 +626,18 @@ function fivestar_nodeapi(&$node, $op, $teaser, $page) {
         }
         switch ($position) {
           case 'above':
-            $node->content['fivestar_widget'] = array(
-              '#value' => fivestar_widget_form($node),
-              '#weight' => -10,
-            );
-            break;
           case 'below':
             $node->content['fivestar_widget'] = array(
               '#value' => fivestar_widget_form($node),
-              '#weight' => 50,
+              '#weight' => $position == 'above' ? -10 : 50,
+            );
+            break;
+          case 'above_static':
+          case 'above_static':
+            $stars = variable_get('fivestar_stars_'. $node->type, 5);
+            $node->content['fivestar_widget'] = array(
+              '#value' => fivestar_static('node', $node->nid, $node->type),
+              '#weight' => $position == 'above' ? -10 : 50,
             );
             break;
           default:
@@ -732,6 +739,73 @@ function fivestar_form($content_type, $content_id) {
   return fivestar_custom_widget($values, $settings);  
 }
 
+function fivestar_static($content_type, $content_id, $node_type = NULL) {
+  global $user;
+
+  $current_avg = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'average');
+  $current_count = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'count');
+  $user_vote = $user->uid ? votingapi_get_vote($content_type, $content_id, 'percent', 'vote', $user->uid) : 0;
+
+  if ($content_type == 'node') {
+    $star_display = variable_get('fivestar_style_'. $node_type, 'average');
+    $text_display = variable_get('fivestar_text_'. $node_type, 'dual');
+    $title_display = variable_get('fivestar_title_'. $node_type, 1);
+
+    $stars = variable_get('fivestar_stars_'. $node_type, 5);
+    switch ($star_display) {
+      case 'average':
+      case 'dual':
+        $star_value = $current_avg->value;
+        $title = $title_display ? t('Average') : NULL;
+        break;
+      case 'user':
+        $star_value = $user_vote->value;
+        $title = $title_display ? t('Your Rating') : NULL;
+        break;
+      case 'smart':
+        $star_value = $user_vote->value ? $user_vote->value : $current_avg->value;
+        $title = $title_display ? $user_vote->value ? t('Your Rating') : t('Average') : NULL;
+        break;
+    }
+
+    // Set all text values, then unset the unnecessary ones.
+    $user_value = $user_vote->value;
+    $average_value = $current_avg->value;
+    $count_value = $current_count->value;
+    switch ($text_display) {
+      case 'average':
+        $user_value = NULL;
+        break;
+      case 'user':
+        $average_value = NULL;
+        break;
+      case 'smart':
+        if ($user_vote->value) {
+          $average_value = NULL;
+        }
+        else {
+          $user_value = NULL;
+        }
+        break;
+      case 'none':
+        $count_value = NULL;
+    }
+  }
+  // Possibly add other content types here (comment, user, etc).
+  else {
+    $stars = 5;
+    $star_value = $current_avg->value;
+    $user_value = $user_vote->value;
+    $average_value = $current_avg->value;
+    $count_value = $current_count->value;
+  }
+
+  $star_display = theme('fivestar_static', $star_value, $stars);
+  $text_display = theme('fivestar_summary', $user_value, $average_value, $count_value, $stars);
+
+  return theme('fivestar_static_element', $star_display, $title, $text_display);
+}
+
 function fivestar_custom_widget($values, $settings) {
   $form = array(
     '#attributes' => array('class' => 'fivestar-widget'),
@@ -740,17 +814,21 @@ function fivestar_custom_widget($values, $settings) {
     '#theme' => 'fivestar_widget',
   );
 
-  $form['content_type'] = array(
-    '#type' => 'hidden',
-    '#value' => $settings['content_type'],
-    '#id' => $settings['content_id'] ? 'edit-content-type-'. $settings['content_id'] : NULL,
-  );
+  if (isset($settings['content_type'])) {
+    $form['content_type'] = array(
+      '#type' => 'hidden',
+      '#value' => $settings['content_type'],
+      '#id' => $settings['content_id'] ? 'edit-content-type-'. $settings['content_id'] : NULL,
+    );
+  }
 
-  $form['content_id'] = array(
-    '#type' => 'hidden',
-    '#value' => $settings['content_id'],
-    '#id' => $settings['content_id'] ? 'edit-content-id-'. $settings['content_id'] : NULL,
-  );
+  if (isset($settings['content_id'])) {
+    $form['content_id'] = array(
+      '#type' => 'hidden',
+      '#value' => $settings['content_id'],
+      '#id' => $settings['content_id'] ? 'edit-content-id-'. $settings['content_id'] : NULL,
+    );
+  }
 
   $form['vote'] = array(
     '#type' => 'fivestar',
@@ -763,6 +841,13 @@ function fivestar_custom_widget($values, $settings) {
     '#content_id' => $settings['content_id'],
     '#required' => isset($settings['required']) ? $settings['required'] : FALSE,
     '#labels' => isset($settings['labels']) ? $settings['labels'] : NULL,
+  );
+
+  $form['fivestar_submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit rating'),
+    '#attributes' => array('class' => 'fivestar-submit'),
+    '#id' => $settings['content_id'] ? 'edit-fivestar-submit-'. $settings['content_id'] : NULL,
   );
 
   switch ($settings['text']) {
@@ -792,32 +877,26 @@ function fivestar_custom_widget($values, $settings) {
       $form['vote']['#attributes']['class'] .= ' fivestar-average-stars';
       break;
     case 'user':
-      $form['vote']['#title'] = t('Your vote');
+      $form['vote']['#title'] = t('Rate it');
       $form['vote']['#default_value'] = $values['user'];
       $form['vote']['#attributes']['class'] .= ' fivestar-user-stars';
       break;
     case 'smart':
-      $form['vote']['#title'] = $values['user'] ? t('Your vote') : t('Average');
+      $form['vote']['#title'] = $values['user'] ? t('Rate it') : t('Average');
       $form['vote']['#default_value'] = $values['user'] ? $values['user'] : $values['average'];
       $form['vote']['#attributes']['class'] .= ' '. ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars');
       break;
     case 'dual':
-      $form['vote']['#title'] = t('Your vote');
+      $form['vote']['#title'] = t('Rate it');
       $form['vote']['#default_value'] = $values['user'];
-      $form['average'] = array(
-        '#type' => 'item',
-        '#title' => t('Current rating'),
-        '#value' => theme('fivestar_static', $values['average'], $settings['stars'])
-      );
-      // Dual display needs to display help text as a separate form element.
-      if (!empty($form['vote']['#description'])) {
-        $form['summary'] = array(
-          '#type' => 'item',
-          '#description' => $form['vote']['#description'],
-        );
-        unset($form['vote']['#description']);
-      }
+      $form['vote']['#attributes']['class'] .= ' fivestar-combo-stars';
       $form['#attributes']['class'] .= ' fivestar-combo-stars';
+      $static_average = theme('fivestar_static', $values['average'], $settings['stars']);
+      $form['average'] = array(
+        '#type' => 'markup',
+        '#value' => theme('fivestar_static_element', $static_average, t('Average')),
+        '#weight' => -1,
+      );
       break;
   }
 
@@ -833,13 +912,6 @@ function fivestar_custom_widget($values, $settings) {
       unset($form['average']['#title']);
     }
   }
-  
-  $form['fivestar_submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Submit rating'),
-    '#attributes' => array('class' => 'fivestar-submit'),
-    '#id' => $settings['content_id'] ? 'edit-fivestar-submit-'. $settings['content_id'] : NULL,
-  );
 
   return $form;
 }
@@ -891,25 +963,32 @@ function theme_fivestar($element) {
 }
 
 /**
+ * Theme the straight HTML version of the fivestar select list. This is used
+ * to remove the wrapping 'form-item' div from the select list.
+ */
+function theme_fivestar_select($element) {
+  $select = '';
+  $size = $element['#size'] ? ' size="' . $element['#size'] . '"' : '';
+  _form_set_class($element, array('form-select'));
+  $multiple = isset($element['#multiple']) && $element['#multiple'];
+  return '<select name="'. $element['#name'] .''. ($multiple ? '[]' : '') .'"'. ($multiple ? ' multiple="multiple" ' : '') . drupal_attributes($element['#attributes']) .' id="'. $element['#id'] .'" '. $size .'>'. form_select_options($element) .'</select>';
+}
+
+/**
  * Theme an entire fivestar widget, including the submit button and the normal
  * fivestar widget themed in the theme_fivestar() function.
  */
 function theme_fivestar_widget($form) {
-  // Move the title and description to a new merged element.
+  // Move the description outside of the vote element.
   $description = $form['vote']['#description'];
-  $title = $form['vote']['#title'];
   unset($form['vote']['#description']);
-  unset($form['vote']['#title']);
 
-  $merged_element = array(
-    '#type' => 'item',
-    '#title' => $title,
-    '#description' => '<div class="fivestar-summary-'. $form['vote']['#content_id'] .'">'. $description .'</div>',
-  );
-
-  // Insert the entire form into a new form element displayed inline.
-  $value = '<div class="container-inline">'. drupal_render($form) .'</div>';
-  return theme('form_element', $merged_element, $value);
+  $output  = '';
+  $output .= '<div class="fivestar-form-'. $form['content_id']['#value'] .'">';
+  $output .= drupal_render($form);
+  $output .= '<div class="description fivestar-summary-'. $form['content_id']['#value'] .'">'. $description .'</div>';
+  $output .= '</div>';
+  return $output;
 }
 
 /**
@@ -979,6 +1058,21 @@ function theme_fivestar_summary($user_rating, $average_rating, $votes = 0, $star
   $vote_text = format_plural($votes, 'vote', 'votes');
   $output .= ' <span class="total-votes">'. t('(<span>!votes</span> !vote_text)', array('!votes' => $votes, '!vote_text' => $vote_text)) .'</span>';
   $output = '<div class="fivestar-summary-'. $div_class .'">'. $output .'</div>';
+  return $output;
+}
+
+/**
+ * Display a static fivestar value as stars with a title and description.
+ */
+function theme_fivestar_static_element($value, $title = NULL, $description = NULL) {
+  $output .= '<div class="fivestar-static-form-item">';
+  $element = array(
+    '#type' => 'item',
+    '#title' => $title,
+    '#description' => $description,
+  );
+  $output .= theme('form_element', $element, $value);
+  $output .= '</div>';
   return $output;
 }
 
@@ -1063,6 +1157,7 @@ function fivestar_expand($element) {
     '#required' => $element['#required'],
     '#default_value' => $element['#default_value'],
     '#id' => $element['#content_id'] ? 'edit-vote-'. $element['#content_id'] : NULL,
+    '#theme' => 'fivestar_select',
   );
 
   // If a default value is not exactly on a radio value, round up to the next one

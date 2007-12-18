@@ -45,7 +45,7 @@
         else {
           var starDisplay = 'none';
         }
-        // Recore text display.
+        // Record text display.
         if ($obj.is('.fivestar-user-text')) {
           var textDisplay = 'user';
         }
@@ -201,7 +201,7 @@
         }
         $container.addClass('fivestar-widget-' + (size + cancel));
         // Attach the new widget and hide the existing widget.
-        $widget.after($container).hide();
+        $widget.find('select').after($container).hide();
         return $container;
     };
 
@@ -222,7 +222,19 @@
      * voteResult.display.text The type of text display we're using. Either 'average', 'user', or 'combo'.
      */
     function fivestarDefaultResult(voteResult) {
+      // Update the summary text.
       $('div.fivestar-summary-'+voteResult.vote.id).html(voteResult.result.summary[voteResult.display.text]);
+      // If this is a combo display, update the average star display.
+      if (voteResult.display.stars == 'combo') {
+        $('div.fivestar-form-'+voteResult.vote.id).each(function() {
+          var $stars = $('.fivestar-widget-static .star span', this);
+          var average = voteResult.result.average/100 * $stars.size();
+          var index = Math.floor(average);
+          $stars.removeClass('on').addClass('off').css('width', 'auto');
+          $stars.filter(':lt(' + (index + 1) + ')').removeClass('off').addClass('on');
+          $stars.eq(index).css('width', ((average - index) * 100) + "%");
+        });
+      }
     };
 
     /**

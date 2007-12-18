@@ -8,6 +8,18 @@ form.fivestar-widget input {
   margin: 0;
 }
 
+/* Combo Static and Rate Widget */
+.fivestar-combo-stars .fivestar-form-item {
+  float: left;
+  margin-left: 20px;
+}
+.fivestar-combo-stars .fivestar-static-form-item {
+  float: left;
+}
+.fivestar-combo-stars .description {
+  clear: left;
+}
+
 /* Static View-only Star Version */
 div.fivestar-widget-static {
   display: block;
