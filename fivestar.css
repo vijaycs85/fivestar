@@ -20,6 +20,12 @@ form.fivestar-widget input {
   clear: left;
 }
 
+/* Fivestar form items */
+.fivestar-static-form-item .form-item,
+.fivestar-form-item .form-item {
+  margin: 0;
+}
+
 /* Static View-only Star Version */
 div.fivestar-widget-static {
   display: block;
