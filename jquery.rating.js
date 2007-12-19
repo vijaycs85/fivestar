@@ -29,8 +29,16 @@
         var $widget = buildInterface($obj),
             $stars = $('.star', $widget),
             $cancel = $('.cancel', $widget),
-            averageIndex = $("select", $obj).val();
+            $summary = $obj.siblings('.description'),
+            summaryText = $summary.html(),
+            averageIndex = $("select", $obj).val(),
             averagePercent = 0;
+
+        // If the summary doesn't exist, try another location.
+        if ($summary.size() == 0) {
+          $summary = $('.description', $obj);
+          summaryText = $summary.html();
+        }
 
         // Record star display.
         if ($obj.is('.fivestar-user-stars')) {
@@ -119,23 +127,31 @@
         });
 
         var event = {
-            fill: function(el){ // Fill to the current mouse position.
-                var index = $stars.index(el) + 1;
-                $stars
-                    .children('a').css('width', '100%').end()
-                    .filter(':lt(' + index + ')').addClass('hover').end();
+            fill: function(el){
+              // Fill to the current mouse position.
+              var index = $stars.index(el) + 1;
+              $stars
+                .children('a').css('width', '100%').end()
+                .filter(':lt(' + index + ')').addClass('hover').end();
+              // Update the description text.
+              var summary = $("select option", $obj)[index - 1 + $cancel.size()].text;
+              $summary.html(summary);
             },
-            drain: function() { // Drain all the stars.
-                $stars
-                    .filter('.on').removeClass('on').end()
-                    .filter('.hover').removeClass('hover').end();
+            drain: function() {
+              // Drain all the stars.
+              $stars
+                .filter('.on').removeClass('on').end()
+                .filter('.hover').removeClass('hover').end();
             },
-            reset: function(){ // Reset the stars to the default index.
-                $stars.filter(':lt(' + Math.floor(averageIndex/100 * $stars.size()) + ')').addClass('on').end();
-                var percent = (averagePercent) ? averagePercent * 10 : 0;
-                if (percent > 0) {
-                    $stars.eq(averageIndex).addClass('on').children('a').css('width', percent + "%").end().end();
-                }
+            reset: function(){
+              // Reset the stars to the default index.
+              $stars.filter(':lt(' + Math.floor(averageIndex/100 * $stars.size()) + ')').addClass('on').end();
+              var percent = (averagePercent) ? averagePercent * 10 : 0;
+              if (percent > 0) {
+                $stars.eq(averageIndex).addClass('on').children('a').css('width', percent + "%").end().end();
+              }
+              // Restore the summary text.
+              $summary.html(summaryText);
             }
         };
 
@@ -168,6 +184,8 @@
           else {
             fivestarDefaultResult(returnObj);
           }
+          // Update the summary text.
+          summaryText = returnObj.result.summary[returnObj.display.text];
         };
 
         event.reset();

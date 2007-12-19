@@ -11,10 +11,10 @@ form.fivestar-widget input {
 /* Combo Static and Rate Widget */
 .fivestar-combo-stars .fivestar-form-item {
   float: left;
-  margin-left: 20px;
 }
 .fivestar-combo-stars .fivestar-static-form-item {
   float: left;
+  margin-right: 40px;
 }
 .fivestar-combo-stars .description {
   clear: left;

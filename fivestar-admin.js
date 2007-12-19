@@ -21,6 +21,7 @@ if (Drupal.jsEnabled) {
     $stars  = $('#edit-fivestar-stars');
     $style  = $('#edit-fivestar-style');
     $text   = $('#edit-fivestar-text');
+    $labels = $('.fivestar-label input');
 
     // All the form elements except the enable checkbox.
     $options = $('#fivestar-node-type-form input:not(#edit-fivestar), #fivestar-node-type-form select');
@@ -60,12 +61,36 @@ if (Drupal.jsEnabled) {
     // Setup node preview handlers.
     $unvote.change(function() { nodePreview.setValue('unvote', $(this).attr('checked') ? 1 : 0); });
     $title.change(function() { nodePreview.setValue('title', $(this).attr('checked') ? 1 : 0); });
-    $stars.change(function() { nodePreview.setValue('stars', this.value); });
+    $stars.change(function() {
+      nodePreview.setValue('stars', this.value);
+      nodePreview.displayTextfields();
+    });
     $style.change(function() { nodePreview.setValue('style', this.value); });
     $text.change(function() { nodePreview.setValue('text', this.value); });
+
+    // Handler for the star labels.
+    var currentLabel = '';
+    $labels.focus(function() {
+      currentLabel = this.value;
+    });
+    $labels.blur(function() {
+      if (currentLabel != this.value) {
+        nodePreview.setLabel($labels.index(this), this.value);
+      }
+    });
+
     // Initialize the preview.
     if ($enable.attr('checked')) {
-      nodePreview.enable($unvote.attr('checked') ? 1 : 0, $stars.val(), $style.val(), $text.val(), $title.attr('checked') ? 1 : 0);
+      var labels = new Array();
+      $labels.each(function() {
+        labels.push(this.value);
+      });
+      nodePreview.enable($unvote.attr('checked') ? 1 : 0, $stars.val(), $style.val(), $text.val(), $title.attr('checked') ? 1 : 0, labels);
+    }
+
+    // Hide extra mouseover textfields
+    if ($enable.attr('checked')) {
+      nodePreview.displayTextfields();
     }
 
     // Setup comment preview handlers and initialize.
@@ -84,6 +109,12 @@ if (Drupal.jsEnabled) {
         }
       });
 
+      $labels.blur(function() {
+        if (currentLabel != this.value) {
+          commentPreview.setLabel($labels.index(this), this.value);
+        }
+      });
+
       // Setup comment
       var commentSetting = 0;
       $comment.each(function() {
@@ -92,7 +123,11 @@ if (Drupal.jsEnabled) {
         }
       });
       if ($enable.attr('checked') && commentSetting > 0) {
-        commentPreview.enable(commentSetting == 1 ? 1 : 0, $stars.val(), 'user', 'none', 0);
+        var labels = new Array();
+        $labels.each(function() {
+          labels.push(this.value);
+        });
+        commentPreview.enable(commentSetting == 1 ? 1 : 0, $stars.val(), 'user', 'none', 0, labels);
       }
     }
   });
@@ -111,12 +146,13 @@ var fivestarPreview = function(previewElement) {
   this.stars = 5;
   this.style = '';
   this.text = '';
+  this.labels = new Array();
 };
 
 /**
  * Enable the preview functionality and show the preview.
  */
-fivestarPreview.prototype.enable = function(unvote, stars, style, text, title) {
+fivestarPreview.prototype.enable = function(unvote, stars, style, text, title, labels) {
   if (!this.enabled) {
     this.enabled = true;
     this.unvote = unvote;
@@ -124,6 +160,7 @@ fivestarPreview.prototype.enable = function(unvote, stars, style, text, title) {
     this.stars = stars;
     this.style = style;
     this.text = text;
+    this.labels = labels;
     $(this.preview).show();
     this.update();
   }
@@ -148,6 +185,13 @@ fivestarPreview.prototype.setValue = function(field, value) {
   }
 };
 
+fivestarPreview.prototype.setLabel = function(delta, value) {
+  this.labels[delta] = value;
+  if (this.enabled) {
+    this.update();
+  }
+}
+
 fivestarPreview.prototype.update = function() {
   if (this.enabled) {
     var self = this;
@@ -163,10 +207,45 @@ fivestarPreview.prototype.update = function() {
       $(self.preview).show();
     };
 
+    // Prepare data to send to the server.
+    var data = { style: this.style, text: this.text, stars: this.stars, unvote: this.unvote, title: this.title }
+
+    // Covert labels array format understood by PHP and add to data.
+    for (n in this.labels) {
+      data['labels['+ n +']'] = this.labels[n];
+    }
+
     $.ajax({
       dateType: 'json',
-      url: Drupal.settings.fivestar.preview_url + '/node/' + this.style + '/' + this.text + '/' + this.stars + '/' + this.unvote + '/' + this.title,
+      type: 'POST',
+      url: Drupal.settings.fivestar.preview_url,
+      data: data,
       success: updateSuccess,
     });
+  }
+};
+
+/**
+ * Constructor for fivestarMouseover.
+ * @param star_number
+ *   The number of stars for this node type so that descriptions can be made and extra textfields can be hidden
+ * @param change_flag
+ *   A flag to indicate that the number of stars has changed to overwrite the default values
+ */
+//var fivestarMouseover = function(previewElement) {
+//  this.preview = previewElement;
+//}
+
+// Display the appropriate number of text fields for the mouseover star descriptions
+fivestarPreview.prototype.displayTextfields = function() {
+  if (this.enabled) {
+    for (var count = 0; count < 10; count++) {
+      if (count < this.stars) {
+        $('#fivestar-label-'+ count).show();
+      }
+      else {
+        $('#fivestar-label-'+count).css('display', 'none');
+      }
+    }
   }
 };
