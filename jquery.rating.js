@@ -31,6 +31,7 @@
             $cancel = $('.cancel', $widget),
             $summary = $obj.siblings('.description'),
             summaryText = $summary.html(),
+            summaryHover = $obj.is('.fivestar-labels-hover'),
             averageIndex = $("select", $obj).val(),
             averagePercent = 0;
 
@@ -134,8 +135,10 @@
                 .children('a').css('width', '100%').end()
                 .filter(':lt(' + index + ')').addClass('hover').end();
               // Update the description text.
-              var summary = $("select option", $obj)[index - 1 + $cancel.size()].text;
-              $summary.html(summary);
+              if (summaryHover) {
+                var summary = $("select option", $obj)[index - 1 + $cancel.size()].text;
+                $summary.html(summary);
+              }
             },
             drain: function() {
               // Drain all the stars.
@@ -151,7 +154,9 @@
                 $stars.eq(averageIndex).addClass('on').children('a').css('width', percent + "%").end().end();
               }
               // Restore the summary text.
-              $summary.html(summaryText);
+              if (summaryHover) {
+                $summary.html(summaryText);
+              }
             }
         };
 

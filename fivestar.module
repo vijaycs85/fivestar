@@ -220,11 +220,11 @@ function fivestar_form_alter($form_id, &$form) {
     
     $form['fivestar']['labels']['fivestar_labels_enable'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Enable Custom Star Labels'),
+      '#title' => t('Display labels as hover text'),
       '#default_value' => variable_get('fivestar_labels_enable_'. $form['#node_type']->type, 0),      
       '#return_value' => 1,
       '#weight' => -5,
-      '#description' => t('When enabled, these star descriptions will dynamically appear underneath the stars as the user hovers over each star to provide a more descriptive qualitative meaning for each star value.'),
+      '#description' => t('When enabled, these star labels will dynamically appear underneath the stars as the user hovers over each star to provide a more descriptive qualitative meaning for each star value.'),
     );
     
     // Create the Mouseover text forms for each of the rating options
@@ -234,8 +234,8 @@ function fivestar_form_alter($form_id, &$form) {
     for ($n = 0; $n < 10; $n++) {
       // If the default 5 stars are chosen, then use these five default label values.
       // Populate the star descriptions 6 to 10 for when javascript is disabled, otherwise they will be hidden.
-      if ($star_count == 5) {
-        $default_labels = array('Poor', 'Okay', 'Good', 'Great', 'Awesome', 'Rate it 6 stars', 'Rate it 7 stars', 'Rate it 8 stars', 'Rate it 9 stars', 'Rate it 10 stars');
+      if ($star_count == 5 && $n < 5) {
+        $default_labels = array('Poor', 'Okay', 'Good', 'Great', 'Awesome');
       }
       // Calculate the rating counts for when the star value is anything other than 5
       else {
@@ -456,17 +456,18 @@ function fivestar_preview() {
   $stars = (int)$_POST['stars'];
   $unvote = (boolean)$_POST['unvote'];
   $title = (boolean)$_POST['title'];
+  $labels_enable = (boolean)$_POST['labels_enable'];
   $labels = (array)$_POST['labels'];
   foreach ($labels as $key => $label) {
     $labels[$key] = filter_xss_admin($label);
   }
 
-  $output = theme('fivestar_preview', $style, $text, $stars, $unvote, $title ? NULL : FALSE, $labels);
+  $output = theme('fivestar_preview', $style, $text, $stars, $unvote, $title ? NULL : FALSE, $labels_enable, $labels);
   drupal_set_header('Content-Type: text/javascript; charset=utf-8');
   print drupal_to_js(array('status' => TRUE, 'data' => $output));
 }
 
-function theme_fivestar_preview($style = NULL, $text = NULL, $stars = NULL, $unvote = NULL, $title = NULL, $labels = array()) {
+function theme_fivestar_preview($style = NULL, $text = NULL, $stars = NULL, $unvote = NULL, $title = NULL, $labels_enable = TRUE, $labels = array()) {
   $values = array(
     'average' => 50,
     'user' => 80,
@@ -479,6 +480,7 @@ function theme_fivestar_preview($style = NULL, $text = NULL, $stars = NULL, $unv
     'text' => $text,
     'title' => $title,
     'autosubmit' => FALSE,
+    'labels_enable' => $labels_enable,
     'labels' => $labels,
   );
 
@@ -801,6 +803,7 @@ function fivestar_form($content_type, $content_id) {
     'content_id' => $content_id,
     'autosubmit' => TRUE,
     'title' => variable_get('fivestar_title_'. $node->type, 1) ? NULL : FALSE,
+    'labels_enable' => variable_get('fivestar_labels_enable_'. $node->type, array()),
     'labels' => variable_get('fivestar_labels_'. $node->type, array()),
   );
 
@@ -908,6 +911,7 @@ function fivestar_custom_widget($values, $settings) {
     '#allow_clear' => $settings['allow_clear'],
     '#content_id' => $settings['content_id'],
     '#required' => isset($settings['required']) ? $settings['required'] : FALSE,
+    '#labels_enable' => isset($settings['labels_enable']) ? $settings['labels_enable'] : TRUE,
     '#labels' => isset($settings['labels']) ? $settings['labels'] : NULL,
   );
 
@@ -945,17 +949,17 @@ function fivestar_custom_widget($values, $settings) {
       $form['vote']['#attributes']['class'] .= ' fivestar-average-stars';
       break;
     case 'user':
-      $form['vote']['#title'] = t('Rate it');
+      $form['vote']['#title'] = t('Your Rating');
       $form['vote']['#default_value'] = $values['user'];
       $form['vote']['#attributes']['class'] .= ' fivestar-user-stars';
       break;
     case 'smart':
-      $form['vote']['#title'] = $values['user'] ? t('Rate it') : t('Average');
+      $form['vote']['#title'] = $values['user'] ? t('Your Rating') : t('Average');
       $form['vote']['#default_value'] = $values['user'] ? $values['user'] : $values['average'];
       $form['vote']['#attributes']['class'] .= ' '. ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars');
       break;
     case 'dual':
-      $form['vote']['#title'] = t('Rate it');
+      $form['vote']['#title'] = t('Your Rating');
       $form['vote']['#default_value'] = $values['user'];
       $form['vote']['#attributes']['class'] .= ' fivestar-combo-stars';
       $form['#attributes']['class'] .= ' fivestar-combo-stars';
@@ -1006,6 +1010,7 @@ function fivestar_elements() {
     '#allow_clear' => FALSE,
     '#auto_submit' => FALSE,
     '#auto_submit_path' => '',
+    '#labels_enable' => TRUE,
     '#process' => array('fivestar_expand' => array()),
   );
   return $type;
@@ -1166,6 +1171,8 @@ function fivestar_add_css($widget_css = NULL) {
  * Process callback for fivestar_element -- see fivestar_element()
  */
 function fivestar_expand($element) {
+  static $fivestar_id = 0;
+
   // Add necessary javascript.
   if ($element['#widget'] == 'stars') {
     drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
@@ -1175,7 +1182,7 @@ function fivestar_expand($element) {
     $element['vote_count'] =  array(
       '#type' => 'hidden',
       '#value' => $element['#vote_count'],
-      '#id' => $element['#content_id'] ? 'edit-vote-count-'. $element['#content_id'] : NULL,
+      '#id' => 'edit-vote-count-'. $fivestar_id,
     );
   }
 
@@ -1183,7 +1190,7 @@ function fivestar_expand($element) {
     $element['vote_average'] =  array(
       '#type' => 'hidden',
       '#value' => $element['#vote_average'],
-      '#id' => $element['#content_id'] ? 'edit-vote-average-'. $element['#content_id'] : NULL,
+      '#id' => 'edit-vote-average-'. $fivestar_id,
     );
   }
 
@@ -1192,7 +1199,7 @@ function fivestar_expand($element) {
       '#type' => 'hidden',
       '#value' => url($element['#auto_submit_path']),
       '#attributes' => array('class' => 'fivestar-path'),
-      '#id' => $element['#content_id'] ? 'edit-auto-submit-path-'. $element['#content_id'] : NULL,
+      '#id' => 'edit-auto-submit-path-'. $fivestar_id,
     );
   }
 
@@ -1225,7 +1232,7 @@ function fivestar_expand($element) {
     '#options' => $options,
     '#required' => $element['#required'],
     '#default_value' => $element['#default_value'],
-    '#id' => $element['#content_id'] ? 'edit-vote-'. $element['#content_id'] : NULL,
+    '#id' => 'edit-vote-'. $fivestar_id,
     '#theme' => 'fivestar_select',
   );
 
@@ -1234,9 +1241,13 @@ function fivestar_expand($element) {
     $element['vote'][$i+1]['#default_value'] = $next_value;
   }
 
-  $element['#prefix'] = '<div class="fivestar-form-item '. $element['#attributes']['class'] .'">';
+  // Set a class for the display of label text on hover.
+  $label_class = $element['#labels_enable'] ? ' fivestar-labels-hover' : '';
+
+  $element['#prefix'] = '<div class="fivestar-form-item '. $element['#attributes']['class'] . $label_class .'">';
   $element['#suffix'] = '</div>';
 
+  $fivestar_id++;
   return $element;
 }
 

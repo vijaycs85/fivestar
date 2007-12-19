@@ -22,6 +22,7 @@ if (Drupal.jsEnabled) {
     $style  = $('#edit-fivestar-style');
     $text   = $('#edit-fivestar-text');
     $labels = $('.fivestar-label input');
+    $labels_enable = $('#edit-fivestar-labels-enable');
 
     // All the form elements except the enable checkbox.
     $options = $('#fivestar-node-type-form input:not(#edit-fivestar), #fivestar-node-type-form select');
@@ -78,6 +79,7 @@ if (Drupal.jsEnabled) {
         nodePreview.setLabel($labels.index(this), this.value);
       }
     });
+    $labels_enable.change(function() { nodePreview.setValue('labels_enable', $(this).attr('checked') ? 1 : 0); });
 
     // Initialize the preview.
     if ($enable.attr('checked')) {
@@ -129,6 +131,7 @@ if (Drupal.jsEnabled) {
         });
         commentPreview.enable(commentSetting == 1 ? 1 : 0, $stars.val(), 'user', 'none', 0, labels);
       }
+      $labels_enable.change(function() { commentPreview.setValue('labels_enable', $(this).attr('checked') ? 1 : 0); });
     }
   });
 }
@@ -147,12 +150,13 @@ var fivestarPreview = function(previewElement) {
   this.style = '';
   this.text = '';
   this.labels = new Array();
+  this.labels_enable = false;
 };
 
 /**
  * Enable the preview functionality and show the preview.
  */
-fivestarPreview.prototype.enable = function(unvote, stars, style, text, title, labels) {
+fivestarPreview.prototype.enable = function(unvote, stars, style, text, title, labels, labels_enable) {
   if (!this.enabled) {
     this.enabled = true;
     this.unvote = unvote;
@@ -161,6 +165,7 @@ fivestarPreview.prototype.enable = function(unvote, stars, style, text, title, l
     this.style = style;
     this.text = text;
     this.labels = labels;
+    this.labels_enable = labels_enable;
     $(this.preview).show();
     this.update();
   }
@@ -208,7 +213,7 @@ fivestarPreview.prototype.update = function() {
     };
 
     // Prepare data to send to the server.
-    var data = { style: this.style, text: this.text, stars: this.stars, unvote: this.unvote, title: this.title }
+    var data = { style: this.style, text: this.text, stars: this.stars, unvote: this.unvote, title: this.title, labels_enable: this.labels_enable }
 
     // Covert labels array format understood by PHP and add to data.
     for (n in this.labels) {
@@ -224,17 +229,6 @@ fivestarPreview.prototype.update = function() {
     });
   }
 };
-
-/**
- * Constructor for fivestarMouseover.
- * @param star_number
- *   The number of stars for this node type so that descriptions can be made and extra textfields can be hidden
- * @param change_flag
- *   A flag to indicate that the number of stars has changed to overwrite the default values
- */
-//var fivestarMouseover = function(previewElement) {
-//  this.preview = previewElement;
-//}
 
 // Display the appropriate number of text fields for the mouseover star descriptions
 fivestarPreview.prototype.displayTextfields = function() {
