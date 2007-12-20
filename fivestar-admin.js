@@ -8,6 +8,9 @@ if (Drupal.jsEnabled) {
   $(document).ready(function() {
     var nodePreview = new fivestarPreview($('#fivestar-direct-preview .fivestar-preview')[0]);
 
+    // Hide extra mouseover textfields
+    nodePreview.displayTextfields();
+
     // Enable comments if available.
     $comment = $('input[@name=fivestar_comment]');
     if ($comment.size()) {
@@ -27,6 +30,7 @@ if (Drupal.jsEnabled) {
     // Disable the settings if not enabled.
     if (!$enable.attr('checked')) {
       $options.attr('disabled', 'disabled');
+      nodePreview.disable();
     }
     else {
       nodePreview.enable($unvote.attr('checked') ? 1 : 0, $style.val(), $text.val(), $title.attr('checked') ? 1 : 0);
@@ -69,13 +73,13 @@ if (Drupal.jsEnabled) {
     $title.change(function() { nodePreview.setValue('title', $(this).attr('checked') ? 1 : 0); });
     $unvote.change(function() { nodePreview.setValue('unvote', $(this).attr('checked') ? 1 : 0); });
 
-    // Hide extra mouseover textfields
-    nodePreview.displayTextfields();
-
     if (commentPreview) {
       // Enable the comment preview.
       if ($enable.attr('checked')) {
         commentPreview.enable(this.value == 1 ? 1 : 0, 'user', 'none', 0);
+      }
+      else {
+        commentPreview.disable();
       }
 
       // Setup comment preview handlers.
@@ -108,7 +112,7 @@ var fivestarPreview = function(previewElement) {
   this.stars = 5;
   this.style = '';
   this.text = '';
-  this.labels = new Array();
+  this.labels = new Object();
   this.labelsEnable = false;
 
   // Elements that need handlers.
@@ -144,8 +148,8 @@ fivestarPreview.prototype.enable = function(unvote, style, text, title) {
     // Update global settings.
     this.stars = this.elements.stars.val();
     var labels = new Array();
-    this.elements.labels.each(function() {
-      labels.push(this.value);
+    this.elements.labels.each(function(n) {
+      labels[n] = this.value;
     });
     this.labels = labels;
     this.labelsEnable = this.elements.labelsEnable.attr('checked') ? 1 : 0;
@@ -157,7 +161,7 @@ fivestarPreview.prototype.enable = function(unvote, style, text, title) {
     this.text = text;
 
     // Show the preview.
-    $(this.preview).show();
+    $(this.preview).css('display', 'block');
   }
 };
 
@@ -165,10 +169,8 @@ fivestarPreview.prototype.enable = function(unvote, style, text, title) {
  * Disable the preview functionality and show the preview.
  */
 fivestarPreview.prototype.disable = function() {
-  if (this.enabled) {
-    this.enabled = false;
-    $(this.preview).hide();
-  }
+  this.enabled = false;
+  $(this.preview).css('display', 'none');
 };
 
 fivestarPreview.prototype.setValue = function(field, value) {
@@ -222,14 +224,12 @@ fivestarPreview.prototype.update = function() {
 
 // Display the appropriate number of text fields for the mouseover star descriptions
 fivestarPreview.prototype.displayTextfields = function() {
-  if (this.enabled) {
-    for (var count = 0; count < 10; count++) {
-      if (count < this.stars) {
-        $('#fivestar-label-'+ count).show();
-      }
-      else {
-        $('#fivestar-label-'+count).css('display', 'none');
-      }
+  for (var count = 0; count <= 10; count++) {
+    if (count <= this.stars) {
+      $('#fivestar-label-'+ count).show();
+    }
+    else {
+      $('#fivestar-label-'+count).css('display', 'none');
     }
   }
 };

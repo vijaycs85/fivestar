@@ -134,36 +134,36 @@ function fivestar_form_alter($form_id, &$form) {
     
     $form['fivestar']['labels']['fivestar_labels_enable'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Display labels as hover text'),
-      '#default_value' => variable_get('fivestar_labels_enable_'. $form['#node_type']->type, 0),      
+      '#title' => t('Display labels on mouse over'),
+      '#default_value' => variable_get('fivestar_labels_enable_'. $form['#node_type']->type, 1),      
       '#return_value' => 1,
       '#weight' => -5,
-      '#description' => t('When enabled, these star labels will dynamically appear underneath the stars as the user hovers over each star to provide a more descriptive qualitative meaning for each star value.'),
+      '#description' => t('When enabled, the star labels will dynamically appear underneath the stars as the user hovers over each star to provide a more descriptive qualitative meaning for each star value.'),
     );
     
     // Create the Mouseover text forms for each of the rating options
     // This form depends on the number of stars, and these extra textfields will be hidden with javascript
     $star_count = variable_get('fivestar_stars_'. $form['#node_type']->type, 5);
     $labels = variable_get('fivestar_labels_'. $form['#node_type']->type, array());
-    for ($n = 0; $n < 10; $n++) {
-      // If the default 5 stars are chosen, then use these five default label values.
-      // Populate the star descriptions 6 to 10 for when javascript is disabled, otherwise they will be hidden.
-      if ($star_count == 5 && $n < 5) {
-        $default_labels = array('Poor', 'Okay', 'Good', 'Great', 'Awesome');
+    for ($n = 0; $n <= 10; $n++) {
+      if ($star_count == 5 && $n <= 5) {
+        // If the default 5 stars are chosen, then use these five default label values.
+        $default_labels = array('Cancel rating', 'Poor', 'Okay', 'Good', 'Great', 'Awesome');
       }
-      // Calculate the rating counts for when the star value is anything other than 5
+      elseif ($n == 0) {
+        $default_labels[$n] = 'Cancel rating';
+      }
       else {
         $default_labels[$n] = 'Give it @star/@count';
       }
       $form['fivestar']['labels']['fivestar_label_'. $n] = array(
         '#type' => 'textfield',
-        '#title' => t('Star @star Label', array('@star' => $n + 1)),
+        '#title' => $n > 0 ? t('Star @star label', array('@star' => $n)) : t('Cancel label'),
         '#default_value' => isset($labels[$n]) ? $labels[$n] : $default_labels[$n],
         '#prefix' => '<div id="fivestar-label-'. $n .'" class="fivestar-label">',
         '#suffix' => '</div>',
         '#size' => 30,
       );
-      $star_count++;
     }
 
     $form['fivestar']['direct'] = array(
@@ -283,9 +283,9 @@ function fivestar_node_type_form_submit($form_id, &$form_values) {
   }
   // Merge labels into a single variable.
   $labels = array();
-  for ($n = 0; $n < 10; $n++) {
+  for ($n = 0; $n <= 10; $n++) {
     $labels[] = $form_values['fivestar_label_'. $n];
-    variable_del('fivestar_label_'. $n);
+    variable_del('fivestar_label_'. $n .'_'. $form_values['type']);
   }
   variable_del('fivestar_labels_'. $form_values['type']);
   if ($form_values['fivestar_labels_enable']) {
@@ -813,7 +813,7 @@ function fivestar_form($content_type, $content_id) {
     'content_id' => $content_id,
     'autosubmit' => TRUE,
     'title' => variable_get('fivestar_title_'. $node->type, 1) ? NULL : FALSE,
-    'labels_enable' => variable_get('fivestar_labels_enable_'. $node->type, array()),
+    'labels_enable' => variable_get('fivestar_labels_enable_'. $node->type, 1),
     'labels' => variable_get('fivestar_labels_'. $node->type, array()),
   );
 
@@ -1220,12 +1220,12 @@ function fivestar_expand($element) {
 
     // Display clear button only if enabled.
     if ($element['#allow_clear'] == TRUE && $i == 0) {
-      $options[$this_value] = t('Clear');
+      $options[$this_value] = isset($element['#labels'][$i]) ? t(filter_xss_admin($element['#labels'][$i])) : t('Cancel rating');
     }
     // Display a normal star value.
     if ($i > 0) {
-      if (isset($element['#labels'][$i - 1])) {
-        $options[$this_value] = t(filter_xss_admin($element['#labels'][$i - 1]), array('@star' => $i, '@count' => $element['#stars']));
+      if (isset($element['#labels'][$i])) {
+        $options[$this_value] = t(filter_xss_admin($element['#labels'][$i]), array('@star' => $i, '@count' => $element['#stars']));
       }
       else {
         $options[$this_value] = t('Give it @star/@count', array('@star' => $i, '@count' => $element['#stars']));

@@ -145,6 +145,11 @@
               $stars
                 .filter('.on').removeClass('on').end()
                 .filter('.hover').removeClass('hover').end();
+              // Update the description text.
+              if (summaryHover) {
+                var summary = $("select option", $obj)[0].text;
+                $summary.html(summary);
+              }
             },
             reset: function(){
               // Reset the stars to the default index.
