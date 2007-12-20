@@ -123,6 +123,49 @@ function fivestar_form_alter($form_id, &$form) {
       '#weight' => -4,
     );
 
+
+    $form['fivestar']['labels'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Star Labels'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#description' => t('These star labels appear as the link title when javascript is enabled as well as the select list options when javascript is disabled.'),
+    );
+    
+    $form['fivestar']['labels']['fivestar_labels_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Display labels as hover text'),
+      '#default_value' => variable_get('fivestar_labels_enable_'. $form['#node_type']->type, 0),      
+      '#return_value' => 1,
+      '#weight' => -5,
+      '#description' => t('When enabled, these star labels will dynamically appear underneath the stars as the user hovers over each star to provide a more descriptive qualitative meaning for each star value.'),
+    );
+    
+    // Create the Mouseover text forms for each of the rating options
+    // This form depends on the number of stars, and these extra textfields will be hidden with javascript
+    $star_count = variable_get('fivestar_stars_'. $form['#node_type']->type, 5);
+    $labels = variable_get('fivestar_labels_'. $form['#node_type']->type, array());
+    for ($n = 0; $n < 10; $n++) {
+      // If the default 5 stars are chosen, then use these five default label values.
+      // Populate the star descriptions 6 to 10 for when javascript is disabled, otherwise they will be hidden.
+      if ($star_count == 5 && $n < 5) {
+        $default_labels = array('Poor', 'Okay', 'Good', 'Great', 'Awesome');
+      }
+      // Calculate the rating counts for when the star value is anything other than 5
+      else {
+        $default_labels[$n] = 'Give it @star/@count';
+      }
+      $form['fivestar']['labels']['fivestar_label_'. $n] = array(
+        '#type' => 'textfield',
+        '#title' => t('Star @star Label', array('@star' => $n + 1)),
+        '#default_value' => isset($labels[$n]) ? $labels[$n] : $default_labels[$n],
+        '#prefix' => '<div id="fivestar-label-'. $n .'" class="fivestar-label">',
+        '#suffix' => '</div>',
+        '#size' => 30,
+      );
+      $star_count++;
+    }
+
     $form['fivestar']['direct'] = array(
       '#type' => 'fieldset',
       '#title' => t('Direct rating widget'),
@@ -199,7 +242,16 @@ function fivestar_form_alter($form_id, &$form) {
     $form['fivestar']['direct']['fivestar_direct_preview'] = array(
       '#type' => 'item',
       '#title' => t('Direct rating widget preview'),
-      '#value' => theme('fivestar_preview', $form['fivestar']['fivestar_style']['#default_value'], $form['fivestar']['fivestar_text']['#default_value'], $form['fivestar']['fivestar_stars']['#default_value'], $form['fivestar']['fivestar_unvote']['#default_value'], $form['fivestar']['fivestar_title']['#default_value']),
+      '#value' => theme(
+        'fivestar_preview',
+        $form['fivestar']['direct']['fivestar_style']['#default_value'],
+        $form['fivestar']['direct']['fivestar_text']['#default_value'],
+        $form['fivestar']['fivestar_stars']['#default_value'],
+        $form['fivestar']['direct']['fivestar_unvote']['#default_value'],
+        $form['fivestar']['direct']['fivestar_title']['#default_value'] ? NULL : FALSE,
+        $form['fivestar']['fivestar_labels_enable']['#default_value'],
+        variable_get('fivestar_labels_'. $form['#node_type']->type, array())
+      ),
     );
     if (!$form['fivestar']['fivestar']['#default_value']) {
       $form['fivestar']['direct']['fivestar_direct_preview']['#value'] = theme('fivestar_preview_wrapper', '');
@@ -209,48 +261,6 @@ function fivestar_form_alter($form_id, &$form) {
     }
 
     $form['#submit']['fivestar_node_type_form_submit'] = array();
-
-    $form['fivestar']['labels'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Star Labels'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-      '#description' => t('These star labels appear as the link title when javascript is enabled as well as the select list options when javascript is disabled.'),
-    );
-    
-    $form['fivestar']['labels']['fivestar_labels_enable'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Display labels as hover text'),
-      '#default_value' => variable_get('fivestar_labels_enable_'. $form['#node_type']->type, 0),      
-      '#return_value' => 1,
-      '#weight' => -5,
-      '#description' => t('When enabled, these star labels will dynamically appear underneath the stars as the user hovers over each star to provide a more descriptive qualitative meaning for each star value.'),
-    );
-    
-    // Create the Mouseover text forms for each of the rating options
-    // This form depends on the number of stars, and these extra textfields will be hidden with javascript
-    $star_count = variable_get('fivestar_stars_'. $form['#node_type']->type, 5);
-    $labels = variable_get('fivestar_labels_'. $form['#node_type']->type, array());
-    for ($n = 0; $n < 10; $n++) {
-      // If the default 5 stars are chosen, then use these five default label values.
-      // Populate the star descriptions 6 to 10 for when javascript is disabled, otherwise they will be hidden.
-      if ($star_count == 5 && $n < 5) {
-        $default_labels = array('Poor', 'Okay', 'Good', 'Great', 'Awesome');
-      }
-      // Calculate the rating counts for when the star value is anything other than 5
-      else {
-        $default_labels[$n] = 'Give it @star/@count';
-      }
-      $form['fivestar']['labels']['fivestar_label_'. $n] = array(
-        '#type' => 'textfield',
-        '#title' => t('Star @star Label', array('@star' => $n + 1)),
-        '#default_value' => isset($labels[$n]) ? $labels[$n] : $default_labels[$n],
-        '#prefix' => '<div id="fivestar-label-'. $n .'" class="fivestar-label">',
-        '#suffix' => '</div>',
-        '#size' => 30,
-      );
-      $star_count++;
-    }    
   }
 
   // Add comment form modifications.
@@ -1215,7 +1225,7 @@ function fivestar_expand($element) {
     // Display a normal star value.
     if ($i > 0) {
       if (isset($element['#labels'][$i - 1])) {
-        $options[$this_value] = t($element['#labels'][$i - 1], array('@star' => $i, '@count' => $element['#stars']));
+        $options[$this_value] = t(filter_xss_admin($element['#labels'][$i - 1]), array('@star' => $i, '@count' => $element['#stars']));
       }
       else {
         $options[$this_value] = t('Give it @star/@count', array('@star' => $i, '@count' => $element['#stars']));

@@ -18,11 +18,8 @@ if (Drupal.jsEnabled) {
     $enable = $('#edit-fivestar');
     $unvote = $('#edit-fivestar-unvote');
     $title  = $('#edit-fivestar-title');
-    $stars  = $('#edit-fivestar-stars');
     $style  = $('#edit-fivestar-style');
     $text   = $('#edit-fivestar-text');
-    $labels = $('.fivestar-label input');
-    $labels_enable = $('#edit-fivestar-labels-enable');
 
     // All the form elements except the enable checkbox.
     $options = $('#fivestar-node-type-form input:not(#edit-fivestar), #fivestar-node-type-form select');
@@ -31,12 +28,18 @@ if (Drupal.jsEnabled) {
     if (!$enable.attr('checked')) {
       $options.attr('disabled', 'disabled');
     }
+    else {
+      nodePreview.enable($unvote.attr('checked') ? 1 : 0, $style.val(), $text.val(), $title.attr('checked') ? 1 : 0);
+    }
 
     // Add event handler for enable checkbox.
     $enable.change(function() {
       if ($(this).attr('checked')) {
-        nodePreview.enable($unvote.attr('checked') ? 1 : 0, $stars.val(), $style.val(), $text.val(), $title.attr('checked') ? 1 : 0);
+        // Enable the node preview.
+        nodePreview.enable($unvote.attr('checked') ? 1 : 0, $style.val(), $text.val(), $title.attr('checked') ? 1 : 0);
+        nodePreview.update()
 
+        // Enable the comment preview if available.
         if (commentPreview) {
           var commentSetting = 0;
           $comment.each(function() {
@@ -45,7 +48,8 @@ if (Drupal.jsEnabled) {
             }
           });
           if (commentSetting != 0) {
-            commentPreview.enable(commentSetting == 1 ? 1 : 0, $stars.val(), 'user', 'none');
+            commentPreview.enable(commentSetting == 1 ? 1 : 0, 'user', 'none', 0);
+            commentPreview.update();
           }
         }
         $options.attr('disabled', false);
@@ -59,79 +63,34 @@ if (Drupal.jsEnabled) {
       }
     });
 
-    // Setup node preview handlers.
-    $unvote.change(function() { nodePreview.setValue('unvote', $(this).attr('checked') ? 1 : 0); });
-    $title.change(function() { nodePreview.setValue('title', $(this).attr('checked') ? 1 : 0); });
-    $stars.change(function() {
-      nodePreview.setValue('stars', this.value);
-      nodePreview.displayTextfields();
-    });
+    // Setup node specific preview handlers.
     $style.change(function() { nodePreview.setValue('style', this.value); });
     $text.change(function() { nodePreview.setValue('text', this.value); });
-
-    // Handler for the star labels.
-    var currentLabel = '';
-    $labels.focus(function() {
-      currentLabel = this.value;
-    });
-    $labels.blur(function() {
-      if (currentLabel != this.value) {
-        nodePreview.setLabel($labels.index(this), this.value);
-      }
-    });
-    $labels_enable.change(function() { nodePreview.setValue('labels_enable', $(this).attr('checked') ? 1 : 0); });
-
-    // Initialize the preview.
-    if ($enable.attr('checked')) {
-      var labels = new Array();
-      $labels.each(function() {
-        labels.push(this.value);
-      });
-      nodePreview.enable($unvote.attr('checked') ? 1 : 0, $stars.val(), $style.val(), $text.val(), $title.attr('checked') ? 1 : 0, labels);
-    }
+    $title.change(function() { nodePreview.setValue('title', $(this).attr('checked') ? 1 : 0); });
+    $unvote.change(function() { nodePreview.setValue('unvote', $(this).attr('checked') ? 1 : 0); });
 
     // Hide extra mouseover textfields
-    if ($enable.attr('checked')) {
-      nodePreview.displayTextfields();
-    }
+    nodePreview.displayTextfields();
 
-    // Setup comment preview handlers and initialize.
     if (commentPreview) {
+      // Enable the comment preview.
+      if ($enable.attr('checked')) {
+        commentPreview.enable(this.value == 1 ? 1 : 0, 'user', 'none', 0);
+      }
+
       // Setup comment preview handlers.
-      $stars.change(function() { commentPreview.setValue('stars', this.value); });
       $comment.change(function() {
         if ($(this).attr('checked') && $enable.attr('checked')) {
           if (this.value != 0) {
             commentPreview.setValue('unvote', this.value == 1 ? 1 : 0);
-            commentPreview.enable(this.value == 1 ? 1 : 0, $stars.val(), 'user', 'none', 0);
+            commentPreview.enable(this.value == 1 ? 1 : 0, 'user', 'none', 0);
+            commentPreview.update();
           }
           else {
             commentPreview.disable();
           }
         }
       });
-
-      $labels.blur(function() {
-        if (currentLabel != this.value) {
-          commentPreview.setLabel($labels.index(this), this.value);
-        }
-      });
-
-      // Setup comment
-      var commentSetting = 0;
-      $comment.each(function() {
-        if ($(this).attr('checked')) {
-          commentSetting = this.value;
-        }
-      });
-      if ($enable.attr('checked') && commentSetting > 0) {
-        var labels = new Array();
-        $labels.each(function() {
-          labels.push(this.value);
-        });
-        commentPreview.enable(commentSetting == 1 ? 1 : 0, $stars.val(), 'user', 'none', 0, labels);
-      }
-      $labels_enable.change(function() { commentPreview.setValue('labels_enable', $(this).attr('checked') ? 1 : 0); });
     }
   });
 }
@@ -150,24 +109,55 @@ var fivestarPreview = function(previewElement) {
   this.style = '';
   this.text = '';
   this.labels = new Array();
-  this.labels_enable = false;
+  this.labelsEnable = false;
+
+  // Elements that need handlers.
+  this.elements = new Object();
+  this.elements.stars  = $('#edit-fivestar-stars');
+  this.elements.labels = $('.fivestar-label input');
+  this.elements.labelsEnable = $('#edit-fivestar-labels-enable');
+
+  // Setup handlers that affect all previews.
+  var self = this;
+  this.elements.stars.change(function() { self.setValue('stars', this.value); self.displayTextfields(); });
+  this.elements.labelsEnable.change(function() { self.setValue('labelsEnable', $(this).attr('checked') ? 1 : 0); });
+
+  // Handler for the star labels.
+  var currentLabel = '';
+  this.elements.labels.focus(function() {
+    currentLabel = this.value;
+  });
+  this.elements.labels.blur(function() {
+    if (currentLabel != this.value) {
+      self.setLabel(self.elements.labels.index(this), this.value);
+    }
+  });
 };
 
 /**
  * Enable the preview functionality and show the preview.
  */
-fivestarPreview.prototype.enable = function(unvote, stars, style, text, title, labels, labels_enable) {
+fivestarPreview.prototype.enable = function(unvote, style, text, title) {
   if (!this.enabled) {
     this.enabled = true;
+
+    // Update global settings.
+    this.stars = this.elements.stars.val();
+    var labels = new Array();
+    this.elements.labels.each(function() {
+      labels.push(this.value);
+    });
+    this.labels = labels;
+    this.labelsEnable = this.elements.labelsEnable.attr('checked') ? 1 : 0;
+
+    // Update settings specific to this preview.
     this.unvote = unvote;
     this.title = title;
-    this.stars = stars;
     this.style = style;
     this.text = text;
-    this.labels = labels;
-    this.labels_enable = labels_enable;
+
+    // Show the preview.
     $(this.preview).show();
-    this.update();
   }
 };
 
@@ -213,7 +203,7 @@ fivestarPreview.prototype.update = function() {
     };
 
     // Prepare data to send to the server.
-    var data = { style: this.style, text: this.text, stars: this.stars, unvote: this.unvote, title: this.title, labels_enable: this.labels_enable }
+    var data = { style: this.style, text: this.text, stars: this.stars, unvote: this.unvote, title: this.title, labels_enable: this.labelsEnable }
 
     // Covert labels array format understood by PHP and add to data.
     for (n in this.labels) {
