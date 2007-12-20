@@ -32,8 +32,10 @@
             $summary = $obj.siblings('.description'),
             summaryText = $summary.html(),
             summaryHover = $obj.is('.fivestar-labels-hover'),
-            averageIndex = $("select", $obj).val(),
-            averagePercent = 0;
+            currentValue = $("select", $obj).val(),
+            voteTitle = Drupal.settings.fivestar.titleUser,
+            cancelTitle = $('label', $obj).text(),
+            voteChanged = false;
 
         // If the summary doesn't exist, try another location.
         if ($summary.size() == 0) {
@@ -47,6 +49,7 @@
         }
         else if ($obj.is('.fivestar-average-stars')) {
           var starDisplay = 'average';
+          currentValue = $("input[name=vote_average]", $obj).val();
         }
         else if ($obj.is('.fivestar-combo-stars')) {
           var starDisplay = 'combo';
@@ -54,6 +57,12 @@
         else {
           var starDisplay = 'none';
         }
+
+        // Smart is intentionally separate, so the average will be set if necessary.
+        if ($obj.is('.fivestar-smart-stars')) {
+          var starDisplay = 'smart';
+        }
+
         // Record text display.
         if ($obj.is('.fivestar-user-text')) {
           var textDisplay = 'user';
@@ -108,22 +117,27 @@
         
         // Click events.
         $cancel.click(function(){
-            event.drain();
-            averageIndex = 0;
-            averagePercent = 0;
-            // Save the value in a hidden field.
-            $("select", $obj).val(averageIndex);
+            currentValue = 0;
+            event.reset();
+            voteChanged = false;
+            // Save the currentValue in a hidden field.
+            $("select", $obj).val(0);
+            // Update the title.
+            cancelTitle = starDisplay != 'smart' ? cancelTitle : Drupal.settings.fivestar.titleAverage;
+            $('label', $obj).text(cancelTitle);
             // Submit the form if needed.
-            $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + averageIndex, success: voteHook }); });
+            $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + 0, success: voteHook }); });
             return false;
         });
         $stars.click(function(){
-            averageIndex = Math.ceil(($stars.index(this) + 1) * (100/$stars.size()));
-            averagePercent = 0;
-            // Save the value in a hidden field.
-            $("select", $obj).val(averageIndex);
+            currentValue = $('select option', $obj).get($stars.index(this) + $cancel.size()).value;
+            // Save the currentValue to the hidden select field.
+            $("select", $obj).val(currentValue);
+            // Update the display of the stars.
+            voteChanged = true;
+            event.reset();
             // Submit the form if needed.
-            $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + averageIndex, success: voteHook }); });
+            $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + currentValue, success: voteHook }); });
             return false;
         });
 
@@ -134,10 +148,11 @@
               $stars
                 .children('a').css('width', '100%').end()
                 .filter(':lt(' + index + ')').addClass('hover').end();
-              // Update the description text.
+              // Update the description text and label.
               if (summaryHover) {
                 var summary = $("select option", $obj)[index - 1 + $cancel.size()].text;
                 $summary.html(summary);
+                $('label', $obj).text(voteTitle);
               }
             },
             drain: function() {
@@ -149,18 +164,28 @@
               if (summaryHover) {
                 var summary = $("select option", $obj)[0].text;
                 $summary.html(summary);
+                if (!voteChanged) {
+                  $('label', $obj).text(cancelTitle);
+                }
               }
             },
             reset: function(){
               // Reset the stars to the default index.
-              $stars.filter(':lt(' + Math.floor(averageIndex/100 * $stars.size()) + ')').addClass('on').end();
-              var percent = (averagePercent) ? averagePercent * 10 : 0;
+              var starValue = currentValue/100 * $stars.size();
+              var percent = (starValue - Math.floor(starValue)) * 100;
+              $stars.filter(':lt(' + Math.floor(starValue) + ')').addClass('on').end();
               if (percent > 0) {
-                $stars.eq(averageIndex).addClass('on').children('a').css('width', percent + "%").end().end();
+                $stars.eq(Math.floor(starValue)).addClass('on').children('a').css('width', percent + "%").end().end();
               }
-              // Restore the summary text.
+              // Restore the summary text and original title.
               if (summaryHover) {
                 $summary.html(summaryText);
+              }
+              if (voteChanged) {
+                $('label', $obj).text(voteTitle);
+              }
+              else {
+                $('label', $obj).text(cancelTitle);
               }
             }
         };
@@ -196,6 +221,12 @@
           }
           // Update the summary text.
           summaryText = returnObj.result.summary[returnObj.display.text];
+          // Update the current star currentValue to the previous average.
+          console.log(returnObj.vote);
+          if (returnObj.vote.value == 0) {
+            currentValue = returnObj.result.average - returnObj.result.average % $stars.size();
+            event.reset();
+          }
         };
 
         event.reset();
@@ -223,7 +254,7 @@
             else {
               var zebra = (i + cancel) % 2 == 0 ? 'even' : 'odd';
               var count = i + cancel;
-              $div = $('<div class="star star-' + count + ' star-' + zebra + '"><a href="#' + option.value + '" title="' + option.text + '">' + option.text + '</a></div>');
+              $div = $('<div class="star star-' + count + ' star-' + zebra + '"><a href="#' + option.currentValue + '" title="' + option.text + '">' + option.text + '</a></div>');
             }
             $container.append($div[0]);                    
         }
@@ -245,7 +276,7 @@
      * voteResult.result.summary.user The textual description of the user's current vote.
      * voteResult.vote.id The id of the item the vote was placed on (such as the nid)
      * voteResult.vote.type The type of the item the vote was placed on (such as 'node')
-     * voteResult.vote.value The value of the new vote saved
+     * voteResult.vote.average The average of the new vote saved
      * voteResult.display.stars The type of star display we're using. Either 'average', 'user', or 'combo'.
      * voteResult.display.text The type of text display we're using. Either 'average', 'user', or 'combo'.
      */

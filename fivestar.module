@@ -297,7 +297,6 @@ function fivestar_node_type_form_submit($form_id, &$form_values) {
  * Theme function to add the Fivestar preview to the node type form.
  */
 function theme_fivestar_node_type_form($form) {
-  drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
   drupal_add_js(drupal_get_path('module', 'fivestar') .'/fivestar-admin.js');
   drupal_add_js(array('fivestar' => array('preview_url' => url('fivestar/preview/node'))), 'setting');
   fivestar_add_css();
@@ -841,11 +840,11 @@ function fivestar_static($content_type, $content_id, $node_type = NULL) {
         break;
       case 'user':
         $star_value = $user_vote->value;
-        $title = $title_display ? t('Your Rating') : NULL;
+        $title = $title_display ? t('Your rating') : NULL;
         break;
       case 'smart':
         $star_value = $user_vote->value ? $user_vote->value : $current_avg->value;
-        $title = $title_display ? $user_vote->value ? t('Your Rating') : t('Average') : NULL;
+        $title = $title_display ? $user_vote->value ? t('Your rating') : t('Average') : NULL;
         break;
     }
 
@@ -943,8 +942,7 @@ function fivestar_custom_widget($values, $settings) {
       break;
     case 'smart':
       $form['vote']['#description'] = theme('fivestar_summary', $values['user'], $values['user'] ? NULL : $values['average'], $values['count'], $settings['stars']);
-      $form['vote']['#attributes']['class'] .= ' '. ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars') .' fivestar-combo-text';
-      $form['vote']['#attributes']['class'] .= $values['user'] ? ' fivestar-average-text' : ' fivestar-average-text';
+      $form['vote']['#attributes']['class'] .= ' fivestar-smart-text '. ($values['user'] ? 'fivestar-user-text' : 'fivestar-average-text');
       break;
     case 'dual':
       $form['vote']['#description'] = theme('fivestar_summary', $values['user'], $values['average'], $values['count'], $settings['stars']);
@@ -959,17 +957,17 @@ function fivestar_custom_widget($values, $settings) {
       $form['vote']['#attributes']['class'] .= ' fivestar-average-stars';
       break;
     case 'user':
-      $form['vote']['#title'] = t('Your Rating');
+      $form['vote']['#title'] = t('Your rating');
       $form['vote']['#default_value'] = $values['user'];
       $form['vote']['#attributes']['class'] .= ' fivestar-user-stars';
       break;
     case 'smart':
-      $form['vote']['#title'] = $values['user'] ? t('Your Rating') : t('Average');
+      $form['vote']['#title'] = $values['user'] ? t('Your rating') : t('Average');
       $form['vote']['#default_value'] = $values['user'] ? $values['user'] : $values['average'];
-      $form['vote']['#attributes']['class'] .= ' '. ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars');
+      $form['vote']['#attributes']['class'] .= ' fivestar-smart-stars '. ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars');
       break;
     case 'dual':
-      $form['vote']['#title'] = t('Your Rating');
+      $form['vote']['#title'] = t('Your rating');
       $form['vote']['#default_value'] = $values['user'];
       $form['vote']['#attributes']['class'] .= ' fivestar-combo-stars';
       $form['#attributes']['class'] .= ' fivestar-combo-stars';
@@ -1027,21 +1025,21 @@ function fivestar_elements() {
 }
 
 /**
- * Format a fivestar voting element.
- *
- * @param $element
- *   An associative array containing the properties of the element.
- *   Properties used: title, value, options, description, extra, multiple, required
- * @return
- *   A themed HTML string representing the form element.
- *
- * It is possible to group options together; to do this, change the format of
- * $options to an associative array in which the keys are group labels, and the
- * values are associative arrays in the normal $options format.
+ * Theme the fivestar form element by adding necessary css and javascript.
  */
 function theme_fivestar($element) {
+  static $js_added = FALSE;
+
   // Add necessary CSS.
   fivestar_add_css();
+
+  // Add necessary javascript only once per page.
+  if ($element['#widget'] == 'stars' && !$js_added) {
+    drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
+    drupal_add_js(array('fivestar' => array('titleUser' => t('Your rating') .':', 'titleAverage' => t('Average') .':')), 'setting');
+    $js_added = TRUE;
+  }
+
   return theme('form_element', $element, $element['#children']);
 }
 
@@ -1124,7 +1122,7 @@ function theme_fivestar_summary($user_rating, $average_rating, $votes = 0, $star
   if ($user_rating) {
     $div_class = 'user';
     $user_stars = round(($user_rating * $stars) / 100, 1);
-    $output .= '<span class="user-rating">'. t('Your Rating: <span>!stars</span>', array('!stars' => $user_rating ? $user_stars : t('None'))) .'</span>';
+    $output .= '<span class="user-rating">'. t('Your rating: <span>!stars</span>', array('!stars' => $user_rating ? $user_stars : t('None'))) .'</span>';
   }
   if ($user_rating && $average_rating) {
     $output .= ' ';
@@ -1182,11 +1180,6 @@ function fivestar_add_css($widget_css = NULL) {
  */
 function fivestar_expand($element) {
   static $fivestar_id = 0;
-
-  // Add necessary javascript.
-  if ($element['#widget'] == 'stars') {
-    drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
-  }
 
   if (isset($element['#vote_count'])) {
     $element['vote_count'] =  array(
