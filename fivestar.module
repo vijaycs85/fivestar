@@ -299,7 +299,6 @@ function fivestar_node_type_form_submit($form_id, &$form_values) {
 function theme_fivestar_node_type_form($form) {
   drupal_add_js(drupal_get_path('module', 'fivestar') .'/fivestar-admin.js');
   drupal_add_js(array('fivestar' => array('preview_url' => url('fivestar/preview/node'))), 'setting');
-  fivestar_add_css();
 
   $output = '';
   $output .= drupal_render($form['fivestar']);
@@ -423,6 +422,7 @@ function fivestar_preview_page($widget_number = NULL) {
   else {
     fivestar_add_css('default');
   }
+  fivestar_add_js();
   print theme('fivestar_preview_page');
   exit;
 }
@@ -437,7 +437,7 @@ function theme_fivestar_preview_page() {
     '#allow_clear' => TRUE,
   );
 
-  $form = form_builder('upload_js', $form);
+  $form = form_builder('fivestar_preview', $form);
 
   $output = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
   $output .= '<html xmlns="http://www.w3.org/1999/xhtml">';
@@ -1028,16 +1028,12 @@ function fivestar_elements() {
  * Theme the fivestar form element by adding necessary css and javascript.
  */
 function theme_fivestar($element) {
-  static $js_added = FALSE;
-
   // Add necessary CSS.
   fivestar_add_css();
 
-  // Add necessary javascript only once per page.
-  if ($element['#widget'] == 'stars' && !$js_added) {
-    drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
-    drupal_add_js(array('fivestar' => array('titleUser' => t('Your rating') .':', 'titleAverage' => t('Average') .':')), 'setting');
-    $js_added = TRUE;
+  // Add necessary javascript.
+  if ($element['#widget'] == 'stars' ) {
+    fivestar_add_js();
   }
 
   return theme('form_element', $element, $element['#children']);
@@ -1172,6 +1168,20 @@ function fivestar_add_css($widget_css = NULL) {
 
   if ($widget_css != 'default') {
     drupal_add_css($widget_css, 'module');
+  }
+}
+
+/**
+ * Add necessary JS files and settings to render the fivestar widget.
+ */
+function fivestar_add_js() {
+  static $js_added = FALSE;
+
+  // Add necessary javascript only once per page.
+  if (!$js_added) {
+    drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
+    drupal_add_js(array('fivestar' => array('titleUser' => t('Your rating') .':', 'titleAverage' => t('Average') .':')), 'setting');
+    $js_added = TRUE;
   }
 }
 

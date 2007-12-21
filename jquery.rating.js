@@ -222,7 +222,6 @@
           // Update the summary text.
           summaryText = returnObj.result.summary[returnObj.display.text];
           // Update the current star currentValue to the previous average.
-          console.log(returnObj.vote);
           if (returnObj.vote.value == 0) {
             currentValue = returnObj.result.average - returnObj.result.average % $stars.size();
             event.reset();
