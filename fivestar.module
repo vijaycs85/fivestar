@@ -711,11 +711,11 @@ function fivestar_nodeapi(&$node, $op, $teaser, $page) {
             );
             break;
           case 'above_static':
-          case 'above_static':
+          case 'below_static':
             $stars = variable_get('fivestar_stars_'. $node->type, 5);
             $node->content['fivestar_widget'] = array(
               '#value' => fivestar_static('node', $node->nid, $node->type),
-              '#weight' => $position == 'above' ? -10 : 50,
+              '#weight' => $position == 'above_static' ? -10 : 50,
             );
             break;
           default:
