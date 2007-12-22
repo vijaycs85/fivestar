@@ -105,21 +105,22 @@ if (Drupal.jsEnabled) {
  *   The id attribute of the div containing the preview.
  */
 var fivestarPreview = function(previewElement) {
-  this.preview = previewElement;
-  this.enabled = false;
-  this.unvote = 0;
-  this.title = 1;
-  this.stars = 5;
-  this.style = '';
-  this.text = '';
-  this.labels = new Object();
-  this.labelsEnable = false;
-
   // Elements that need handlers.
   this.elements = new Object();
   this.elements.stars  = $('#edit-fivestar-stars');
   this.elements.labels = $('.fivestar-label input');
   this.elements.labelsEnable = $('#edit-fivestar-labels-enable');
+
+  // Private variables.
+  this.preview = previewElement;
+  this.enabled = false;
+  this.unvote = 0;
+  this.title = 1;
+  this.stars = this.elements.stars.val();
+  this.style = '';
+  this.text = '';
+  this.labels = new Object();
+  this.labelsEnable = false;
 
   // Setup handlers that affect all previews.
   var self = this;
