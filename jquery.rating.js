@@ -29,7 +29,7 @@
         var $widget = buildInterface($obj),
             $stars = $('.star', $widget),
             $cancel = $('.cancel', $widget),
-            $summary = $('.description', $($obj).parent()),
+            $summary = $('.description', $obj).size() ? $('.description', $obj) : $($obj).siblings('.description'),
             summaryText = $summary.html(),
             summaryHover = $obj.is('.fivestar-labels-hover'),
             currentValue = $("select", $obj).val(),
