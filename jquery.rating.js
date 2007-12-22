@@ -33,8 +33,8 @@
             summaryText = $summary.html(),
             summaryHover = $obj.is('.fivestar-labels-hover'),
             currentValue = $("input[@name=vote_value]", $obj).val(),
-            voteTitle = Drupal.settings.fivestar.titleUser,
             cancelTitle = $('label', $obj).text(),
+            voteTitle = cancelTitle != Drupal.settings.fivestar.titleAverage ? cancelTitle : Drupal.settings.fivestar.titleUser,
             voteChanged = false;
 
         // Record star display.
@@ -156,8 +156,7 @@
                 .filter('.hover').removeClass('hover').end();
               // Update the description text.
               if (summaryHover) {
-                var summary = $("select option", $obj)[0].text;
-                $summary.html(summary);
+                $summary.html('&nbsp');
                 if (!voteChanged) {
                   $('label', $obj).html(cancelTitle);
                 }

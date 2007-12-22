@@ -1057,7 +1057,7 @@ function theme_fivestar_select($element) {
  */
 function theme_fivestar_widget($form) {
   // Move the description outside of the vote element.
-  $description = $form['vote']['#description'];
+  $description = empty($form['vote']['#description']) ? '&nbsp;' : $form['vote']['#description'];
   unset($form['vote']['#description']);
 
   $output  = '';
@@ -1149,7 +1149,7 @@ function theme_fivestar_static_element($value, $title = NULL, $description = NUL
   );
 
   $output .= theme('form_element', $element, $value);
-  $output .= '<div class="description">'. $description .'</div>';
+  $output .= isset($description) ? '<div class="description">'. $description .'</div>' : '';
   $output .= '</div>';
   return $output;
 }
