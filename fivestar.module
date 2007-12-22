@@ -1228,7 +1228,7 @@ function fivestar_expand($element) {
     // Display a normal star value.
     if ($i > 0) {
       if (isset($element['#labels'][$i])) {
-        $options[$this_value] = t(filter_xss_admin($element['#labels'][$i]), array('@star' => $i, '@count' => $element['#stars']));
+        $options[$this_value] = $element['#labels'][$i] == '' ? $this_value : t(filter_xss_admin($element['#labels'][$i]), array('@star' => $i, '@count' => $element['#stars']));
       }
       else {
         $options[$this_value] = t('Give it @star/@count', array('@star' => $i, '@count' => $element['#stars']));

@@ -145,7 +145,8 @@
               // Update the description text and label.
               if (summaryHover) {
                 var summary = $("select option", $obj)[index - 1 + $cancel.size()].text;
-                $summary.html(summary);
+                var value = $("select option", $obj)[index - 1 + $cancel.size()].value;
+                $summary.html(summary != value ? summary : '&nbsp;');
                 $('label', $obj).html(voteTitle);
               }
             },
@@ -157,7 +158,7 @@
               // Update the description text.
               if (summaryHover) {
                 var cancelText = $("select option", $obj)[0].text;
-                $summary.html(($cancel.size() && cancelText != '') ? cancelText : '&nbsp');
+                $summary.html(($cancel.size() && cancelText != 0) ? cancelText : '&nbsp');
                 if (!voteChanged) {
                   $('label', $obj).html(cancelTitle);
                 }
