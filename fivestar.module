@@ -1207,14 +1207,6 @@ function fivestar_expand($element) {
     );
   }
 
-  if (isset($element['#default_value'])) {
-    $element['vote_value'] =  array(
-      '#type' => 'hidden',
-      '#value' => $element['#default_value'],
-      '#id' => 'edit-vote-value-'. $fivestar_id,
-    );
-  }
-
   if ($element['#auto_submit'] && !empty($element['#auto_submit_path'])) {
     $element['auto_submit_path'] =  array(
       '#type' => 'hidden',
@@ -1252,7 +1244,7 @@ function fivestar_expand($element) {
     '#type' => 'select',
     '#options' => $options,
     '#required' => $element['#required'],
-    '#default_value' => $element['#default_value'],
+    '#default_value' => $default_value,
     '#id' => 'edit-vote-'. $fivestar_id,
     '#theme' => 'fivestar_select',
   );
