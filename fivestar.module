@@ -1245,8 +1245,10 @@ function fivestar_expand($element) {
     '#options' => $options,
     '#required' => $element['#required'],
     '#default_value' => $default_value,
+    '#parents' => $element['#parents'],
     '#id' => 'edit-vote-'. $fivestar_id,
     '#theme' => 'fivestar_select',
+    '#weight' => $element['#weight'],
   );
 
   // If a default value is not exactly on a radio value, round up to the next one

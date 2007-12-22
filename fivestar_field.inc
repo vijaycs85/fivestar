@@ -231,6 +231,6 @@ function fivestar_field_formatter($field, $item, $formatter, $node) {
       return $item['rating'];
 
     default:
-      return theme('fivestar_static', $item['rating']['vote'], $field['stars']);
+      return theme('fivestar_static', $item['rating'], $field['stars']);
   }
 }
