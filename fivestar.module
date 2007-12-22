@@ -1207,6 +1207,14 @@ function fivestar_expand($element) {
     );
   }
 
+  if (isset($element['#default_value'])) {
+    $element['vote_value'] =  array(
+      '#type' => 'hidden',
+      '#value' => $element['#default_value'],
+      '#id' => 'edit-vote-value-'. $fivestar_id,
+    );
+  }
+
   if ($element['#auto_submit'] && !empty($element['#auto_submit_path'])) {
     $element['auto_submit_path'] =  array(
       '#type' => 'hidden',

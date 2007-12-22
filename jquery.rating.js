@@ -29,19 +29,13 @@
         var $widget = buildInterface($obj),
             $stars = $('.star', $widget),
             $cancel = $('.cancel', $widget),
-            $summary = $obj.siblings('.description'),
+            $summary = $('.description', $($obj).parent()),
             summaryText = $summary.html(),
             summaryHover = $obj.is('.fivestar-labels-hover'),
-            currentValue = $("select", $obj).val(),
+            currentValue = $("input[@name=vote_value]", $obj).val(),
             voteTitle = Drupal.settings.fivestar.titleUser,
             cancelTitle = $('label', $obj).text(),
             voteChanged = false;
-
-        // If the summary doesn't exist, try another location.
-        if ($summary.size() == 0) {
-          $summary = $('.description', $obj);
-          summaryText = $summary.html();
-        }
 
         // Record star display.
         if ($obj.is('.fivestar-user-stars')) {
@@ -49,7 +43,7 @@
         }
         else if ($obj.is('.fivestar-average-stars')) {
           var starDisplay = 'average';
-          currentValue = $("input[name=vote_average]", $obj).val();
+          currentValue = $("input[@name=vote_average]", $obj).val();
         }
         else if ($obj.is('.fivestar-combo-stars')) {
           var starDisplay = 'combo';
@@ -124,7 +118,7 @@
             $("select", $obj).val(0);
             // Update the title.
             cancelTitle = starDisplay != 'smart' ? cancelTitle : Drupal.settings.fivestar.titleAverage;
-            $('label', $obj).text(cancelTitle);
+            $('label', $obj).html(cancelTitle);
             // Submit the form if needed.
             $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + 0, success: voteHook }); });
             return false;
@@ -152,7 +146,7 @@
               if (summaryHover) {
                 var summary = $("select option", $obj)[index - 1 + $cancel.size()].text;
                 $summary.html(summary);
-                $('label', $obj).text(voteTitle);
+                $('label', $obj).html(voteTitle);
               }
             },
             drain: function() {
@@ -165,7 +159,7 @@
                 var summary = $("select option", $obj)[0].text;
                 $summary.html(summary);
                 if (!voteChanged) {
-                  $('label', $obj).text(cancelTitle);
+                  $('label', $obj).html(cancelTitle);
                 }
               }
             },
@@ -182,10 +176,10 @@
                 $summary.html(summaryText);
               }
               if (voteChanged) {
-                $('label', $obj).text(voteTitle);
+                $('label', $obj).html(voteTitle);
               }
               else {
-                $('label', $obj).text(cancelTitle);
+                $('label', $obj).html(cancelTitle);
               }
             }
         };
@@ -259,7 +253,7 @@
         }
         $container.addClass('fivestar-widget-' + (size + cancel));
         // Attach the new widget and hide the existing widget.
-        $widget.find('select').after($container).hide();
+        $('select', $widget).after($container).hide();
         return $container;
     };
 
