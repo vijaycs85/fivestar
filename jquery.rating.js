@@ -156,7 +156,8 @@
                 .filter('.hover').removeClass('hover').end();
               // Update the description text.
               if (summaryHover) {
-                $summary.html('&nbsp');
+                var cancelText = $("select option", $obj)[0].text;
+                $summary.html(($cancel.size() && cancelText != '') ? cancelText : '&nbsp');
                 if (!voteChanged) {
                   $('label', $obj).html(cancelTitle);
                 }
@@ -172,7 +173,7 @@
               }
               // Restore the summary text and original title.
               if (summaryHover) {
-                $summary.html(summaryText);
+                $summary.html(summaryText ? summaryText : '&nbsp;');
               }
               if (voteChanged) {
                 $('label', $obj).html(voteTitle);
