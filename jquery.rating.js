@@ -146,7 +146,7 @@
               if (summaryHover) {
                 var summary = $("select option", $obj)[index - 1 + $cancel.size()].text;
                 var value = $("select option", $obj)[index - 1 + $cancel.size()].value;
-                $summary.html(summary != value ? summary : '&nbsp;');
+                $summary.html(summary != index ? summary : '&nbsp;');
                 $('label', $obj).html(voteTitle);
               }
             },
@@ -248,7 +248,7 @@
             else {
               var zebra = (i + cancel) % 2 == 0 ? 'even' : 'odd';
               var count = i + cancel;
-              $div = $('<div class="star star-' + count + ' star-' + zebra + '"><a href="#' + option.currentValue + '" title="' + option.text + '">' + option.text + '</a></div>');
+              $div = $('<div class="star star-' + count + ' star-' + zebra + '"><a href="#' + option.value + '" title="' + option.text + '">' + option.text + '</a></div>');
             }
             $container.append($div[0]);                    
         }

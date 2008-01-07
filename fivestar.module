@@ -926,7 +926,7 @@ function fivestar_custom_widget($values, $settings) {
 
   $form['fivestar_submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit rating'),
+    '#value' => t('Rate'),
     '#attributes' => array('class' => 'fivestar-submit'),
     '#id' => $settings['content_id'] ? 'edit-fivestar-submit-'. $settings['content_id'] : NULL,
   );
@@ -1061,7 +1061,7 @@ function theme_fivestar_widget($form) {
   unset($form['vote']['#description']);
 
   $output  = '';
-  $output .= '<div class="fivestar-form-'. $form['content_id']['#value'] .'">';
+  $output .= '<div class="fivestar-form-'. $form['content_id']['#value'] .' clear-block">';
   $output .= drupal_render($form);
   $output .= '<div class="description fivestar-summary-'. $form['content_id']['#value'] .'">'. $description .'</div>';
   $output .= '</div>';
@@ -1228,7 +1228,7 @@ function fivestar_expand($element) {
     // Display a normal star value.
     if ($i > 0) {
       if (isset($element['#labels'][$i])) {
-        $options[$this_value] = $element['#labels'][$i] == '' ? $this_value : t(filter_xss_admin($element['#labels'][$i]), array('@star' => $i, '@count' => $element['#stars']));
+        $options[$this_value] = $element['#labels'][$i] == '' ? $i : t(filter_xss_admin($element['#labels'][$i]), array('@star' => $i, '@count' => $element['#stars']));
       }
       else {
         $options[$this_value] = t('Give it @star/@count', array('@star' => $i, '@count' => $element['#stars']));
