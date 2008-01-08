@@ -33,7 +33,7 @@
             summaryText = $summary.html(),
             summaryHover = $obj.is('.fivestar-labels-hover'),
             currentValue = $("select", $obj).val(),
-            cancelTitle = $('label', $obj).text(),
+            cancelTitle = $('label', $obj).html(),
             voteTitle = cancelTitle != Drupal.settings.fivestar.titleAverage ? cancelTitle : Drupal.settings.fivestar.titleUser,
             voteChanged = false;
 
