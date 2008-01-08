@@ -1217,6 +1217,7 @@ function fivestar_expand($element) {
   }
 
   $options = array();
+  $default_value = $element['#default_value'];
   for ($i = 0; $i <= $element['#stars']; $i++) {
     $this_value = ceil($i * 100/$element['#stars']);
     $next_value = ceil(($i+1) * 100/$element['#stars']);
@@ -1253,7 +1254,7 @@ function fivestar_expand($element) {
 
   // If a default value is not exactly on a radio value, round up to the next one
   if ($element['#default_value'] > $this_value && $element['#default_value'] <= $next_value) {
-    $element['vote'][$i+1]['#default_value'] = $next_value;
+    $element['vote']['#default_value'] = $next_value;
   }
 
   // Set a class for the display of label text on hover.
@@ -1262,8 +1263,17 @@ function fivestar_expand($element) {
   $element['#prefix'] = '<div class="fivestar-form-item '. $element['#attributes']['class'] . $label_class .'">';
   $element['#suffix'] = '</div>';
 
+  // Add validation function that considers a 0 value as empty.
+  $element['#validate']['fivestar_validate'] = array();
+
   $fivestar_id++;
   return $element;
+}
+
+function fivestar_validate($form) {
+  if ($form['#required'] && empty($form['vote']['#value'])) {
+    form_error($form, t('!name field is required.', array('!name' => $form['#title'])));
+  }
 }
 
 function fivestar_votingapi_views_formatters($details = array()) {
