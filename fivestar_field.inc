@@ -189,7 +189,7 @@ function fivestar_widget($op, &$node, $field, &$items) {
       $form[$field['field_name']][0]['axis'] = array(
         '#type' => 'value',
         '#value' => $field['axis'],
-        );
+      );
       return $form;
   }
 }
