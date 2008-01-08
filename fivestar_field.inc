@@ -179,7 +179,9 @@ function fivestar_widget($op, &$node, $field, &$items) {
         '#weight' => $field['widget']['weight'],
         '#auto_submit' => false,
         '#widget' => $field['widget']['type'],
+        '#required' => $field['required'],
       );
+
       $form[$field['field_name']][0]['target'] = array(
         '#type' => 'value',
         '#value' => $field['target'],
