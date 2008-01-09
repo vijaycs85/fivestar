@@ -124,7 +124,7 @@
             return false;
         });
         $stars.click(function(){
-            currentValue = $('select option', $obj).get($stars.index(this) + $cancel.size()).value;
+            currentValue = $('select option', $obj).get($stars.index(this) + $cancel.size() + 1).value;
             // Save the currentValue to the hidden select field.
             $("select", $obj).val(currentValue);
             // Update the display of the stars.
@@ -144,9 +144,9 @@
                 .filter(':lt(' + index + ')').addClass('hover').end();
               // Update the description text and label.
               if (summaryHover) {
-                var summary = $("select option", $obj)[index - 1 + $cancel.size()].text;
-                var value = $("select option", $obj)[index - 1 + $cancel.size()].value;
-                $summary.html(summary != index ? summary : '&nbsp;');
+                var summary = $("select option", $obj)[index + $cancel.size()].text;
+                var value = $("select option", $obj)[index + $cancel.size()].value;
+                $summary.html(summary != index + 1 ? summary : '&nbsp;');
                 $('label', $obj).html(voteTitle);
               }
             },
@@ -240,14 +240,14 @@
         var $options = $("select option", $widget);
         var size = $('option', $widget).size() - 1;
         var cancel = 1;
-        for (var i = 0, option; option = $options[i]; i++){
+        for (var i = 1, option; option = $options[i]; i++){
             if (option.value == "0") {
               cancel = 0;
               $div = $('<div class="cancel"><a href="#0" title="' + option.text + '">' + option.text + '</a></div>');
             }
             else {
-              var zebra = (i + cancel) % 2 == 0 ? 'even' : 'odd';
-              var count = i + cancel;
+              var zebra = (i + cancel - 1) % 2 == 0 ? 'even' : 'odd';
+              var count = i + cancel - 1;
               $div = $('<div class="star star-' + count + ' star-' + zebra + '"><a href="#' + option.value + '" title="' + option.text + '">' + option.text + '</a></div>');
             }
             $container.append($div[0]);                    

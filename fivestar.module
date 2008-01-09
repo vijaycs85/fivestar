@@ -1216,7 +1216,7 @@ function fivestar_expand($element) {
     );
   }
 
-  $options = array();
+  $options = array('-' => t('Select rating'));
   $default_value = $element['#default_value'];
   for ($i = 0; $i <= $element['#stars']; $i++) {
     $this_value = ceil($i * 100/$element['#stars']);
@@ -1271,7 +1271,7 @@ function fivestar_expand($element) {
 }
 
 function fivestar_validate($form) {
-  if ($form['#required'] && empty($form['vote']['#value'])) {
+  if ($form['#required'] && (empty($form['vote']['#value']) || $form['vote']['#value'] == '-')) {
     form_error($form, t('!name field is required.', array('!name' => $form['#title'])));
   }
 }
