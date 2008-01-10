@@ -252,7 +252,7 @@
             }
             $container.append($div[0]);                    
         }
-        $container.addClass('fivestar-widget-' + (size + cancel));
+        $container.addClass('fivestar-widget-' + (size + cancel - 1));
         // Attach the new widget and hide the existing widget.
         $('select', $widget).after($container).hide();
         return $container;
