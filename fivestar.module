@@ -997,11 +997,22 @@ function fivestar_custom_widget($values, $settings) {
 }
 
 /**
- * Submit handler for the above form
+ * Submit handler for the above form (non-javascript version).
  */
 function fivestar_form_submit($form_id, $form_values) {
   if ($form_id == 'fivestar_form_' . $form_values['content_type'] . '_' . $form_values['content_id']) {
-    _fivestar_cast_vote($form_values['content_type'], $form_values['content_id'], $form_values['vote']);
+    // Cast the vote.
+    $result = _fivestar_cast_vote($form_values['content_type'], $form_values['content_id'], $form_values['vote']);
+
+    // Set a message that the vote was received.
+    if ($form_values['vote'] === '0') {
+      drupal_set_message(t('Your vote has been cleared.'));
+    }
+    elseif (is_numeric($form_values['vote'])) {
+      drupal_set_message(t('Thank you for your vote.'));
+    }
+    // Regenerate the page with a drupal_goto() to update the current values.
+    drupal_goto();
   }
 }
 
