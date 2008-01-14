@@ -217,8 +217,8 @@
           // Update the summary text.
           summaryText = returnObj.result.summary[returnObj.display.text];
           // Update the current star currentValue to the previous average.
-          if (returnObj.vote.value == 0) {
-            currentValue = returnObj.result.average - returnObj.result.average % $stars.size();
+          if (returnObj.vote.value == 0 && starDisplay == 'average') {
+            currentValue = returnObj.result.average;
             event.reset();
           }
         };
@@ -248,7 +248,9 @@
             else {
               var zebra = (i + cancel - 1) % 2 == 0 ? 'even' : 'odd';
               var count = i + cancel - 1;
-              $div = $('<div class="star star-' + count + ' star-' + zebra + '"><a href="#' + option.value + '" title="' + option.text + '">' + option.text + '</a></div>');
+              var first = count == 1 ? ' star-first' : '';
+              var last = count == size + cancel - 1 ? ' star-last' : '';
+              $div = $('<div class="star star-' + count + ' star-' + zebra + first + last + '"><a href="#' + option.value + '" title="' + option.text + '">' + option.text + '</a></div>');
             }
             $container.append($div[0]);                    
         }

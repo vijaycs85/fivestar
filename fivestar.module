@@ -1102,7 +1102,9 @@ function theme_fivestar_static($rating, $stars = 5) {
     $star_value = ceil((100/$stars) * $n);
     $prev_star_value = ceil((100/$stars) * ($n-1));
     $zebra = ($n % 2 == 0) ? 'even' : 'odd';
-    $output .= '<div class="star star-'. $n .' star-'. $zebra .'">';
+    $first = $n == 1 ? ' star-first' : '';
+    $last = $n == $stars ? ' star-last' : '';
+    $output .= '<div class="star star-'. $n .' star-'. $zebra . $first . $last .'">';
     if ($rating < $star_value && $rating > $prev_star_value) {
       $percent = (($rating - $prev_star_value) / ($star_value - $prev_star_value)) * 100;
       $output .= '<span class="on" style="width: '.$percent.'%">';
