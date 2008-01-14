@@ -98,11 +98,25 @@ realy simple case, you could just enter the value 10 to always rate on the same
 node with nid = 10. Usually you'll need to enter PHP code to dynamically select
 what node you want to rate.
 
-A common scenario is using fivestar with nodecomments to make reviews, sample
-code for this can be found here: http://drupal.org/node/148150
+A common scenario is using fivestar with nodecomments to make reviews. If using
+nodecomments a separate checkbox appears the Node ID field to allow you easily
+select the nodecomment parent as the target of the vote.
 
 Save your field. Now when making new nodes of type 'review', the user will
 select a star that will register a vote on the value of the Node ID field.
+
+Views Integration
+-----------------
+Fivestar depends on the views integration provided by VotinAPI, but adds some
+special features to make it work specifically with Fivestar. To display Fivestar
+ratings in a view, select the "VotingAPI percent vote result" from the list of
+available Fields. This will display the average vote for nodes. Then choose
+"Fivestar rating" from the Handler options for the field and the averages will
+be displayed as Fivestar ratings.
+
+Fivestar also provides handling for the display of Fivestar CCK fields, they are
+in the Field list under "Fivestar Rating: [Field name]".
+
 
 Contributing
 ------------
