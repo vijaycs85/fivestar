@@ -86,9 +86,8 @@ if (Drupal.jsEnabled) {
       $comment.change(function() {
         if ($(this).attr('checked') && $enable.attr('checked')) {
           if (this.value != 0) {
-            commentPreview.setValue('unvote', this.value == 1 ? 1 : 0);
             commentPreview.enable(this.value == 1 ? 1 : 0, 'user', 'none', 0);
-            commentPreview.update();
+            commentPreview.setValue('unvote', this.value == 1 ? 1 : 0);
           }
           else {
             commentPreview.disable();
