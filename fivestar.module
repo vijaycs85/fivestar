@@ -705,11 +705,13 @@ function fivestar_nodeapi(&$node, $op, $teaser, $page) {
         switch ($position) {
           case 'above':
           case 'below':
-            $node->content['fivestar_widget'] = array(
-              '#value' => fivestar_widget_form($node),
-              '#weight' => $position == 'above' ? -10 : 50,
-            );
-            break;
+            if (user_access('rate content')) {
+              $node->content['fivestar_widget'] = array(
+                '#value' => fivestar_widget_form($node),
+                '#weight' => $position == 'above' ? -10 : 50,
+              );
+              break;
+            } // Fall through to static if not allowed to rate.
           case 'above_static':
           case 'below_static':
             $stars = variable_get('fivestar_stars_'. $node->type, 5);
@@ -827,24 +829,34 @@ function fivestar_static($content_type, $content_id, $node_type = NULL) {
   $user_vote = $user->uid ? votingapi_get_vote($content_type, $content_id, 'percent', 'vote', $user->uid) : 0;
 
   if ($content_type == 'node') {
+    // Content type should always be passed to avoid this node load.
+    if (!isset($node_type)) {
+      $node = node_load($content_id);
+      $node_type = $node->type;
+    }
+
     $star_display = variable_get('fivestar_style_'. $node_type, 'average');
     $text_display = variable_get('fivestar_text_'. $node_type, 'dual');
     $title_display = variable_get('fivestar_title_'. $node_type, 1);
 
     $stars = variable_get('fivestar_stars_'. $node_type, 5);
     switch ($star_display) {
+      case 'user':
+        if (user_access('rate content')) {
+          $star_value = $user_vote->value;
+          $title = $title_display ? t('Your rating') : NULL;
+          break;
+        } // Fall through to average if not allowed to rate.
+      case 'smart':
+        if (user_access('rate content')) {
+          $star_value = $user_vote->value ? $user_vote->value : $current_avg->value;
+          $title = $title_display ? $user_vote->value ? t('Your rating') : t('Average') : NULL;
+          break;
+        } // Fall through to average if not allowed to rate.
       case 'average':
       case 'dual':
         $star_value = $current_avg->value;
         $title = $title_display ? t('Average') : NULL;
-        break;
-      case 'user':
-        $star_value = $user_vote->value;
-        $title = $title_display ? t('Your rating') : NULL;
-        break;
-      case 'smart':
-        $star_value = $user_vote->value ? $user_vote->value : $current_avg->value;
-        $title = $title_display ? $user_vote->value ? t('Your rating') : t('Average') : NULL;
         break;
     }
 
@@ -867,8 +879,6 @@ function fivestar_static($content_type, $content_id, $node_type = NULL) {
           $user_value = NULL;
         }
         break;
-      case 'none':
-        $count_value = NULL;
     }
   }
   // Possibly add other content types here (comment, user, etc).
@@ -881,7 +891,7 @@ function fivestar_static($content_type, $content_id, $node_type = NULL) {
   }
 
   $star_display = theme('fivestar_static', $star_value, $stars);
-  $text_display = theme('fivestar_summary', $user_value, $average_value, $count_value, $stars);
+  $text_display = $text_display == 'none' ? NULL : theme('fivestar_summary', $user_value, $average_value, $count_value, $stars);
 
   return theme('fivestar_static_element', $star_display, $title, $text_display);
 }
