@@ -13,7 +13,7 @@ function fivestar_help($section) {
       $steps = array(
         t('Configure site-wide settings for fivestar below.'),
         t('Go to <a href="!types">admin/content/types</a> and edit the type you would like to rate.', array('!types' => url('admin/content/types'))),
-        t('On the settings page for the content type, a set of options is available for fivestar, where you can enabled rating for that type and set rating options.'),
+        t('On the settings page for the content type, a set of options is available for fivestar, where you can enable rating for that type and set rating options.'),
       );
       $output .= theme('item_list', $steps, NULL, 'ol');
   }
@@ -386,7 +386,7 @@ function fivestar_settings() {
     '#title' => t('Anonymous vote interval'),
     '#options' => array(0 => t('Immediately')) + drupal_map_assoc(array(300, 900, 1800, 3600, 10800, 21600, 32400, 43200, 86400, 172800, 345600, 604800), 'format_interval') + array(-1 => t('Never')),
     '#default_value' => variable_get('fivestar_anonymous_vote_interval', 86400),
-    '#description' => t('Anonymous users may add another vote after this interval. Because the same IP addresses may be used by different people, allowing the same IP to vote again several days later may yeild more votes.'),
+    '#description' => t('Anonymous users may add another vote after this interval. Because the same IP addresses may be used by different people, allowing the same IP to vote again several days later may yield more votes.'),
   );
   return system_settings_form($form);
 }
