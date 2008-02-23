@@ -1208,7 +1208,7 @@ function fivestar_add_js() {
   // Add necessary javascript only once per page.
   if (!$js_added) {
     drupal_add_js(drupal_get_path('module', 'fivestar') .'/jquery.rating.js');
-    drupal_add_js(array('fivestar' => array('titleUser' => t('Your rating') .':', 'titleAverage' => t('Average') .':')), 'setting');
+    drupal_add_js(array('fivestar' => array('titleUser' => t('Your rating') .': ', 'titleAverage' => t('Average') .': ')), 'setting');
     $js_added = TRUE;
   }
 }
