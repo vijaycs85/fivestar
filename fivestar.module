@@ -848,7 +848,7 @@ function fivestar_form(&$form_state, $content_type, $content_id) {
     'labels' => variable_get('fivestar_labels_'. $node->type, array()),
   );
 
-  return fivestar_custom_widget(&$form_state, $values, $settings);  
+  return fivestar_custom_widget($form_state, $values, $settings);  
 }
 
 function fivestar_static($content_type, $content_id, $node_type = NULL) {
