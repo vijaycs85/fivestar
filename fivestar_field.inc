@@ -96,8 +96,12 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
         if ($field['dynamic_target'] && !empty($node->$field['dynamic_target'])) {
           $items[$delta]['target'] = $node->$field['dynamic_target'];
         }
-        elseif ($field['php'] && !empty($item['target'])) {
-          $items[$delta]['target'] = drupal_eval($item['target']);
+        elseif (is_numeric($item['target'])) {
+          $items[$delta]['target'] = $item['target'];
+        }
+        elseif ($field['php'] && strpos($item['target'], '<?php') === 0) {
+          // Use eval rather than drupal_eval to allow access to local variables.
+          $items[$delta]['target'] = eval('?>'. $item['target']);
         }
 
         if (is_numeric($items[$delta]['target'])) {
@@ -112,8 +116,15 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
       break;
     case 'delete':
       foreach ($items as $delta => $item) {
-        if ($field['php'] && !empty($item['target'])) {
-          $items[$delta]['target'] = drupal_eval($item['target']);
+        if ($field['dynamic_target'] && !empty($node->$field['dynamic_target'])) {
+          $items[$delta]['target'] = $node->$field['dynamic_target'];
+        }
+        elseif (is_numeric($item['target'])) {
+          $items[$delta]['target'] = $item['target'];
+        }
+        elseif ($field['php'] && strpos($item['target'], '<?php') === 0) {
+          // Use eval rather than drupal_eval to allow access to local variables.
+          $items[$delta]['target'] = eval('?>'. $item['target']);
         }
         if (is_numeric($items[$delta]['target'])) {
           votingapi_unset_vote('node', $items[$delta]['target']);
