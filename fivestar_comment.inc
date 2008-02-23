@@ -55,7 +55,7 @@ function fivestar_comment_form_alter(&$form, &$form_state, $form_id) {
             '#allow_clear' => variable_get('fivestar_comment_'. $node->type, FIVESTAR_COMMENT_DISABLED) == FIVESTAR_COMMENT_OPTIONAL ? 1 : 0,
             '#content_id' => $node->nid,
             '#required' => variable_get('fivestar_comment_'. $node->type, FIVESTAR_COMMENT_DISABLED) == FIVESTAR_COMMENT_REQUIRED ? 1 : 0,
-            '#default_value' => $form['cid']['#value'] ? fivestar_comment_load($form['cid']['#value']) : 0,
+            '#default_value' => $form['cid']['#value'] ? fivestar_comment_load($form['cid']['#value'], $form['nid']['#value']) : 0,
             '#description' => '&nbsp;',
             '#labels' => variable_get('fivestar_labels_'. $node->type, array()),
           );
@@ -73,37 +73,56 @@ function fivestar_comment_form_alter(&$form, &$form_state, $form_id) {
  * Implementation of hook_comment().
  */
 function fivestar_comment(&$comment, $op) {
-  $node = node_load(is_array($comment) ? $comment['nid'] : $comment->nid);
-  $fivestar_status = variable_get('fivestar_comment_'. $node->type, FIVESTAR_COMMENT_DISABLED);
+  if (is_array($comment) && is_numeric($comment['nid'])) {
+  	$nid = $comment['nid'];
+  }
+  elseif (is_array($comment) && is_array($comment['nid']) && is_numeric($comment['nid']['#value'])) {
+    $nid = $comment['nid']['#value'];
+  }
+  elseif (is_object($comment) && is_numeric($comment->nid)) {
+    $nid = $comment->nid;
+  }
+
+  if (isset($nid)) {
+    $node = node_load($nid);
+    $fivestar_status = variable_get('fivestar_comment_'. $node->type, FIVESTAR_COMMENT_DISABLED);
+  }
+
   switch ($op) {
     case 'view':
-      $comment->fivestar_rating = isset($comment->fivestar_rating) ? $comment->fivestar_rating : fivestar_comment_load($comment->cid, $comment->nid);
-      $comment->fivestar_view = theme('fivestar_static', $comment->fivestar_rating, variable_get('fivestar_stars_'. $node->type, 5));
-      if ($comment->fivestar_rating) {
-        $comment->comment = $comment->fivestar_view . $comment->comment;
+      if ($fivestar_status != FIVESTAR_COMMENT_DISABLED) {
+        $comment->fivestar_rating = isset($comment->fivestar_rating) ? $comment->fivestar_rating : fivestar_comment_load($comment->cid, $comment->nid);
+        $comment->fivestar_view = theme('fivestar_static', $comment->fivestar_rating, variable_get('fivestar_stars_'. $node->type, 5));
+        if ($comment->fivestar_rating) {
+          $comment->comment = $comment->fivestar_view . $comment->comment;
+        }
       }
       break;
     case 'insert':
-      $comment = (object)$comment; // Comment module is inconsistent about comment data structures.
-      if ($comment->fivestar_rating) {
-        fivestar_comment_insert($comment->cid, $comment->nid, $commnt->uid, $comment->fivestar_rating);
-      }
-      $comment = (array)$comment;
-    case 'update':
-      $comment = (object)$comment; // Comment module is inconsistent about comment data structures.
-      $current_rating = fivestar_comment_load($comment->cid, $comment->nid);
-      if ($comment->fivestar_rating) {
-        if (is_numeric($current_rating)) {
-          fivestar_comment_update($comment->cid, $comment->nid, $commnt->uid, $comment->fivestar_rating);
-        }
-        else {
+      if ($fivestar_status != FIVESTAR_COMMENT_DISABLED) {
+        $comment = (object)$comment; // Comment module is inconsistent about comment data structures.
+        if ($comment->fivestar_rating) {
           fivestar_comment_insert($comment->cid, $comment->nid, $commnt->uid, $comment->fivestar_rating);
         }
+        $comment = (array)$comment;
       }
-      elseif ($fivestar_status != FIVESTAR_COMMENT_DISABLED && is_numeric($current_rating)) {
-        fivestar_comment_delete($comment->cid, $comment->nid, $comment->uid);
+    case 'update':
+      if ($fivestar_status != FIVESTAR_COMMENT_DISABLED) {
+        $comment = (object)$comment; // Comment module is inconsistent about comment data structures.
+        $current_rating = fivestar_comment_load($comment->cid, $comment->nid);
+        if ($comment->fivestar_rating) {
+          if (is_numeric($current_rating)) {
+            fivestar_comment_update($comment->cid, $comment->nid, $commnt->uid, $comment->fivestar_rating);
+          }
+          else {
+            fivestar_comment_insert($comment->cid, $comment->nid, $commnt->uid, $comment->fivestar_rating);
+          }
+        }
+        elseif ($fivestar_status != FIVESTAR_COMMENT_DISABLED && is_numeric($current_rating)) {
+          fivestar_comment_delete($comment->cid, $comment->nid, $comment->uid);
+        }
+        $comment = (array)$comment;
       }
-      $comment = (array)$comment;
       break;
     case 'delete':
       $current_rating = fivestar_comment_load($comment->cid, $comment->nid);
