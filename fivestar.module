@@ -21,7 +21,7 @@ function fivestar_help($section) {
 }
 
 /**
- * Implementation of hook_menu.
+ * Implementation of hook_menu().
  * Provides a callback url where votes can be submitted by the client-side
  * javascript.
  */
