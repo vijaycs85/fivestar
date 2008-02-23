@@ -77,7 +77,6 @@ function fivestar_comment(&$comment, $op) {
   $fivestar_status = variable_get('fivestar_comment_'. $node->type, FIVESTAR_COMMENT_DISABLED);
   switch ($op) {
     case 'view':
-      $node = node_load($comment->nid);
       $comment->fivestar_rating = isset($comment->fivestar_rating) ? $comment->fivestar_rating : fivestar_comment_load($comment->cid, $comment->nid);
       $comment->fivestar_view = theme('fivestar_static', $comment->fivestar_rating, variable_get('fivestar_stars_'. $node->type, 5));
       if ($comment->fivestar_rating) {
