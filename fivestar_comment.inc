@@ -152,6 +152,6 @@ function fivestar_comment_delete($cid, $nid, $uid) {
 
   // Find if the user has posted any other comments. If so, use that
   // comment's rating rather than deleting their vote entirely.
-  $new_vote = db_result(db_query('SELECT value FROM {fivestar_comment} fc INNER JOIN {comments} c ON fc.cid = c.cid WHERE fc.uid = %d AND c.nid = %d ORDER BY timestamp desc', $uid, $nid)); 
+  $new_vote = db_result(db_query('SELECT value FROM {fivestar_comment} fc INNER JOIN {comments} c ON fc.cid = c.cid WHERE c.uid = %d AND c.nid = %d AND fc.value > 0 ORDER BY c.timestamp DESC', $uid, $nid));
   _fivestar_cast_vote('node', $nid, empty($new_vote) ? 0 : $new_vote, 'vote', $uid);
 }
