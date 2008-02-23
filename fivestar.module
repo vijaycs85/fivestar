@@ -539,7 +539,7 @@ function theme_fivestar_preview($style = NULL, $text = NULL, $stars = NULL, $unv
   // form_id elements can cause the content type form to choke. Forms inside of
   // forms is also frowned upon, so this removes the wrapping form tag as well.
   $form = str_replace(array('<form', '</form>'), array('<div', '</div>'), $form);
-  $form = preg_replace('/( method=".*?")|( action=".*?")|(<input.*?name="(form_token|form_id)".*?\/>)/', '', $form);
+  $form = preg_replace('/( method=".*?")|( action=".*?")|(<input.*?name="(form_token|form_id|destination|form_build_id)".*?\/>)/', '', $form);
   return $form;
 }
 
