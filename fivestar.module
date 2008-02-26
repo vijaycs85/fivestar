@@ -1160,8 +1160,7 @@ function theme_fivestar_summary($user_rating, $average_rating, $votes = 0, $star
     $div_class = 'combo';
   }
 
-  $vote_text = format_plural($votes, 'vote', 'votes');
-  $output .= ' <span class="total-votes">'. t('(<span>!votes</span> !vote_text)', array('!votes' => $votes, '!vote_text' => $vote_text)) .'</span>';
+  $output .= ' <span class="total-votes">'. format_plural($votes, '<span>1</span> vote', '<span>@count</span> votes') .'</span>';
   $output = '<div class="fivestar-summary fivestar-summary-'. $div_class .'">'. $output .'</div>';
   return $output;
 }
