@@ -48,6 +48,13 @@ function fivestar_comment_form_alter(&$form, &$form_state, $form_id) {
       $new_form = array();
       foreach ($form as $key => $element) {
         if ($key == 'comment_filter') {
+          if ($form['cid']['#value']) {
+            $current_rating = fivestar_comment_load($form['cid']['#value'], $form['nid']['#value']);
+            $default_value = $current_rating['value'];
+          }
+          else {
+            $default_value = 0;
+          }
           $new_form['fivestar_rating'] = array(
             '#type' => 'fivestar',
             '#title' => t('Rating'),
@@ -55,7 +62,7 @@ function fivestar_comment_form_alter(&$form, &$form_state, $form_id) {
             '#allow_clear' => variable_get('fivestar_comment_'. $node->type, FIVESTAR_COMMENT_DISABLED) == FIVESTAR_COMMENT_OPTIONAL ? 1 : 0,
             '#content_id' => $node->nid,
             '#required' => variable_get('fivestar_comment_'. $node->type, FIVESTAR_COMMENT_DISABLED) == FIVESTAR_COMMENT_REQUIRED ? 1 : 0,
-            '#default_value' => $form['cid']['#value'] ? fivestar_comment_load($form['cid']['#value'], $form['nid']['#value']) : 0,
+            '#default_value' => $default_value,
             '#description' => '&nbsp;',
             '#labels' => variable_get('fivestar_labels_'. $node->type, array()),
           );
@@ -91,7 +98,11 @@ function fivestar_comment(&$comment, $op) {
   switch ($op) {
     case 'view':
       if ($fivestar_status != FIVESTAR_COMMENT_DISABLED) {
-        $comment->fivestar_rating = isset($comment->fivestar_rating) ? $comment->fivestar_rating : fivestar_comment_load($comment->cid, $comment->nid);
+        if (!isset($comment->fivestar_rating)) {
+          $current_rating = fivestar_comment_load($comment->cid, $comment->nid);
+          $comment->fivestar_rating = isset($current_rating['value']) ? $current_rating['value'] : NULL; 
+        }
+        $comment->fivestar_rating = $comment->fivestar_rating;
         $comment->fivestar_view = theme('fivestar_static', $comment->fivestar_rating, variable_get('fivestar_stars_'. $node->type, 5));
         if ($comment->fivestar_rating) {
           $comment->comment = $comment->fivestar_view . $comment->comment;
@@ -111,14 +122,14 @@ function fivestar_comment(&$comment, $op) {
         $comment = (object)$comment; // Comment module is inconsistent about comment data structures.
         $current_rating = fivestar_comment_load($comment->cid, $comment->nid);
         if ($comment->fivestar_rating) {
-          if (is_numeric($current_rating)) {
+          if (isset($current_rating['value'])) {
             fivestar_comment_update($comment->cid, $comment->nid, $commnt->uid, $comment->fivestar_rating);
           }
           else {
             fivestar_comment_insert($comment->cid, $comment->nid, $commnt->uid, $comment->fivestar_rating);
           }
         }
-        elseif ($fivestar_status != FIVESTAR_COMMENT_DISABLED && is_numeric($current_rating)) {
+        elseif ($fivestar_status != FIVESTAR_COMMENT_DISABLED && isset($current_rating['value'])) {
           fivestar_comment_delete($comment->cid, $comment->nid, $comment->uid);
         }
         $comment = (array)$comment;
@@ -126,8 +137,8 @@ function fivestar_comment(&$comment, $op) {
       break;
     case 'delete':
       $current_rating = fivestar_comment_load($comment->cid, $comment->nid);
-      if (is_numeric($current_rating)) {
-        fivestar_comment_delete($comment->cid, $comment->nid, $comment->uid);
+      if (isset($current_rating['value'])) {
+        fivestar_comment_delete($comment->cid, $comment->nid, $current_rating['vote_id']);
       }
       break;
   }
@@ -140,8 +151,7 @@ function fivestar_comment_load($cid, $nid, $reset = FALSE) {
   global $user;
   static $cids = array();
   if (!isset($cids[$cid]) || $reset) {
-    $value = db_result(db_query('SELECT value FROM {fivestar_comment} WHERE cid = %d', $cid));
-    $cids[$cid] = $value;
+    $cids[$cid] = db_fetch_array(db_query('SELECT * FROM {fivestar_comment} WHERE cid = %d', $cid));
   }
   return $cids[$cid];
 }
@@ -150,26 +160,28 @@ function fivestar_comment_load($cid, $nid, $reset = FALSE) {
  * Update a fivestar comment value.
  */
 function fivestar_comment_update($cid, $nid, $uid, $value) {
-  db_query('UPDATE {fivestar_comment} SET value = %d WHERE cid = %d', $value, $cid);
-  _fivestar_cast_vote('node', $nid, $value, 'vote', $uid);
+  $vote = _fivestar_cast_vote('node', $nid, $value, 'vote', $uid);
+  db_query('UPDATE {fivestar_comment} SET value = %d, vote_id = %d WHERE cid = %d', $value, $vote['vote_id'], $cid);
 }
 
 /**
  * Insert a fivestar comment value.
  */
 function fivestar_comment_insert($cid, $nid, $uid, $value) {
-  db_query('INSERT INTO {fivestar_comment} (cid, value) VALUES (%d, %d)', $cid, $value);
-  _fivestar_cast_vote('node', $nid, $value, 'vote', $uid);
+  $vote = _fivestar_cast_vote('node', $nid, $value, 'vote', $uid);
+  db_query('INSERT INTO {fivestar_comment} (cid, value) VALUES (%d, %d)', $cid, $vote['vote_id'], $value);
 }
 
 /**
  * Delete any value for a comment and update their vote.
  */
-function fivestar_comment_delete($cid, $nid, $uid) {
+function fivestar_comment_delete($cid, $nid, $vote_id) {
   db_query('DELETE FROM {fivestar_comment} WHERE cid = %d', $cid);
 
-  // Find if the user has posted any other comments. If so, use that
-  // comment's rating rather than deleting their vote entirely.
-  $new_vote = db_result(db_query('SELECT value FROM {fivestar_comment} fc INNER JOIN {comments} c ON fc.cid = c.cid WHERE c.uid = %d AND c.nid = %d AND fc.value > 0 ORDER BY c.timestamp DESC', $uid, $nid));
-  _fivestar_cast_vote('node', $nid, empty($new_vote) ? 0 : $new_vote, 'vote', $uid);
+  $vote = array();
+  $vote['content_id'] = $nid;
+  $vote['content_type'] = 'node';
+  $vote['vote_id'] = $vote_id;
+  votingapi_delete_votes(array($vote));
+  votingapi_recalculate_results('node', $nid);
 }

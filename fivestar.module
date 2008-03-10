@@ -563,7 +563,7 @@ function theme_fivestar_preview_wrapper($content, $type = 'direct') {
  */
 function fivestar_vote($type, $cid, $value, $tag = 'vote') {
 
-  $result = _fivestar_cast_vote($type, $cid, $value, $tag);
+  $result = _fivestar_cast_vote($type, $cid, $value, $tag, NULL, TRUE);
 
   if ($type == 'node') {
     $node = node_load($cid);
@@ -603,7 +603,7 @@ function fivestar_vote($type, $cid, $value, $tag = 'vote') {
  * Internal function to handle vote casting, flood control, XSS, IP based
  * voting, etc...
  */
-function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL) {
+function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $result = FALSE) {
   global $user;
   $tag = empty($tag) ? 'vote' : $tag;
   $uid = empty($uid) ? $user->uid : $uid;
@@ -627,13 +627,10 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL) {
       votingapi_delete_votes($user_votes);
     }
     else {
-      votingapi_set_votes($criteria += array('value' => $value, 'uid' => $uid), $user_votes);
+      $votes = $criteria += array('value' => $value, 'uid' => $uid);
+      votingapi_set_votes($votes, $user_votes);
+      return $votes[0];
     }
-
-    return votingapi_recalculate_results($type, $cid);
-  }
-  else {
-    return array();
   }
 }
 
@@ -1052,7 +1049,7 @@ function fivestar_custom_widget(&$form_state, $values, $settings) {
 function fivestar_form_submit($form, &$form_state) {
   if ($form_state['values']['form_id'] == 'fivestar_form_'. $form_state['values']['content_type'] .'_'. $form_state['values']['content_id']) {
     // Cast the vote.
-    $result = _fivestar_cast_vote($form_state['values']['content_type'], $form_state['values']['content_id'], $form_state['values']['vote']);
+    _fivestar_cast_vote($form_state['values']['content_type'], $form_state['values']['content_id'], $form_state['values']['vote']);
 
     // Set a message that the vote was received.
     if ($form_state['values']['vote'] === '0') {
