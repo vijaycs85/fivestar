@@ -522,7 +522,8 @@ function theme_fivestar_preview_wrapper($content, $type = 'direct') {
  */
 function fivestar_vote($type, $cid, $value, $tag = 'vote') {
 
-  $result = _fivestar_cast_vote($type, $cid, $value, $tag);
+  _fivestar_cast_vote($type, $cid, $value, $tag);
+  $result = votingapi_recalculate_results($type, $cid);
 
   if ($type == 'node') {
     $node = node_load($cid);
@@ -598,14 +599,14 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL) {
         // If the user is logged in, we'll delete votes from that uid.
         $sql = "DELETE FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag='%s'";
         db_query($sql, $type, $cid, $uid, $tag);
-        return votingapi_recalculate_results($type, $cid);
+        return;
       }
       else {
         // Otherwise, we'll delete votes from the same IP address within the anonymous interval.
         $sql = "DELETE FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag='%s' AND hostname='%s'";
         $sql .= $anon_interval != -1 ? " AND timestamp > %d" : '';
         db_query($sql, $type, $cid, $uid, $tag, $hostname, time() - $anon_interval);
-        return votingapi_recalculate_results($type, $cid);
+        return;
       }
     }
     // If the vote ISN'T zero, check for existing votes in the database.
@@ -627,15 +628,12 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL) {
     // or change it. If it doesn't exist and the vote is non-zero, cast
     // it and recalculate.
     if ($old_vote = db_fetch_object($result)) {
-      votingapi_change_vote($old_vote, $value);
+      $vote = votingapi_change_vote($old_vote, $value);
     }
     elseif ($value != 0) {
-      votingapi_add_vote($type, $cid, $value, 'percent', $tag, $uid);
+      $vote = votingapi_add_vote($type, $cid, $value, 'percent', $tag, $uid);
     }
-    return votingapi_recalculate_results($type, $cid);
-  }
-  else {
-    return array();
+    return $vote;
   }
 }
 
@@ -1019,7 +1017,8 @@ function fivestar_custom_widget($values, $settings) {
 function fivestar_form_submit($form_id, $form_values) {
   if ($form_id == 'fivestar_form_'. $form_values['content_type'] .'_'. $form_values['content_id']) {
     // Cast the vote.
-    $result = _fivestar_cast_vote($form_values['content_type'], $form_values['content_id'], $form_values['vote']);
+    _fivestar_cast_vote($form_values['content_type'], $form_values['content_id'], $form_values['vote']);
+    votingapi_recalculate_results($form_values['content_type'], $form_values['content_id']);
 
     // Set a message that the vote was received.
     if ($form_values['vote'] === '0') {
