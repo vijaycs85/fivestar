@@ -232,7 +232,7 @@ function fivestar_field_formatter_info() {
  */
 function fivestar_field_formatter($field, $item, $formatter, $node) {
   if (!isset($item['rating'])) {
-    return '';
+    $item['rating'] = 0;
   }
 
   switch ($formatter) {
