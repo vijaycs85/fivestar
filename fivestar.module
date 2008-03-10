@@ -1124,7 +1124,10 @@ function theme_fivestar_widget($form) {
   $output  = '';
   $output .= '<div class="fivestar-form-'. $form['content_id']['#value'] .' clear-block">';
   $output .= drupal_render($form);
-  $output .= '<div class="description fivestar-summary-'. $form['content_id']['#value'] .'">'. $description .'</div>';
+  // Only print out the summary if text is being displayed or using rollover text.
+  if ($form['#parameters'][2]['text'] != 'none' || !empty($form['#parameters'][2]['labels'])) {
+    $output .= '<div class="description fivestar-summary-'. $form['content_id']['#value'] .'">'. $description .'</div>';
+  }
   $output .= '</div>';
   return $output;
 }
@@ -1340,26 +1343,64 @@ function fivestar_validate($form, &$form_state) {
 
 function fivestar_votingapi_views_formatters($details = array()) {
   if ($details['value_type'] == 'percent') {
-    return array('fivestar_views_value_display_handler' => t('Fivestar rating'));
+    return array(
+      'fivestar_views_value_display_handler' => t('Fivestar Stars (display only)'),
+      'fivestar_views_widget_compact_handler' => t('Fivestar Stars (clickable, no text)'),
+      'fivestar_views_widget_normal_handler' => t('Fivestar Stars (clickable, with text)'),
+    );
   }
 }
 
 function fivestar_views_value_display_handler($op, $filter, $value, &$query) {
-  if ($value === NULL) {
-    return $value;
+  // Determine number of stars to display
+  if (is_numeric($query->options)) {
+    $stars = $query->options;
+  }
+  elseif (isset($query->node_type)) {
+    $stars = variable_get('fivestar_stars_'. $query->node_type, 5);
   }
   else {
-    // Determine number of stars to display
-    if (is_numeric($query->options)) {
-      $stars = $query->options;
-    }
-    elseif (isset($query->node_type)) {
-      $stars = variable_get('fivestar_stars_'. $query->node_type, 5);
-    }
-    else {
-      $type = db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $query->nid));
-      $stars = variable_get('fivestar_stars_'. (!isset($type) ? 'default' : $type), 5);
-    }
-    return theme('fivestar_static', $value, $stars);
+    $type = db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $query->nid));
+    $stars = variable_get('fivestar_stars_'. (!isset($type) ? 'default' : $type), 5);
   }
+  return theme('fivestar_static', $value, $stars);
+}
+
+function fivestar_views_widget_compact_handler($op, $filter, $value, &$query) {
+  return fivestar_views_widget_handler($op, $filter, $value, &$query, FALSE);
+}
+
+function fivestar_views_widget_normal_handler($op, $filter, $value, &$query) {
+  return fivestar_views_widget_handler($op, $filter, $value, &$query, TRUE);
+}
+
+function fivestar_views_widget_handler($op, $filter, $value, &$query, $summary) {
+  $content_type = 'node';
+  $content_id = $query->nid;
+  $node_type = isset($query->node_type) ? $query->node_type : db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $query->nid));
+
+  $votes = fivestar_get_votes($content_type, $content_id);
+
+  $values = array(
+    'user' => $votes['user']['value'],
+    'average' => (int)$value,
+    'count' => $votes['count']['value'],
+  );
+
+  $settings = array(
+    'stars' => variable_get('fivestar_stars_'. $node_type, 5),
+    'allow_clear' => variable_get('fivestar_unvote_'. $node_type, FALSE),
+    // If the user has setup this content type to use smart stars, display
+    // the smart version instead of just the average.
+    'style' => variable_get('fivestar_style_'. $node_type, 'average') != 'smart' ? 'average' : 'smart',
+    'text' => $summary ? variable_get('fivestar_text_'. $node_type, 'combo') : 'none',
+    'content_type' => $content_type,
+    'content_id' => $content_id,
+    'autosubmit' => TRUE,
+    'title' => FALSE,
+    'labels_enable' => $summary ? variable_get('fivestar_labels_enable_'. $node_type, 1) : FALSE,
+    'labels' => $summary ? variable_get('fivestar_labels_'. $node_type, array()) : array(),
+  );
+
+  return drupal_get_form('fivestar_custom_widget', $values, $settings);
 }
