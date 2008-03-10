@@ -218,7 +218,7 @@ fivestarPreview.prototype.update = function() {
       type: 'POST',
       url: Drupal.settings.fivestar.preview_url,
       data: data,
-      success: updateSuccess,
+      success: updateSuccess
     });
   }
 };
