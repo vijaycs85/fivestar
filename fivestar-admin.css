@@ -1,0 +1,27 @@
+/* Fivestar Settings Preview */
+iframe.fivestar-preview {
+  border: none;
+  width: 200px;
+  height: 32px;
+}
+div.fivestar-widgets div.form-item {
+  float: left;
+}
+
+/* Fivestar Node Type Preview */
+#fivestar-comment-form,
+#fivestar-direct-form {
+  float: left;
+}
+#fivestar-comment-preview,
+#fivestar-direct-preview {
+  float: left;
+  margin-left: 40px;
+}
+#fivestar-node-type-form fieldset {
+  background: transparent;
+}
+.fivestar-preview {
+  border: 1px solid #CCC;
+  padding: 10px;
+}

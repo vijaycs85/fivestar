@@ -299,6 +299,7 @@ function fivestar_node_type_form_submit($form_id, &$form_values) {
 function theme_fivestar_node_type_form($form) {
   drupal_add_js(drupal_get_path('module', 'fivestar') .'/fivestar-admin.js');
   drupal_add_js(array('fivestar' => array('preview_url' => url('fivestar/preview/node'))), 'setting');
+  drupal_add_css(drupal_get_path('module', 'fivestar') .'/fivestar-admin.css', 'module', 'all', FALSE);
 
   $output = '';
   $output .= drupal_render($form['fivestar']);
@@ -393,6 +394,7 @@ function fivestar_settings() {
 
 function theme_fivestar_settings($form) {
   fivestar_add_css();
+  drupal_add_css(drupal_get_path('module', 'fivestar') .'/fivestar-admin.css', 'module', 'all', FALSE);
   drupal_set_title(t('Fivestar Settings'));
 
   // Default preview.
