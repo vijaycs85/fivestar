@@ -10,7 +10,7 @@ function fivestar_install() {
         vote_id int(10) NOT NULL default '0',
         value tinyint unsigned NOT NULL default '0',
         PRIMARY KEY (cid),
-        KEY (vote_id)
+        INDEX (vote_id)
       ) /*!40100 DEFAULT CHARACTER SET UTF8 */ ");
       break;
 
