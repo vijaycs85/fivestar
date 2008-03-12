@@ -9,6 +9,9 @@ function fivestar_schema() {
       'value' => array('type' => 'int', 'size' => 'tiny', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
     ),
     'primary key' => array('cid'),
+    'indexes' => array(
+      'vote_id' => array('vote_id'),
+    ),
   );
   return $schema;
 }
