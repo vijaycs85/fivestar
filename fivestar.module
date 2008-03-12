@@ -1291,6 +1291,7 @@ function fivestar_expand($element) {
   // Set a class for the display of label text on hover.
   $label_class = $element['#labels_enable'] ? ' fivestar-labels-hover' : '';
 
+  $element['#id'] = 'edit-vote-'. $fivestar_id;
   $element['#prefix'] = '<div class="fivestar-form-item '. $element['#attributes']['class'] . $label_class .'">';
   $element['#suffix'] = '</div>';
 
