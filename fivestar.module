@@ -969,6 +969,7 @@ function fivestar_custom_widget(&$form_state, $values, $settings) {
   $form['destination'] = array(
     '#type' => 'hidden',
     '#value' => $_GET['q'],
+    '#id' => $settings['content_id'] ? 'edit-destination-'. $settings['content_id'] : NULL,
   );
 
   $form['fivestar_submit'] = array(
