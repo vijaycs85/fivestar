@@ -1474,14 +1474,14 @@ function fivestar_views_value_display_handler($op, $filter, $value, &$query) {
 }
 
 function fivestar_views_widget_compact_handler($op, $filter, $value, &$query) {
-  return fivestar_views_widget_handler($op, $filter, $value, &$query, FALSE);
+  return fivestar_views_widget_handler($op, $filter, $value, $query, FALSE);
 }
 
 function fivestar_views_widget_normal_handler($op, $filter, $value, &$query) {
-  return fivestar_views_widget_handler($op, $filter, $value, &$query, TRUE);
+  return fivestar_views_widget_handler($op, $filter, $value, $query, TRUE);
 }
 
-function fivestar_views_widget_handler($op, $filter, $value, &$query, $summary) {
+function fivestar_views_widget_handler($op, $filter, $value, $query, $summary) {
   $content_type = 'node';
   $content_id = $query->nid;
   $node_type = isset($query->node_type) ? $query->node_type : db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $query->nid));
