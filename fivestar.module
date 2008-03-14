@@ -37,8 +37,8 @@ function fivestar_menu($may_cache) {
       'access'   => user_access('administer site configuration'),
     );
     $items[] = array(
-      'path'     => 'fivestar/preview/widget',
-      'callback' => 'fivestar_preview_page',
+      'path'     => 'fivestar/preview/color',
+      'callback' => 'fivestar_preview_color',
       'type'     => MENU_CALLBACK,
       'access'   => user_access('administer site configuration'),
     );
@@ -374,14 +374,59 @@ function fivestar_node_type($op, $info) {
  */
 function fivestar_settings() {
   $form = array();
-  $form['fivestar_widget'] = array(
-    '#type' => 'radios',
+
+  $form['widget'] = array(
+    '#tree' => FALSE,
+    '#type' => 'fieldset',
     '#title' => t('Widget display'),
-    '#options' => array('default' => t('Default')) + module_invoke_all('fivestar_widgets'),
-    '#default_value' => variable_get('fivestar_widget', 'default'),
-    '#description' => t('Choose a widget set to be used on your site.'),
-    '#attributes' => array('class' => 'fivestar-widgets clear-block'),
+    '#description' => t('Choose a widget set to be used on your site. Classic widgets will be displayed exactly as shown, while widgets supporting custom colors can be further customized using the color settings below.'),
+    '#weight' => -2,
   );
+
+  $widgets = module_invoke_all('fivestar_widgets');
+  $classic_widgets = array();
+  $color_widgets = array();
+  foreach ($widgets as $path => $name) {
+    $directory = dirname($path);
+    $matches = file_scan_directory($directory, '-template.');
+    if (empty($matches)) {
+      $classic_widgets[$path] = $name;
+    }
+    else {
+      $color_widgets[$path] = $name;
+    }
+  }
+
+  // If using a color widget, set the default value to the original path.
+  $default_value = variable_get('fivestar_widget', 'default');
+  foreach ($color_widgets as $path => $name) {
+    if (basename($path) == basename($default_value)) {
+      $default_value = $path;
+    }
+  }
+
+  $form['widget']['fivestar_widget'] = array(
+    '#type' => 'radios',
+    '#title' => t('Classic widgets'),
+    '#options' => array('default' => t('Default')) + $classic_widgets + $color_widgets,
+    '#default_value' => $default_value,
+    '#attributes' => array('class' => 'fivestar-widgets'),
+  );
+
+  $form['widget']['fivestar_color_widget'] = array(
+    '#type' => 'radios',
+    '#title' => t('Custom color widgets'),
+    '#options' => $color_widgets,
+    '#attributes' => array('class' => 'fivestar-widgets'),
+    '#description' => t('<strong>Important note:</strong> A custom color widget must be selected before choosing colors. Only the selected widget will be previewed.'),
+  );
+
+  include_once(drupal_get_path('module', 'fivestar') .'/fivestar_color.inc');
+  $form['color'] = fivestar_color_form();
+  $form['#validate']['fivstar_color_form_validate'] = array();
+  $form['#submit']['fivstar_color_form_submit'] = array();
+  $form['#submit']['fivestar_settings_submit'] = array();
+
   $form['fivestar_anonymous_vote_interval'] = array(
     '#type' => 'select',
     '#title' => t('Anonymous vote interval'),
@@ -389,47 +434,75 @@ function fivestar_settings() {
     '#default_value' => variable_get('fivestar_anonymous_vote_interval', 86400),
     '#description' => t('Anonymous users may add another vote after this interval. Because the same IP addresses may be used by different people, allowing the same IP to vote again several days later may yield more votes.'),
   );
-  return system_settings_form($form);
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+    '#weight' => 45,
+  );
+
+  return $form;
+}
+
+function fivestar_settings_submit($form_id, $form_values) {
+  variable_set('fivestar_widget', $form_values['fivestar_widget']);
+  variable_set('fivestar_colors', $form_values['fivestar_colors']);
+  variable_set('fivestar_color_type', $form_values['fivestar_color_type']);
+  variable_set('fivestar_anonymous_vote_interval', $form_values['fivestar_anonymous_vote_interval']);
 }
 
 function theme_fivestar_settings($form) {
-  fivestar_add_css();
   drupal_add_css(drupal_get_path('module', 'fivestar') .'/fivestar-admin.css', 'module', 'all', FALSE);
   drupal_set_title(t('Fivestar Settings'));
 
   // Default preview.
-  $form['fivestar_widget']['default']['#description'] = 'Default '. t('Preview') .':<br /><iframe class="fivestar-preview" scrolling="no" src="'. url('fivestar/preview/widget') .'"></iframe>';
+  $form['widget']['fivestar_widget']['default']['#description'] = 'Default '. t('Preview') .':<br />'. theme('fivestar_preview_widget', 'default');
 
-  // Preview for each widget.
-  $widget_number = 0;
-  foreach (element_children($form['fivestar_widget']) as $widget_key) {
+  // Preview for each classic widget.
+  foreach (element_children($form['widget']['fivestar_widget']) as $widget_key) {
     if ($widget_key != 'default') {
-      $form['fivestar_widget'][$widget_key]['#description'] = $form['fivestar_widget'][$widget_key]['#title'] .' '. t('Preview') .':<br /><iframe class="fivestar-preview" scrolling="no" src="'. url('fivestar/preview/widget/'. $widget_number) .'"></iframe>';
-      $widget_number++;
+      $form['widget']['fivestar_widget'][$widget_key]['#description'] = $form['widget']['fivestar_widget'][$widget_key]['#title'] .' '. t('Preview') .':<br />'. theme('fivestar_preview_widget', $widget_key);
     }
   }
+
+  // Preview for each color-enabled widget.
+  foreach (element_children($form['widget']['fivestar_color_widget']) as $widget_key) {
+    $form['widget']['fivestar_color_widget'][$widget_key] = $form['widget']['fivestar_widget'][$widget_key];
+    $form['widget']['fivestar_color_widget'][$widget_key]['#description'] = $form['widget']['fivestar_color_widget'][$widget_key]['#title'] .' '. t('Preview') .':<br />'. theme('fivestar_preview_widget', $widget_key);
+    unset($form['widget']['fivestar_widget'][$widget_key]);
+  }
+
+  $form['widget']['fivestar_widget']['#attributes']['class'] .= ' clear-block';
+  $form['widget']['fivestar_color_widget']['#attributes']['class'] .= ' fivestar-color-widgets clear-block';
+
   return drupal_render($form);
 }
 
-/**
- * Callback function for fivestar/preview/widget. Outputs an entire page
- * containing a preview of the passed in fivestar widget format.
- */
-function fivestar_preview_page($widget_number = NULL) {
-  $widgets = module_invoke_all('fivestar_widgets');
-  $css_files = array_keys($widgets);
-  if (isset($css_files[$widget_number])) {
-    fivestar_add_css($css_files[$widget_number]);
-  }
-  else {
-    fivestar_add_css('default');
-  }
-  fivestar_add_js();
-  print theme('fivestar_preview_page');
-  exit;
-}
+function theme_fivestar_preview_widget($css_file) {
+  static $default_css_added = FALSE;
 
-function theme_fivestar_preview_page() {
+  // Add the default CSS to the page to ensure the defaults take precedence.
+  if (!$default_css_added) {
+    $css = file_get_contents(drupal_get_path('module', 'fivestar') .'/fivestar.css');
+    // Prepend the classes with the unique widget div.
+    $css = preg_replace('/((div)?\.fivestar-widget)/', 'div.fivestar-widgets $1', $css);
+    // Update relative URLs with absolute locations.
+    $css = preg_replace('/url\((.*?)\)/', 'url('. base_path() . drupal_get_path('module', 'fivestar') .'/$1)', $css);
+    drupal_set_html_head("<style type=\"text/css\" media=\"all\">\n". $css ."</style>");
+    $default_css_added = TRUE;
+  }
+
+  // Add widget specific CSS to the page.
+  $widget_name = str_replace('.css', '', basename($css_file));
+  $widget_path = dirname($css_file);
+  if ($widget_name != 'default') {
+    $css = file_get_contents($css_file);
+    // Prepend the classes with the unique widget div.
+    $css = preg_replace('/((div)?\.fivestar-widget)/', 'div#fivestar-preview-'. $widget_name .' $1', $css);
+    // Update relative URLs with absolute locations.
+    $css = preg_replace('/url\((.*?)\)/', 'url('. base_path() . $widget_path .'/$1)', $css);
+    drupal_set_html_head('<style type="text/css" media="all">'. $css .'</style>');
+  }
 
   $form = array();
   $form['vote'] = array(
@@ -441,19 +514,53 @@ function theme_fivestar_preview_page() {
 
   $form = form_builder('fivestar_preview', $form);
 
-  $output = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
-  $output .= '<html xmlns="http://www.w3.org/1999/xhtml">';
-  $output .= '<head>';
-  $output .= ' <title>'. t('Fivestar Preview') .'</title>';
-  $output .= drupal_get_html_head();
-  $output .= drupal_get_css();
-  $output .= drupal_get_js();
-  $output .= ' </head>';
-  $output .= ' <body style="background-color: #fff; color: #000;">';
+  $output = '<div class="fivestar-star-preview" id="fivestar-preview-'. $widget_name .'">';
   $output .= drupal_render($form);
-  $output .= '</body></html>';
+  $output .= '</div>';
 
   return $output;
+}
+
+/**
+ * Callback function for fivestar/preview/color.
+ * 
+ * Outputs a dynamically generated star or cancel png.
+ */
+function fivestar_preview_color() {
+  include_once(drupal_get_path('module', 'fivestar') .'/fivestar_color.inc');
+  $args = func_get_args();
+  $filename = array_pop($args);
+  $type = array_pop($args);
+  $widget = array_pop($args);
+
+  // Convert args to our color scheme.
+  $color_scheme = array(
+    'on1' => $args[0],
+    'on2' => $args[1],
+    'hover1' => $args[2],
+    'hover2' => $args[3],
+    'off1' => $args[4],
+    'off2' => $args[5],
+    'matte' => $args[6],
+  );
+
+  // Find the source location of the desired widget.
+  $widgets = module_invoke_all('fivestar_widgets');
+  foreach ($widgets as $key => $name) {
+    if (drupal_strtolower($name) == $widget) {
+      $source_directory = str_replace($widget .'.css', '', $key);
+      break;
+    }
+  }
+
+  // Generate the requested image and exit.
+  $image = _fivestar_color_render($source_directory . str_replace('.png', '-template.png', $filename), $color_scheme, $type);
+  drupal_set_header('Content-type: image/png');
+  drupal_set_header("Expires: ". gmdate("D, d M Y H:i:s", time() + 300) ." GMT");
+  drupal_set_header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+  drupal_set_header("Cache-Control: max-age=300");
+  imagepng($image);
+  exit();
 }
 
 /**
@@ -682,7 +789,7 @@ function fivestar_fivestar_widgets() {
 
   $widgets = array();
   foreach ($files as $file) {
-    $widgets[$file->filename] = drupal_ucfirst($file->name);
+    $widgets[$file->filename] = drupal_ucfirst(str_replace('-color', '', $file->name));
   }
   return $widgets;
 }
