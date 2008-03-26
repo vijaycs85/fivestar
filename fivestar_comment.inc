@@ -81,7 +81,7 @@ function fivestar_comment_form_alter(&$form, &$form_state, $form_id) {
  */
 function fivestar_comment(&$comment, $op) {
   if (is_array($comment) && is_numeric($comment['nid'])) {
-  	$nid = $comment['nid'];
+    $nid = $comment['nid'];
   }
   elseif (is_array($comment) && is_array($comment['nid']) && is_numeric($comment['nid']['#value'])) {
     $nid = $comment['nid']['#value'];
