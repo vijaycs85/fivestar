@@ -206,6 +206,13 @@ function fivestar_form_alter($form_id, &$form) {
       '#return_value' => 1,
     );
 
+    $form['fivestar']['direct']['fivestar_feedback'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Enable confirmations to inform a vote was saved or deleted.'),
+      '#default_value' => variable_get('fivestar_feedback_'. $form['#node_type']->type, 1),
+      '#return_value' => 1
+    );
+
     $form['fivestar']['direct']['fivestar_unvote'] = array(
       '#type' => 'checkbox',
       '#title' => t('Allow users to undo their votes'),
@@ -315,6 +322,7 @@ function theme_fivestar_node_type_form($form) {
   $direct .= drupal_render($form['direct']['fivestar_text']);
   $direct .= drupal_render($form['direct']['fivestar_title']);
   $direct .= drupal_render($form['direct']['fivestar_unvote']);
+  $direct .= drupal_render($form['direct']['fivestar_feedback']);
   $direct .= drupal_render($form['direct']['fivestar_position_teaser']);
   $direct .= drupal_render($form['direct']['fivestar_position']);
   $direct .= '</div>';
@@ -574,18 +582,19 @@ function fivestar_preview() {
   $stars = (int)$_POST['stars'];
   $unvote = (boolean)$_POST['unvote'];
   $title = (boolean)$_POST['title'];
+  $feedback = (boolean)$_POST['feedback'];
   $labels_enable = (boolean)$_POST['labels_enable'];
   $labels = (array)$_POST['labels'];
   foreach ($labels as $key => $label) {
     $labels[$key] = filter_xss_admin($label);
   }
 
-  $output = theme('fivestar_preview', $style, $text, $stars, $unvote, $title ? NULL : FALSE, $labels_enable, $labels);
+  $output = theme('fivestar_preview', $style, $text, $stars, $unvote, $title ? NULL : FALSE, $feedback, $labels_enable, $labels);
   drupal_set_header('Content-Type: text/javascript; charset=utf-8');
   print drupal_to_js(array('status' => TRUE, 'data' => $output));
 }
 
-function theme_fivestar_preview($style = NULL, $text = NULL, $stars = NULL, $unvote = NULL, $title = NULL, $labels_enable = TRUE, $labels = array()) {
+function theme_fivestar_preview($style = NULL, $text = NULL, $stars = NULL, $unvote = NULL, $title = NULL, $feedback = TRUE, $labels_enable = TRUE, $labels = array()) {
   $values = array(
     'average' => 50,
     'user' => 80,
@@ -597,6 +606,7 @@ function theme_fivestar_preview($style = NULL, $text = NULL, $stars = NULL, $unv
     'style' => $style,
     'text' => $text,
     'title' => $title,
+    'feedback' => $feedback,
     'autosubmit' => FALSE,
     'labels_enable' => $labels_enable,
     'labels' => $labels,
@@ -1030,6 +1040,7 @@ function fivestar_custom_widget($values, $settings) {
   $form['vote'] = array(
     '#type' => 'fivestar',
     '#stars' => $settings['stars'],
+    '#feedback' => $settings['feedback'],
     '#vote_count' => $values['count'],
     '#vote_average' => $values['average'],
     '#auto_submit' => isset($settings['autosubmit']) ? $settings['autosubmit'] : TRUE,
@@ -1202,6 +1213,11 @@ function theme_fivestar_widget($form) {
   if ($form['#parameters'][2]['text'] != 'none' || !empty($form['#parameters'][2]['labels'])) {
     $output .= '<div class="description fivestar-summary-'. $form['content_id']['#value'] .'">'. $description .'</div>';
   }
+  $feedback_preview = $form['vote']['#feedback'];
+  if ((!isset($feedback_preview) && variable_get('fivestar_feedback_'. $form['#node_type']->type, 1)) ||
+      (isset($feedback_preview) && $feedback_preview)) {
+    $output .= '<div class="feedback fivestar-feedback-'. $form['content_id']['#value'] .'">&nbsp;</div>';
+  }
   $output .= '</div>';
   return $output;
 }
@@ -1318,8 +1334,13 @@ function fivestar_add_js() {
 
   // Add necessary javascript only once per page.
   if (!$js_added) {
+    $feedback_enabled = variable_get('fivestar_feedback_'. $form['#node_type']->type, 1);
+    $settings = array('titleUser' => t('Your rating') .': ', 'titleAverage' => t('Average') .': ', 'feedbackEnabled' => $feedback_enabled);
+    if ($feedback_enabled) {
+      $settings = array_merge($settings, array('feedbackSavingVote' => t('Saving your vote...'), 'feedbackVoteSaved' => t('Your vote has been saved.'), 'feedbackDeletingVote' => t('Deleting your vote...'), 'feedbackVoteDeleted' => t('Your vote has been deleted.')));
+    }
     drupal_add_js(drupal_get_path('module', 'fivestar') .'/jquery.rating.js');
-    drupal_add_js(array('fivestar' => array('titleUser' => t('Your rating') .': ', 'titleAverage' => t('Average') .': ')), 'setting');
+    drupal_add_js(array('fivestar' => $settings), 'setting');
     $js_added = TRUE;
   }
 }

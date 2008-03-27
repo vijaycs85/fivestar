@@ -92,3 +92,10 @@ div.fivestar-widgets div.form-item {
 #fivestar-palette .item-selected input {
   border: 2px solid black;
 }
+#fivestar-direct-preview div.description {
+  margin-bottom: 0;
+}
+#fivestar-direct-preview div.feedback{
+  font-size: 0.85em;
+  line-height: 150%;
+}

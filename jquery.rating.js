@@ -30,6 +30,8 @@
             $stars = $('.star', $widget),
             $cancel = $('.cancel', $widget),
             $summary = $('.description', $obj).size() ? $('.description', $obj) : $($obj).siblings('.description'),
+            $feedback = $('.feedback', $obj).size() ? $('.feedback', $obj) : $($obj).siblings('.feedback'),
+            feedbackTimerId = 0,
             summaryText = $summary.html(),
             summaryHover = $obj.is('.fivestar-labels-hover'),
             currentValue = $("select", $obj).val(),
@@ -114,6 +116,10 @@
             currentValue = 0;
             event.reset();
             voteChanged = false;
+            // Inform a user that his vote is being processed
+            if (Drupal.settings.fivestar.feedbackEnabled) {
+              setFeedbackText(Drupal.settings.fivestar.feedbackDeletingVote);
+            }
             // Save the currentValue in a hidden field.
             $("select", $obj).val(0);
             // Update the title.
@@ -130,6 +136,10 @@
             // Update the display of the stars.
             voteChanged = true;
             event.reset();
+            // Inform a user that his vote is being processed
+            if (Drupal.settings.fivestar.feedbackEnabled) {
+              setFeedbackText(Drupal.settings.fivestar.feedbackSavingVote);
+            }
             // Submit the form if needed.
             $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + currentValue, success: voteHook }); });
             return false;
@@ -185,6 +195,15 @@
             }
         };
 
+        var setFeedbackText = function(text) {
+          // Kill previous timer if it isn't finished yet so that the text we are about to set will not get cleared too early
+          if (feedbackTimerId != 0) {                
+            clearTimeout(feedbackTimerId);
+            feedbackTimerId = 0;
+          }
+          $feedback.html(text);
+        };
+
         /**
          * Checks for the presence of a javascript hook 'fivestarResult' to be
          * called upon completion of a AJAX vote request.
@@ -216,6 +235,17 @@
           }
           // Update the summary text.
           summaryText = returnObj.result.summary[returnObj.display.text];
+          if (Drupal.settings.fivestar.feedbackEnabled) {
+            // Inform user that his/her vote has been processed
+            if (returnObj.vote.value != 0) { // check if vote has been saved or deleted 
+              setFeedbackText(Drupal.settings.fivestar.feedbackVoteSaved);
+            }
+            else {
+              setFeedbackText(Drupal.settings.fivestar.feedbackVoteDeleted);
+            }
+            // Setup a timer to clear the feedback text after 3 seconds
+            feedbackTimerId = setTimeout(function() { feedbackTimerId = 0; $feedback.html('&nbsp;'); }, 3000);
+          }
           // Update the current star currentValue to the previous average.
           if (returnObj.vote.value == 0 && starDisplay == 'average') {
             currentValue = returnObj.result.average;
