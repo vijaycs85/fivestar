@@ -237,29 +237,30 @@ function fivstar_color_form_submit($form, &$form_state) {
  */
 function _fivestar_color_render($source, $palette, $type) {
 
-  // Prepare template image.
+  // Pull in the template image.
   $template = imagecreatefrompng($source);
   imagealphablending($template, true);
-
   $width = imagesx($template) / 2;
   $height = imagesy($template);
 
+  // Create a true color mask image from the left side of the template.
   $mask = imagecreatetruecolor($width, $height);
   $transparent = imagecolorallocatealpha($mask, 0, 0, 0, 127);
   imagefill($mask, 0, 0, $transparent);
   imagecopy($mask, $template, 0, 0, 0, 0, $width, $height);
 
+  // Create a true color overlay image from the right side of the template.
   $overlay = imagecreatetruecolor($width, $height);
   $transparent = imagecolorallocatealpha($overlay, 0, 0, 0, 127);
   imagefill($overlay, 0, 0, $transparent);
   imagecopy($overlay, $template, 0, 0, $width, 0, $width, $height);
 
+  // No need for the template image any more.
   imagedestroy($template);
 
-  // Apply color mask.
+  // Apply the selected colors to the mask.
   $slices = (basename($source) == 'star-template.png') ? 3 : 2;
   $slice_height = floor($height / $slices);
-
   foreach ($slices == 2 ? array('off', 'hover') : array('off', 'on', 'hover') as $slice => $key) {
     $slice_y = $slice_height * $slice;
     if ($type == 'gradient') {
@@ -284,12 +285,14 @@ function _fivestar_color_render($source, $palette, $type) {
   else {
     // If there is a matte, create a new 8-bit image, fill with the matte,
     // apply the star over the top, then set the matte to transparent.
-    $return = imagecreate($width, $height);
+    $return = imagecreatetruecolor($width, $height);
     $matte_rgb = _fivestar_color_unpack($palette['matte']);
     $transparent = imagecolorallocate($return, $matte_rgb[0], $matte_rgb[1], $matte_rgb[2]);
-    imagecolortransparent($return, $transparent);
+    imagefill($return, 0, 0, $transparent);
     imagealphablending($return, true);
     imagecopy($return, $mask, 0, 0, 0, 0, $width, $height);
+    imagecolortransparent($return, $transparent);
+    imagetruecolortopalette($return, TRUE, 255);
   }
 
   return $return;

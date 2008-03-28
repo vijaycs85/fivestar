@@ -205,20 +205,11 @@ basic widget, you can make allow users to customize the colors in your Fivestar 
    template is a 24-bit PNG (which isn't compatible with IE6), the generated images can be either
    an 8-bit PNG (with a matte) or 24-bit PNG (if no matte is chosen).
 
-6. Besides the star-template.png image, it's also necessary to make a basic star.png that will
-   serve as a preview on the Fivestar settings page before any colors are chosen. This preview
-   image should be entirely grayscale. For consistency, try to use these suggested default colors:
-
-   Off: White or 80% Brightness
-   Hover: 40% Brightness
-   On: 70% or 50% Brightness
-
-7. Repeat steps 1 through 6 for the cancel image, only with a 32x32 pixel image for the Off and
+6. Repeat steps 1 through 6 for the cancel image, only with a 32x32 pixel image for the Off and
    Hover states. Save the final images as cancel-template.png and cancel.png.
 
-8. Create a CSS file for your star set. The format is identical to a basic star set. After new
-   colors are chosen, the star-template.png and cancel-template.png are converted to star.png
-   and cancel.png, replacing the default grayscale ones.
+7. The two template.png files will tell Fivestar that the set is "color enhanced" and allow users to
+   choose new colors for their stars.
 
 Contributing
 ------------
