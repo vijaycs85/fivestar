@@ -10,8 +10,8 @@ form.fivestar-widget input {
 
 /* Combo Static and Rate Widget */
 .fivestar-combo-stars .fivestar-static-form-item {
-  float: left;
-  margin-right: 40px;
+  float: left; /* RTL */
+  margin-right: 40px; /* RTL */
 }
 
 /* Fivestar form items */
@@ -26,11 +26,11 @@ div.fivestar-widget-static {
 }
 
 div.fivestar-widget-static br {
-  clear: left;
+  clear: left; /* RTL */
 }
 
 div.fivestar-widget-static .star {
-  float: left;
+  float: left; /* RTL */
   width: 17px;
   height: 15px;
   overflow: hidden;
@@ -58,7 +58,7 @@ div.fivestar-widget {
 }
 
 div.fivestar-widget .cancel, div.fivestar-widget .star {
-  float: left;
+  float: left; /* RTL */
   width: 17px;
   height: 15px;
   overflow: hidden;
@@ -66,10 +66,12 @@ div.fivestar-widget .cancel, div.fivestar-widget .star {
 }
 div.fivestar-widget .cancel, div.fivestar-widget .cancel a {
   background: url(widgets/default/delete.gif) no-repeat 0 -16px;
+  text-decoration: none;
 }
 
 div.fivestar-widget .star, div.fivestar-widget .star a {
   background: url(widgets/default/star.gif) no-repeat 0 0px;
+  text-decoration: none;
 }
 
 div.fivestar-widget .cancel a, div.fivestar-widget .star a {

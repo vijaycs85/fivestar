@@ -117,7 +117,7 @@ function fivestar_color_form() {
 function theme_fivestar_color_form($form) {
   // Add Farbtastic color picker.
   drupal_add_css('misc/farbtastic/farbtastic.css', 'module', 'all', FALSE);
-  drupal_add_js(drupal_get_path('module', 'fivestar') .'/fivestar-color.js');
+  drupal_add_js(drupal_get_path('module', 'fivestar') .'/js/fivestar-color.js');
   drupal_add_js('misc/farbtastic/farbtastic.js');
 
   // Add custom CSS/JS.
@@ -191,6 +191,7 @@ function fivstar_color_form_submit($form_id, &$form_values) {
 
   $widget = str_replace('.css', '', basename($form_values['fivestar_widget']));
   $widget_css = $form_values['fivestar_widget'];
+  $widget_rtl_css = str_replace('.css', '-rtl.css', $widget_css);
   $upload_directory = file_directory_path() .'/fivestar';
   $widget_directory = $upload_directory .'/'. $widget;
   $current_widget = variable_get('fivestar_widget', 'default');
@@ -214,6 +215,12 @@ function fivstar_color_form_submit($form_id, &$form_values) {
 
   // Copy over the stylesheet.
   file_copy($widget_css, $widget_directory .'/'. $widget .'.css', FILE_EXISTS_REPLACE);
+
+  // Copy over RTL stylesheet.
+  if (file_exists($widget_rtl_css)) {
+    file_copy($widget_rtl_css, $widget_directory .'/'. $widget .'-rtl.css', FILE_EXISTS_REPLACE);
+  }
+
   $form_values['fivestar_widget'] = $widget_css;
 
   drupal_set_message(t('Custom %name stars generated. You may need to clear your browser cache before the new stars are visible.', array('%name' => t($widget))));
