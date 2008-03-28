@@ -63,7 +63,7 @@ div.fivestar-widgets div.form-item {
   height: 16px;
 }
 #fivestar-palette .down, #fivestar-palette .up, #fivestar-palette .both {
-  background: url(images/hook.png) no-repeat 100% 0;
+  background: url(../images/hook.png) no-repeat 100% 0;
 }
 #fivestar-palette .up {
   background-position: 100% -27px;
@@ -78,7 +78,7 @@ div.fivestar-widgets div.form-item {
   left: -3px; /* RTL */
   width: 20px;
   height: 25px;
-  background: url(images/lock.png) no-repeat 50% 2px;
+  background: url(../images/lock.png) no-repeat 50% 2px;
   cursor: pointer;
 }
 #fivestar-palette .unlocked {
