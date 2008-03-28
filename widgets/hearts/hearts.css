@@ -10,7 +10,7 @@ div.fivestar-widget-static .star span.on {
 }
 
 div.fivestar-widget-static .star span.off {
-  background: url(heart.gif) no-repeat 0 0px;
+  background: url(heart.gif) no-repeat 0 0;
 }
 
 /* Javascript Star Version */
@@ -23,7 +23,7 @@ div.fivestar-widget .cancel, div.fivestar-widget .cancel a {
 }
 
 div.fivestar-widget .star, div.fivestar-widget .star a {
-  background: url(heart.gif) no-repeat 0 0px;
+  background: url(heart.gif) no-repeat 0 0;
 }
 
 div.fivestar-widget div.on a {

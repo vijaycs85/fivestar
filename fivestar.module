@@ -355,9 +355,9 @@ function fivestar_node_type_form_submit($form, &$form_state) {
  * Theme function to add the Fivestar preview to the node type form.
  */
 function theme_fivestar_node_type_form($form) {
-  drupal_add_js(drupal_get_path('module', 'fivestar') .'/fivestar-admin.js');
+  drupal_add_js(drupal_get_path('module', 'fivestar') .'/js/fivestar-admin.js');
   drupal_add_js(array('fivestar' => array('preview_url' => url('fivestar/preview/node'))), 'setting');
-  drupal_add_css(drupal_get_path('module', 'fivestar') .'/fivestar-admin.css', 'module', 'all', FALSE);
+  drupal_add_css(drupal_get_path('module', 'fivestar') .'/css/fivestar-admin.css', 'module', 'all', FALSE);
 
   $output = '';
   $output .= drupal_render($form['fivestar']);
@@ -502,7 +502,7 @@ function fivestar_settings_submit($form, $form_state) {
 }
 
 function theme_fivestar_settings($form) {
-  drupal_add_css(drupal_get_path('module', 'fivestar') .'/fivestar-admin.css', 'module', 'all', FALSE);
+  drupal_add_css(drupal_get_path('module', 'fivestar') .'/css/fivestar-admin.css', 'module', 'all', FALSE);
   drupal_set_title(t('Fivestar Settings'));
 
   // Default preview.
@@ -533,7 +533,7 @@ function theme_fivestar_preview_widget($css_file) {
 
   // Add the default CSS to the page to ensure the defaults take precedence.
   if (!$default_css_added) {
-    $css = file_get_contents(drupal_get_path('module', 'fivestar') .'/fivestar.css');
+    $css = file_get_contents(drupal_get_path('module', 'fivestar') .'/css/fivestar.css');
     // Prepend the classes with the unique widget div.
     $css = preg_replace('/((div)?\.fivestar-widget)/', 'div.fivestar-widgets $1', $css);
     // Update relative URLs with absolute locations.
@@ -841,7 +841,9 @@ function fivestar_fivestar_widgets() {
 
   $widgets = array();
   foreach ($files as $file) {
-    $widgets[$file->filename] = drupal_ucfirst(str_replace('-color', '', $file->name));
+    if (strpos($file->filename, '-rtl.css') === FALSE) {
+      $widgets[$file->filename] = drupal_ucfirst(str_replace('-color', '', $file->name));
+    }
   }
   return $widgets;
 }
@@ -1346,7 +1348,7 @@ function theme_fivestar_static_element($value, $title = NULL, $description = NUL
  */
 function fivestar_add_css($widget_css = NULL) {
   // Add fivestar CSS.
-  drupal_add_css(drupal_get_path('module', 'fivestar') .'/fivestar.css');
+  drupal_add_css(drupal_get_path('module', 'fivestar') .'/css/fivestar.css');
 
   // Add widget specific CSS.
   if (!isset($widget_css)) {
@@ -1354,7 +1356,7 @@ function fivestar_add_css($widget_css = NULL) {
   }
 
   if ($widget_css != 'default') {
-    drupal_add_css($widget_css, 'module');
+    drupal_add_css($widget_css);
   }
 }
 
@@ -1371,7 +1373,7 @@ function fivestar_add_js() {
     if ($feedback_enabled) {
       $settings = array_merge($settings, array('feedbackSavingVote' => t('Saving your vote...'), 'feedbackVoteSaved' => t('Your vote has been saved.'), 'feedbackDeletingVote' => t('Deleting your vote...'), 'feedbackVoteDeleted' => t('Your vote has been deleted.')));
     }
-    drupal_add_js(drupal_get_path('module', 'fivestar') .'/jquery.rating.js');
+    drupal_add_js(drupal_get_path('module', 'fivestar') .'/js/fivestar.js');
     drupal_add_js(array('fivestar' => $settings), 'setting');
     $js_added = TRUE;
   }

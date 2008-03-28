@@ -2,7 +2,7 @@
 div.fivestar-widget-static .star {
   width: 8px;
   height: 18px;
-  background: url(min_star.png) no-repeat 0 0px;
+  background: url(min_star.png) no-repeat 0 0;
 }
 
 div.fivestar-widget-static .star span.on {
@@ -10,7 +10,7 @@ div.fivestar-widget-static .star span.on {
 }
 
 div.fivestar-widget-static .star span.off {
-  background: url(min_star.png) no-repeat 0 0px;
+  background: url(min_star.png) no-repeat 0 0;
 }
 
 /* Javascript Star Version */
@@ -23,7 +23,7 @@ div.fivestar-widget .cancel, div.fivestar-widget .cancel a {
 }
 
 div.fivestar-widget .star, div.fivestar-widget .star a {
-  background: url(min_star.png) no-repeat 0 0px;
+  background: url(min_star.png) no-repeat 0 0;
 }
 
 div.fivestar-widget div.on a {

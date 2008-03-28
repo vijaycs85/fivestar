@@ -5,18 +5,19 @@ div.fivestar-star-preview {
   height: 32px;
 }
 div.fivestar-widgets div.form-item {
-  float: left;
+  float: left; /* RTL */
 }
 
 /* Fivestar Node Type Preview */
 #fivestar-comment-form,
 #fivestar-direct-form {
-  float: left;
+  float: left; /* RTL */
 }
 #fivestar-comment-preview,
 #fivestar-direct-preview {
-  float: left;
-  margin-left: 40px;
+  float: left; /* RTL */
+  margin-left: 40px; /* RTL */
+  width: 300px;
 }
 #fivestar-node-type-form fieldset {
   background: transparent;
@@ -34,7 +35,7 @@ div.fivestar-widgets div.form-item {
 #placeholder {
   position: absolute;
   top: -1em;
-  right: 0;
+  right: 0; /* RTL */
 }
 
 /* Palette */
@@ -44,20 +45,20 @@ div.fivestar-widgets div.form-item {
   margin: 0.5em 0;
 }
 .color-form label {
-  float: left;
+  float: left; /* RTL */
   width: 12em;
 }
 .color-form .form-text, .color-form .form-select {
-  float: left;
+  float: left; /* RTL */
 }
 .color-form .form-text {
   text-align: center;
-  margin-right: 5px;
+  margin-right: 5px; /* RTL */
   cursor: pointer;
 }
 
 #fivestar-palette .hook {
-  float: left;
+  float: left; /* RTL */
   margin-top: 3px;
   width: 16px;
   height: 16px;
@@ -73,9 +74,9 @@ div.fivestar-widgets div.form-item {
 }
 
 #fivestar-palette .lock {
-  float: left;
+  float: left; /* RTL */
   position: relative;
-  left: -3px;
+  left: -3px; /* RTL */
   width: 20px;
   height: 25px;
   background: url(images/lock.png) no-repeat 50% 2px;
@@ -87,7 +88,7 @@ div.fivestar-widgets div.form-item {
 #fivestar-palette .form-item .form-item {
   width: inherit;
   margin: 0;
-  float: left;
+  float: left; /* RTL */
 }
 #fivestar-palette .item-selected input {
   border: 2px solid black;
