@@ -13,59 +13,27 @@ function fivestar_color_form() {
     '#title' => t('Color scheme'),
     '#weight' => -1,
     '#attributes' => array('id' => 'fivestar_color_scheme_form'),
+    '#description' => t('A custom color widget must be selected to choose colors. Only the selected widget will be previewed.'),
   );
 
   // Create the list of available schemes.
-  $fivestar_schemes = array(
+  $options = array(
+    '#fff633,#f5d000,#d2e7f9,#027AC6,#cccccc,#dfdfdf' => t('Blue Lagoon (default)'),
     '#ffeb38,#fff385,#ffd60a,#ffe561,#8f8f8f,#e6e6e6' => t('Yellow'),
     '#ad0002,#ff5f61,#ff1a1f,#f3b3b4,#8f8f8f,#e6e6e6' => t('Red'),
     '#001efa,#bbc3fb,#1022c1,#2e41ee,#8f8f8f,#e6e6e6' => t('Blue'),
     '#015700,#7cf47c,#12c610,#c8f9c7,#8f8f8f,#e6e6e6' => t('Green'),
+    '' => t('Custom'),
   );
 
-  // Add schemes provided by themes if color module is available.
-  if (module_exists('color')) {
-    $theme = variable_get('theme_default', 'garland');
-    $theme_info = color_get_info($theme);
-    $themes = list_themes();
-    $theme_name = $themes[$theme]->name;
-  }
-
-  $theme_schemes = array();
-  if (!empty($theme_info['schemes'])) {
-    foreach ($theme_info['schemes'] as $key => $name) {
-      $colors = explode(',', $key);
-      $theme_scheme = array(
-        'on1' => $colors[0],
-        'on2' => _fivestar_color_blend($colors[0], '#FFFFFF', .8),
-        'hover1' => $colors[2],
-        'hover2' => _fivestar_color_blend($colors[2], '#FFFFFF', .8),
-        'off1' => $colors[4],
-        'off2' => _fivestar_color_blend($colors[4], '#FFFFFF', .8),
-      );
-      $theme_schemes[implode(',', $theme_scheme)] = $name;
-    }
-  }
-
-  if (!empty($theme_schemes)) {
-    $options = array(
-      t('Fivestar schemes') => $fivestar_schemes,
-      t('@theme_name schemes', array('@theme_name' => drupal_ucfirst($theme_name))) => $theme_schemes,
-    );
-  }
-  else {
-    $options = $fivestar_schemes;
-  }
-  $options[''] = t('Custom');
-
   // See if we're using a predefined scheme.
-  $yellow_palette = explode(',', array_search(t('Yellow'), $fivestar_schemes));
-  $default_palette['on1'] = $yellow_palette[0];
-  $default_palette['on2'] = $yellow_palette[1];
-  $default_palette['hover1'] = $yellow_palette[2];
-  $default_palette['hover2'] = $yellow_palette[3];
-  $default_palette['off1'] = $yellow_palette[4];
-  $default_palette['off2'] = $yellow_palette[5];
+  $palette = explode(',', array_search(t('Blue Lagoon (default)'), $options));
+  $default_palette['on1'] = $palette[0];
+  $default_palette['on2'] = $palette[1];
+  $default_palette['hover1'] = $palette[2];
+  $default_palette['hover2'] = $palette[3];
+  $default_palette['off1'] = $palette[4];
+  $default_palette['off2'] = $palette[5];
   $default_palette['matte'] = '#ffffff';
 
   $palette = variable_get('fivestar_colors', $default_palette);
@@ -74,7 +42,7 @@ function fivestar_color_form() {
   $form['fivestar_color_type'] = array(
     '#type' => 'select',
     '#title' => t('Color display'),
-    '#options' => array('solid' => t('Solid color'), 'gradient' => t('Gradient')),
+    '#options' => array('default' => t('Default display'), 'solid' => t('Solid color'), 'gradient' => t('Gradient')),
     '#default_value' => variable_get('fivestar_color_type', 'solid'),
   );
 
@@ -166,6 +134,11 @@ function theme_fivestar_color_form($form) {
  * Validate handler for color form.
  */
 function fivstar_color_form_validate($form_id, &$form_values) {
+  if ($form_values['fivestar_color_type'] == 'default' || $form_values['fivestar_color_type']) {
+    form_set_value(array('#parents' => array('fivestar_color_type')), 'default');
+    return;
+  }
+
   foreach ($form_values['fivestar_colors'] as $key => $value) {
     $form_values['fivestar_colors'][$key] = trim(drupal_strtolower($value));
     if (!preg_match('/^#([0-9a-f]{3}|[0-9a-f]{6})$/', $form_values['fivestar_colors'][$key]) && !($key == 'matte' && ($value == 'none' || $value == ''))) {
@@ -185,7 +158,7 @@ function fivstar_color_form_submit($form_id, &$form_values) {
   }
 
   // Check if we're using a color-enabled set of stars.
-  if (!array_key_exists($form_values['fivestar_widget'], $form['widget']['fivestar_color_widget']['#options'])) {
+  if (!array_key_exists($form_values['fivestar_widget'], $form['widget']['fivestar_color_widget']['#options']) || $form_values['fivestar_color_type'] == 'default') {
     return;
   }
 
@@ -222,6 +195,9 @@ function fivstar_color_form_submit($form_id, &$form_values) {
   }
 
   $form_values['fivestar_widget'] = $widget_css;
+
+  variable_set('fivestar_colors', $form_values['fivestar_colors']);
+  variable_set('fivestar_color_type', $form_values['fivestar_color_type']);
 
   drupal_set_message(t('Custom %name stars generated. You may need to clear your browser cache before the new stars are visible.', array('%name' => t($widget))));
 }

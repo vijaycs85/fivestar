@@ -387,7 +387,7 @@ function fivestar_settings() {
     '#tree' => FALSE,
     '#type' => 'fieldset',
     '#title' => t('Widget display'),
-    '#description' => t('Choose a widget set to be used on your site. Classic widgets will be displayed exactly as shown, while widgets supporting custom colors can be further customized using the color settings below.'),
+    '#description' => t('Choose a widget set to be used on your site. Widgets supporting custom colors can be further customized by adjusting the color scheme.'),
     '#weight' => -2,
   );
 
@@ -415,7 +415,6 @@ function fivestar_settings() {
 
   $form['widget']['fivestar_widget'] = array(
     '#type' => 'radios',
-    '#title' => t('Classic widgets'),
     '#options' => array('default' => t('Default')) + $classic_widgets + $color_widgets,
     '#default_value' => $default_value,
     '#attributes' => array('class' => 'fivestar-widgets'),
@@ -426,7 +425,6 @@ function fivestar_settings() {
     '#title' => t('Custom color widgets'),
     '#options' => $color_widgets,
     '#attributes' => array('class' => 'fivestar-widgets'),
-    '#description' => t('<strong>Important note:</strong> A custom color widget must be selected before choosing colors. Only the selected widget will be previewed.'),
   );
 
   include_once(drupal_get_path('module', 'fivestar') .'/fivestar_color.inc');
@@ -454,8 +452,6 @@ function fivestar_settings() {
 
 function fivestar_settings_submit($form_id, $form_values) {
   variable_set('fivestar_widget', $form_values['fivestar_widget']);
-  variable_set('fivestar_colors', $form_values['fivestar_colors']);
-  variable_set('fivestar_color_type', $form_values['fivestar_color_type']);
   variable_set('fivestar_anonymous_vote_interval', $form_values['fivestar_anonymous_vote_interval']);
 }
 
@@ -495,7 +491,7 @@ function theme_fivestar_preview_widget($css_file) {
     // Prepend the classes with the unique widget div.
     $css = preg_replace('/((div)?\.fivestar-widget)/', 'div.fivestar-widgets $1', $css);
     // Update relative URLs with absolute locations.
-    $css = preg_replace('/url\((.*?)\)/', 'url('. base_path() . drupal_get_path('module', 'fivestar') .'/$1)', $css);
+    $css = preg_replace('/url\(\.\.\/(.*?)\)/', 'url('. base_path() . drupal_get_path('module', 'fivestar') .'/$1)', $css);
     drupal_set_html_head("<style type=\"text/css\" media=\"all\">\n". $css ."</style>");
     $default_css_added = TRUE;
   }
