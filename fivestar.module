@@ -663,7 +663,8 @@ function theme_fivestar_preview_wrapper($content, $type = 'direct') {
 }
 
 /**
- * Callback function for fivestar/vote path
+ * Callback function for fivestar/vote.
+ * 
  * @param type
  *   A content-type to log the vote to. 'node' is the most common.
  * @param cid
@@ -742,7 +743,7 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $res
     else {
       $votes = $criteria += array('value' => $value, 'uid' => $uid);
       votingapi_set_votes($votes, $user_votes);
-      return $votes[0];
+      return fivestar_get_votes($type, $cid, $tag, $uid);
     }
   }
 }
@@ -779,6 +780,7 @@ function fivestar_get_votes($type, $cid, $tag = 'vote', $uid = NULL) {
     $user_vote = votingapi_select_votes($criteria += array('uid' => $user->uid));
     if ($user_vote) {
       $votes['user'] = $user_vote[0];
+      $votes['user']['function'] = 'user';
     }
   }
   else {
