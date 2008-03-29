@@ -8,6 +8,9 @@ if (Drupal.jsEnabled) {
     var radios = document.forms['fivestar-settings']['fivestar_widget'];
     var colorRadios = $('.fivestar-color-widgets input');
     var typeSelect = document.getElementById('edit-fivestar-color-type');
+    var schemeSelect = document.getElementById('edit-scheme');
+    var lastRadio = '';
+    var lastType = $(typeSelect).val();
 
     // Add Farbtastic
     $(form).prepend('<div id="placeholder"></div>');
@@ -22,7 +25,7 @@ if (Drupal.jsEnabled) {
     }
 
     // Set up colorscheme selector
-    $('#edit-scheme', form).change(function () {
+    $(schemeSelect).change(function () {
       var colors = this.options[this.selectedIndex].value;
       if (colors != '') {
         colors = colors.split(',');
@@ -35,16 +38,17 @@ if (Drupal.jsEnabled) {
 
     // Setup radio buttons.
     $(radios).change(function() {
+      var thisRadio = this;
       $(colorRadios).each(function() {
         var widgetName = this.value.replace(/.*?\/([^\/]+)\.css/, '$1');
         var fivestarWidget = document.getElementById('fivestar-preview-' + widgetName);
         $('.star, .star a, .cancel, .cancel a', fivestarWidget).css('background-image', '');
       });
-      preview();
+      changeType();
     });
 
     // Setup color display select.
-    $(typeSelect).change(toggleGradient);
+    $(typeSelect).change(changeType);
 
     // Add document mouseup handlers. This prevents making many AJAX requests
     // while the color picker is being dragged around.
@@ -55,14 +59,46 @@ if (Drupal.jsEnabled) {
     /**
      * Show or hide the second set of colors.
      */
-    function toggleGradient() {
+    function changeType() {
+      // Enable or disable the type select list.
+      $(radios).each(function() {
+        if (!this.checked) {
+          return;
+        }
+        if ($(colorRadios).index(this) == -1) {
+          lastRadio = 'classic';
+          lastType = $(typeSelect).val();
+          $(typeSelect).attr('disabled', true).val('default');
+        }
+        else {
+          $(typeSelect).attr('disabled', false);
+          if (lastRadio == 'classic') {
+            $(typeSelect).val(lastType != 'default' ? lastType : 'solid');
+          }
+          lastType = $(typeSelect).val();
+          lastRadio = 'color';
+        }
+      });
+
       if ($(typeSelect).val() == 'solid') {
-        $(inputs).filter(':odd').parent().hide()
+        $('#fivestar-palette').show();
+        $(schemeSelect).attr('disabled', false);
+        $(inputs).attr('disabled', false).filter(':odd').parent().hide()
         $('.lock', form).hide();
+        $('#placeholder').show();
+      }
+      else if ($(typeSelect).val() == 'gradient') {
+        $(schemeSelect).attr('disabled', false);
+        $('#fivestar-palette').show();
+        $(inputs).attr('disabled', false).parent().show();
+        $('.lock', form).show();
+        $('#placeholder').show();
       }
       else {
-        $(inputs).parent().show();
-        $('.lock', form).show();
+        $(schemeSelect).attr('disabled', true);
+        $(inputs).attr('disabled', true);
+        $('#fivestar-palette').hide();
+        $('#placeholder').hide();
       }
       preview();
     }
@@ -84,9 +120,15 @@ if (Drupal.jsEnabled) {
       }
 
       // Star images.
-      var time = new Date();
-      $('.star, .star a', fivestarWidget).css('background-image', 'url(' + Drupal.settings.fivestar.colorPreview + '/' + inputValues.join('/') + '/' + widgetName + '/' + typeSelect.value + '/star.png?o=' + time.getTime() + ')');
-      $('.cancel, .cancel a', fivestarWidget).css('background-image', 'url(' + Drupal.settings.fivestar.colorPreview + '/' + inputValues.join('/') + '/' + widgetName + '/' + typeSelect.value + '/cancel.png?o=' + time.getTime() + ')');
+      if (typeSelect.value != 'default') {
+        var time = new Date();
+        $('.star, .star a', fivestarWidget).css('background-image', 'url(' + Drupal.settings.fivestar.colorPreview + '/' + inputValues.join('/') + '/' + widgetName + '/' + typeSelect.value + '/star.png?o=' + time.getTime() + ')');
+        $('.cancel, .cancel a', fivestarWidget).css('background-image', 'url(' + Drupal.settings.fivestar.colorPreview + '/' + inputValues.join('/') + '/' + widgetName + '/' + typeSelect.value + '/cancel.png?o=' + time.getTime() + ')');
+      }
+      else {
+        $('.star, .star a', fivestarWidget).css('background-image', '');
+        $('.cancel, .cancel a', fivestarWidget).css('background-image', '');
+      }
     }
 
     /**
@@ -174,7 +216,7 @@ if (Drupal.jsEnabled) {
      * Reset the color scheme selector.
      */
     function resetScheme() {
-      $('#edit-scheme', form).each(function () {
+      $(schemeSelect).each(function () {
         this.selectedIndex = this.options.length - 1;
       });
     }
@@ -249,7 +291,7 @@ if (Drupal.jsEnabled) {
     // Focus first color
     focus.call(inputs[0]);
 
-    // Hide secondary color fields and preview (called in toggleGradient).
-    toggleGradient();
+    // Hide secondary color fields and preview (called in changeType).
+    changeType();
   });
 }
