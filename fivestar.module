@@ -622,7 +622,8 @@ function theme_fivestar_preview_wrapper($content, $type = 'direct') {
 }
 
 /**
- * Callback function for fivestar/vote path
+ * Callback function for fivestar/vote.
+ * 
  * @param type
  *   A content-type to log the vote to. 'node' is the most common.
  * @param cid
@@ -685,7 +686,7 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL) {
     return array();
   }
 
-  // Prep variables for anonymous vs. registered voting
+  // Prep variables for anonymous vs. registered voting.
   if (!isset($uid)) {
     if ($user->uid) {
       $uid = $user->uid;
@@ -700,53 +701,42 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL) {
   }
   $anon_interval = variable_get('fivestar_anonymous_vote_interval', 86400);
 
-  // sanity-check the incoming values.
+  // Sanity-check the incoming values.
   if (is_numeric($cid) && is_numeric($value)) {
     if ($value > 100) {
       $value = 100;
     }
 
-    // If the vote value is 0, blindly nuke any votes for this content by the user.
-    if ($value == 0) {
-      if ($uid) {
-        // If the user is logged in, we'll delete votes from that uid.
-        $sql = "DELETE FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag='%s'";
-        db_query($sql, $type, $cid, $uid, $tag);
-        return;
-      }
-      else {
-        // Otherwise, we'll delete votes from the same IP address within the anonymous interval.
-        $sql = "DELETE FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag='%s' AND hostname='%s'";
-        $sql .= $anon_interval != -1 ? " AND timestamp > %d" : '';
-        db_query($sql, $type, $cid, $uid, $tag, $hostname, time() - $anon_interval);
-        return;
-      }
-    }
-    // If the vote ISN'T zero, check for existing votes in the database.
+    if ($uid) {
+      // If the user is logged in, we'll look for votes from that uid.
+      $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag = '%s'";
+      $result = db_query($sql, $type, $cid, $uid, $tag);
+    } 
     else {
-      if ($uid) {
-        // If the user is logged in, we'll look for votes from that uid.
-        $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag = '%s'";
-        $result = db_query($sql, $type, $cid, $uid, $tag);
-      }
-      else {
-        // Otherwise, we'll look for votes from the same IP address within the anonymous interval.
-        $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag = '%s' AND hostname='%s'";
-        $sql .= $anon_interval != -1 ? " AND timestamp > %d" : '';
-        $result = db_query($sql, $type, $cid, $uid, $tag, $hostname, time() - $anon_interval);
-      }
+      // Otherwise, we'll look for votes from the same IP address within the anonymous interval.
+      $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag = '%s' AND hostname='%s'";
+      $sql .= $anon_interval != -1 ? " AND timestamp > %d" : '';
+      $result = db_query($sql, $type, $cid, $uid, $tag, $hostname, time() - $anon_interval);
     }
 
     // If the old vote exists, either delete it (if the new one is zero)
     // or change it. If it doesn't exist and the vote is non-zero, cast
     // it and recalculate.
     if ($old_vote = db_fetch_object($result)) {
-      $vote = votingapi_change_vote($old_vote, $value);
+      if ($value == 0){
+        votingapi_delete_vote($old_vote);
+      }
+      else {
+        votingapi_change_vote($old_vote, $value);
+      }
     }
     elseif ($value != 0) {
       $vote = votingapi_add_vote($type, $cid, $value, 'percent', $tag, $uid);
     }
-    return $vote;
+    return votingapi_recalculate_results($type, $cid);
+  }
+  else {
+    return array();
   }
 }
 
