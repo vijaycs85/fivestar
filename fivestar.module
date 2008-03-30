@@ -697,9 +697,12 @@ function fivestar_vote($type, $cid, $value, $tag = 'vote') {
     }
   }
   $output .= '<summary>';
-  $output .= '<average>'. theme('fivestar_summary', NULL, $summary[$tag]['average'], $summary[$tag]['count'], $stars) .'</average>';
-  $output .= '<user>'. theme('fivestar_summary', $value, NULL, $summary[$tag]['count'], $stars) .'</user>';
+  $output .= '<average>'. theme('fivestar_summary', NULL, $summary[$tag]['average'], NULL, $stars) .'</average>';
+  $output .= '<average_count>'. theme('fivestar_summary', NULL, $summary[$tag]['average'], $summary[$tag]['count'], $stars) .'</average_count>';
+  $output .= '<user>'. theme('fivestar_summary', $value, NULL, NULL, $stars) .'</user>';
+  $output .= '<user_count>'. theme('fivestar_summary', $value, NULL, $summary[$tag]['count'], $stars) .'</user_count>';
   $output .= '<combo>'. theme('fivestar_summary', $value, $summary[$tag]['average'], $summary[$tag]['count'], $stars) .'</combo>';
+  $output .= '<count>'. theme('fivestar_summary', NULL, NULL, $summary[$tag]['count'], $stars) .'</count>';
   $output .= '</summary>';
   $output .= '</result>';
 
@@ -1101,19 +1104,19 @@ function fivestar_custom_widget(&$form_state, $values, $settings) {
 
   switch ($settings['text']) {
     case 'user':
-      $form['vote']['#description'] = theme('fivestar_summary', $values['user'], NULL, $values['count'], $settings['stars']);
+      $form['vote']['#description'] = theme('fivestar_summary', $values['user'], NULL, $settings['style'] == 'dual' ? NULL : $values['count'], $settings['stars']);
       $form['vote']['#attributes']['class'] .= ' fivestar-user-text';
       break;
     case 'average':
-      $form['vote']['#description'] = theme('fivestar_summary', NULL, $values['average'], $values['count'], $settings['stars']);
+      $form['vote']['#description'] = $settings['style'] == 'dual' ? NULL : theme('fivestar_summary', NULL, $values['average'], $values['count'], $settings['stars']);
       $form['vote']['#attributes']['class'] .= ' fivestar-average-text';
       break;
     case 'smart':
-      $form['vote']['#description'] = theme('fivestar_summary', $values['user'], $values['user'] ? NULL : $values['average'], $values['count'], $settings['stars']);
+      $form['vote']['#description'] = ($settings['style'] == 'dual' && !$values['user']) ? NULL : theme('fivestar_summary', $values['user'], $values['user'] ? NULL : $values['average'], $settings['style'] == 'dual' ? NULL : $values['count'], $settings['stars']);
       $form['vote']['#attributes']['class'] .= ' fivestar-smart-text '. ($values['user'] ? 'fivestar-user-text' : 'fivestar-average-text');
       break;
     case 'dual':
-      $form['vote']['#description'] = theme('fivestar_summary', $values['user'], $values['average'], $values['count'], $settings['stars']);
+      $form['vote']['#description'] = theme('fivestar_summary', $values['user'], $settings['style'] == 'dual' ? NULL : $values['average'], $settings['style'] == 'dual' ? NULL : $values['count'], $settings['stars']);
       $form['vote']['#attributes']['class'] .= ' fivestar-combo-text';
       break;
   }
@@ -1140,9 +1143,18 @@ function fivestar_custom_widget(&$form_state, $values, $settings) {
       $form['vote']['#attributes']['class'] .= ' fivestar-combo-stars';
       $form['#attributes']['class'] .= ' fivestar-combo-stars';
       $static_average = theme('fivestar_static', $values['average'], $settings['stars']);
+      if ($settings['text'] == 'none' && !$settings['labels_enable']) {
+        $static_description = NULL;
+      }
+      elseif ($settings['text'] != 'none') {
+        $static_description = theme('fivestar_summary', NULL, $settings['text'] == 'user' ? NULL : $values['average'], $values['count'], $settings['stars']);
+      }
+      else {
+        $static_description = '&nbsp;';
+      }
       $form['average'] = array(
         '#type' => 'markup',
-        '#value' => theme('fivestar_static_element', $static_average, $settings['title'] !== FALSE ? t('Average') : NULL),
+        '#value' => theme('fivestar_static_element', $static_average, $settings['title'] !== FALSE ? t('Average') : NULL, $static_description),
         '#weight' => -1,
       );
       break;
@@ -1215,6 +1227,8 @@ function theme_fivestar($element) {
     fivestar_add_js();
   }
 
+  $element['#description'] = (empty($element['#description']) && $element['#labels_enable']) ? '<div class="fivestar-summary">&nbsp;</div>' : $element['#description'];
+
   return theme('form_element', $element, $element['#children']);
 }
 
@@ -1235,22 +1249,14 @@ function theme_fivestar_select($element) {
  * fivestar widget themed in the theme_fivestar() function.
  */
 function theme_fivestar_widget($form) {
-  // Move the description outside of the vote element.
-  $description = empty($form['vote']['#description']) ? '&nbsp;' : $form['vote']['#description'];
-  unset($form['vote']['#description']);
+  // Only print out the summary if text is being displayed or using rollover text.
+  if (empty($form['vote']['#description']) && strpos($form['vote']['#prefix'], 'fivestar-labels-hover') === FALSE) {
+    unset($form['vote']['#description']);
+  }
 
   $output  = '';
   $output .= '<div class="fivestar-form-'. $form['content_id']['#value'] .' clear-block">';
   $output .= drupal_render($form);
-  // Only print out the summary if text is being displayed or using rollover text.
-  if ($form['#parameters'][2]['text'] != 'none' || !empty($form['#parameters'][2]['labels'])) {
-    $output .= '<div class="description fivestar-summary-'. $form['content_id']['#value'] .'">'. $description .'</div>';
-  }
-  $feedback_preview = $form['vote']['#feedback'];
-  if ((!isset($feedback_preview) && variable_get('fivestar_feedback_'. $form['#node_type']->type, 1)) ||
-      (isset($feedback_preview) && $feedback_preview)) {
-    $output .= '<div class="feedback fivestar-feedback-'. $form['content_id']['#value'] .'">&nbsp;</div>';
-  }
   $output .= '</div>';
   return $output;
 }
@@ -1298,14 +1304,14 @@ function theme_fivestar_static($rating, $stars = 5) {
   return $output;
 }
 
-function theme_fivestar_summary($user_rating, $average_rating, $votes = 0, $stars = 5) {
-  if ($votes == 0) {
+function theme_fivestar_summary($user_rating, $average_rating, $votes, $stars = 5) {
+  if ($votes === 0) {
     return '<div class="fivestar-summary-empty">'. t('No votes yet') .'</div>';
   }
 
   $output = '';
   if ($user_rating) {
-    $div_class = 'user';
+    $div_class = isset($votes) ? 'user-count' : 'user';
     $user_stars = round(($user_rating * $stars) / 100, 1);
     $output .= '<span class="user-rating">'. t('Your rating: <span>!stars</span>', array('!stars' => $user_rating ? $user_stars : t('None'))) .'</span>';
   }
@@ -1313,7 +1319,7 @@ function theme_fivestar_summary($user_rating, $average_rating, $votes = 0, $star
     $output .= ' ';
   }
   if ($average_rating) {
-    $div_class = 'average';
+    $div_class = isset($votes) ? 'average-count' : 'average';
     $average_stars = round(($average_rating * $stars) / 100, 1);
     $output .= '<span class="average-rating">'. t('Average: <span>!stars</span>', array('!stars' => $average_stars)) .'</span>';
   }
@@ -1321,7 +1327,14 @@ function theme_fivestar_summary($user_rating, $average_rating, $votes = 0, $star
     $div_class = 'combo';
   }
 
-  $output .= ' <span class="total-votes">('. format_plural($votes, '<span>1</span> vote', '<span>@count</span> votes') .')</span>';
+  if ($votes && !($user_rating || $average_rating)) {
+    $output .= ' <span class="total-votes">'. format_plural($votes, '<span>1</span> vote', '<span>@count</span> votes') .'</span>';
+    $div_class = 'count';
+  }
+  elseif ($votes) {
+    $output .= ' <span class="total-votes">('. format_plural($votes, '<span>1</span> vote', '<span>@count</span> votes') .')</span>';
+  }
+
   $output = '<div class="fivestar-summary fivestar-summary-'. $div_class .'">'. $output .'</div>';
   return $output;
 }
@@ -1334,10 +1347,10 @@ function theme_fivestar_static_element($value, $title = NULL, $description = NUL
   $element = array(
     '#type' => 'item',
     '#title' => $title,
+    '#description' => $description,
   );
 
   $output .= theme('form_element', $element, $value);
-  $output .= isset($description) ? '<div class="description">'. $description .'</div>' : '';
   $output .= '</div>';
   return $output;
 }

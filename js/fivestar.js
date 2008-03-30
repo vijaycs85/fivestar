@@ -29,8 +29,7 @@
         var $widget = buildInterface($obj),
             $stars = $('.star', $widget),
             $cancel = $('.cancel', $widget),
-            $summary = $('.description', $obj).size() ? $('.description', $obj) : $($obj).siblings('.description'),
-            $feedback = $('.feedback', $obj).size() ? $('.feedback', $obj) : $($obj).siblings('.feedback'),
+            $summary = $('.fivestar-summary', $obj),
             feedbackTimerId = 0,
             summaryText = $summary.html(),
             summaryHover = $obj.is('.fivestar-labels-hover'),
@@ -60,14 +59,8 @@
         }
 
         // Record text display.
-        if ($obj.is('.fivestar-user-text')) {
-          var textDisplay = 'user';
-        }
-        else if ($obj.is('.fivestar-average-text')) {
-          var textDisplay = 'average';
-        }
-        else if ($obj.is('.fivestar-combo-text')) {
-          var textDisplay = 'combo';
+        if ($summary.size()) {
+          var textDisplay = $summary.attr('class').replace(/.*?fivestar-summary-([^ ]+).*?/, '$1').replace(/-/g, '_');
         }
         else {
           var textDisplay = 'none';
@@ -117,7 +110,7 @@
             event.reset();
             voteChanged = false;
             // Inform a user that his vote is being processed
-            if (Drupal.settings.fivestar.feedbackEnabled) {
+            if ($("input.fivestar-path", $obj).size() && Drupal.settings.fivestar.feedbackEnabled) {
               setFeedbackText(Drupal.settings.fivestar.feedbackDeletingVote);
             }
             // Save the currentValue in a hidden field.
@@ -125,6 +118,15 @@
             // Update the title.
             cancelTitle = starDisplay != 'smart' ? cancelTitle : Drupal.settings.fivestar.titleAverage;
             $('label', $obj).html(cancelTitle);
+            // Update the smart classes on the widget if needed.
+            if ($obj.is('.fivestar-smart-text')) {
+              $obj.removeClass('fivestar-user-text').addClass('fivestar-average-text');
+              $summary[0].className = $summary[0].className.replace(/-user/, '-average');
+              textDisplay = $summary.attr('class').replace(/.*?fivestar-summary-([^ ]+).*?/, '$1').replace(/-/g, '_');
+            }
+            if ($obj.is('.fivestar-smart-stars')) {
+              $obj.removeClass('fivestar-user-stars').addClass('fivestar-average-stars');
+            }
             // Submit the form if needed.
             $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + 0, success: voteHook }); });
             return false;
@@ -137,8 +139,17 @@
             voteChanged = true;
             event.reset();
             // Inform a user that his vote is being processed
-            if (Drupal.settings.fivestar.feedbackEnabled) {
+            if ($("input.fivestar-path", $obj).size() && Drupal.settings.fivestar.feedbackEnabled) {
               setFeedbackText(Drupal.settings.fivestar.feedbackSavingVote);
+            }
+            // Update the smart classes on the widget if needed.
+            if ($obj.is('.fivestar-smart-text')) {
+              $obj.removeClass('fivestar-average-text').addClass('fivestar-user-text');
+              $summary[0].className = $summary[0].className.replace(/-average/, '-user');
+              textDisplay = $summary.attr('class').replace(/.*?fivestar-summary-([^ ]+).*?/, '$1').replace(/-/g, '_');
+            }
+            if ($obj.is('.fivestar-smart-stars')) {
+              $obj.removeClass('fivestar-average-stars').addClass('fivestar-user-stars');
             }
             // Submit the form if needed.
             $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + currentValue, success: voteHook }); });
@@ -153,7 +164,7 @@
                 .children('a').css('width', '100%').end()
                 .filter(':lt(' + index + ')').addClass('hover').end();
               // Update the description text and label.
-              if (summaryHover) {
+              if (summaryHover && !feedbackTimerId) {
                 var summary = $("select option", $obj)[index + $cancel.size()].text;
                 var value = $("select option", $obj)[index + $cancel.size()].value;
                 $summary.html(summary != index + 1 ? summary : '&nbsp;');
@@ -166,7 +177,7 @@
                 .filter('.on').removeClass('on').end()
                 .filter('.hover').removeClass('hover').end();
               // Update the description text.
-              if (summaryHover) {
+              if (summaryHover && !feedbackTimerId) {
                 var cancelText = $("select option", $obj)[0].text;
                 $summary.html(($cancel.size() && cancelText != 0) ? cancelText : '&nbsp');
                 if (!voteChanged) {
@@ -183,7 +194,7 @@
                 $stars.eq(Math.floor(starValue)).addClass('on').children('a').css('width', percent + "%").end().end();
               }
               // Restore the summary text and original title.
-              if (summaryHover) {
+              if (summaryHover && !feedbackTimerId) {
                 $summary.html(summaryText ? summaryText : '&nbsp;');
               }
               if (voteChanged) {
@@ -196,12 +207,10 @@
         };
 
         var setFeedbackText = function(text) {
-          // Kill previous timer if it isn't finished yet so that the text we are about to set will not get cleared too early
-          if (feedbackTimerId != 0) {                
-            clearTimeout(feedbackTimerId);
-            feedbackTimerId = 0;
-          }
-          $feedback.html(text);
+          // Kill previous timer if it isn't finished yet so that the text we
+          // are about to set will not get cleared too early.
+          feedbackTimerId = 1;
+          $summary.html(text);
         };
 
         /**
@@ -213,7 +222,14 @@
             result: {
               count: $("result > count", data).text(),
               average: $("result > average", data).text(),
-              summary: { average: $("summary average", data).text(), user: $("summary user", data).text(), combo: $("summary combo", data).text() }
+              summary: {
+                average: $("summary average", data).text(),
+                average_count: $("summary average_count", data).text(),
+                user: $("summary user", data).text(),
+                user_count: $("summary user_count", data).text(),
+                combo: $("summary combo", data).text(),
+                count: $("summary count", data).text()
+              }
             },
             vote: {
               id: $("vote id", data).text(),
@@ -244,7 +260,7 @@
               setFeedbackText(Drupal.settings.fivestar.feedbackVoteDeleted);
             }
             // Setup a timer to clear the feedback text after 3 seconds
-            feedbackTimerId = setTimeout(function() { feedbackTimerId = 0; $feedback.html('&nbsp;'); }, 3000);
+            feedbackTimerId = setTimeout(function() { clearTimeout(feedbackTimerId); feedbackTimerId = 0; $summary.html(returnObj.result.summary[returnObj.display.text]); }, 2000);
           }
           // Update the current star currentValue to the previous average.
           if (returnObj.vote.value == 0 && starDisplay == 'average') {
@@ -312,12 +328,19 @@
       // If this is a combo display, update the average star display.
       if (voteResult.display.stars == 'combo') {
         $('div.fivestar-form-'+voteResult.vote.id).each(function() {
+          // Update stars.
           var $stars = $('.fivestar-widget-static .star span', this);
           var average = voteResult.result.average/100 * $stars.size();
           var index = Math.floor(average);
           $stars.removeClass('on').addClass('off').css('width', 'auto');
           $stars.filter(':lt(' + (index + 1) + ')').removeClass('off').addClass('on');
           $stars.eq(index).css('width', ((average - index) * 100) + "%");
+          // Update summary.
+          var $summary = $('.fivestar-static-form-item .fivestar-summary', this);
+          if ($summary.size()) {
+            var textDisplay = $summary.attr('class').replace(/.*?fivestar-summary-([^ ]+).*?/, '$1').replace(/-/g, '_');
+            $summary.html(voteResult.result.summary[textDisplay]);
+          }
         });
       }
     };
