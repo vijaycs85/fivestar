@@ -744,6 +744,8 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $res
       $votes = $criteria += array('value' => $value, 'uid' => $uid);
       votingapi_set_votes($votes, $user_votes);
       return fivestar_get_votes($type, $cid, $tag, $uid);
+      unset($votes['user']);
+      return $votes;
     }
   }
 }
