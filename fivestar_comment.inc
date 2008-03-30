@@ -63,7 +63,6 @@ function fivestar_comment_form_alter($form_id, &$form) {
             '#content_id' => $node->nid,
             '#required' => variable_get('fivestar_comment_'. $node->type, FIVESTAR_COMMENT_DISABLED) == FIVESTAR_COMMENT_REQUIRED ? 1 : 0,
             '#default_value' => $default_value,
-            '#description' => '&nbsp;',
             '#labels' => variable_get('fivestar_labels_'. $node->type, array()),
           );
         }

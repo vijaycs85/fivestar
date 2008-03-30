@@ -10,6 +10,9 @@ div.fivestar-widget .star {
   margin-left: 40px;
   margin-right: 0px;
 }
+.fivestar-combo-stars .fivestar-form-item {
+  float: right; /* RTL */
+}
 
 /* Static View-only Star Version */
 div.fivestar-widget-static br {
