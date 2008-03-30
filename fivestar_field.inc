@@ -187,9 +187,10 @@ function fivestar_widget($op, &$node, $field, &$items) {
         '#allow_clear' => $field['widget']['allow_clear'],
         '#description' => $field['widget']['description'],
         '#weight' => $field['widget']['weight'],
-        '#auto_submit' => false,
+        '#auto_submit' => FALSE,
         '#widget' => $field['widget']['type'],
         '#required' => $field['required'],
+        '#labels_enable' => FALSE,
       );
 
       $form[$field['field_name']][0]['target'] = array(
