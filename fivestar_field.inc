@@ -11,7 +11,10 @@
  */
 function fivestar_field_info() {
   return array(
-    'fivestar' => array('label' => t('Fivestar Rating')),
+    'fivestar' => array(
+      'label' => t('Fivestar Rating'),
+      'description' => t('Store a rating for this piece of content.'),
+    ),
   );
 }
 
