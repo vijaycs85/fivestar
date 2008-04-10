@@ -28,15 +28,6 @@ function fivestar_help($path, $arg) {
  */
 function fivestar_menu() {
   $items = array();
-  $items['admin/settings/votingapi'] = array(
-    'title'            => 'Voting API',
-    'description'      => 'Global settings for the Voting API.',
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('votingapi_settings_form'),
-    'access callback'  => 'user_access',
-    'access arguments' => array('administer voting api'),
-    'type'             => MENU_NORMAL_ITEM
-  );
   $items['admin/settings/fivestar'] = array(
     'title'             => 'Fivestar',
     'page callback'     => 'drupal_get_form',
