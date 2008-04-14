@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+// Get the current schema so that updates that have already run for 5 don't get
+// run a second time when upgrading to 6.
+define('FIVESTAR_VERSION', db_result(db_query("SELECT schema_version FROM {system} WHERE type = 'module' && name = 'fivestar'")));
+
 function fivestar_schema() {
   $schema['fivestar_comment'] = array(
     'fields' => array(
@@ -96,12 +100,15 @@ function fivestar_update_6100() {
 function fivestar_update_6101() {
   $ret = array();
 
-  db_add_field($ret, 'fivestar_comment', 'vote_id', array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0));
-  db_add_index($ret, 'fivestar_comment', 'vote_id', array('vote_id'));
+  // This update will already be run as fivestar_update_5701 on Drupal 5.
+  if (FIVESTAR_VERSION >= 6100) {
+    db_add_field($ret, 'fivestar_comment', 'vote_id', array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0));
+    db_add_index($ret, 'fivestar_comment', 'vote_id', array('vote_id'));
 
-  $comments = db_query('SELECT fc.cid, fc.value, v.vote_id FROM {fivestar_comment} fc INNER JOIN {comments} c ON fc.cid = c.cid INNER JOIN {votingapi_vote} v ON fc.value = v.value AND c.nid = v.content_id AND c.uid = v.uid WHERE v.tag = "vote" AND v.value_type = "percent" AND v.content_type = "node"');
-  while ($comment = db_fetch_object($comments)) {
-    db_query('UPDATE {fivestar_comment} SET vote_id = %d WHERE cid = %d', $comment->vote_id, $comment->cid);
+    $comments = db_query('SELECT fc.cid, fc.value, v.vote_id FROM {fivestar_comment} fc INNER JOIN {comments} c ON fc.cid = c.cid INNER JOIN {votingapi_vote} v ON fc.value = v.value AND c.nid = v.content_id AND c.uid = v.uid WHERE v.tag = "vote" AND v.value_type = "percent" AND v.content_type = "node"');
+    while ($comment = db_fetch_object($comments)) {
+      db_query('UPDATE {fivestar_comment} SET vote_id = %d WHERE cid = %d', $comment->vote_id, $comment->cid);
+    }
   }
 
   return $ret;
