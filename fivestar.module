@@ -225,10 +225,11 @@ function fivestar_form_alter($form_id, &$form) {
       '#title' => t('Teaser display'),
       '#default_value' => variable_get('fivestar_position_teaser_'. $form['#node_type']->type, 'hidden'),
       '#options' => array(
-        'above' => t('Rating widget above the teaser'),
-        'below' => t('Rating widget below the teaser'),
-        'above_static' => t('Static display above the teaser'),
-        'below_static' => t('Static display below the teaser'),
+        'above' => t('Clickable widget above teaser'),
+        'below' => t('Clickable widget below teaser'),
+        'above_static' => t('Static display above teaser'),
+        'below_static' => t('Static display below teaser'),
+        'link' => t('Teaser link to full node widget'),
         'hidden' => t('<Hidden>'),
       ),
     );
@@ -238,10 +239,10 @@ function fivestar_form_alter($form_id, &$form) {
       '#title' => t('Full node display'),
       '#default_value' => variable_get('fivestar_position_'. $form['#node_type']->type, 'below'),
       '#options' => array(
-        'above' => t('Above the node body'),
-        'below' => t('Below the node body'),
-        'above_static' => t('Static display above the node body'),
-        'below_static' => t('Static display below the node body'),
+        'above' => t('Clickable widget above node body'),
+        'below' => t('Clickable widget below node body'),
+        'above_static' => t('Static display above node body'),
+        'below_static' => t('Static display below node body'),
         'hidden' => t('<Hidden>'),
       ),
     );
@@ -836,6 +837,28 @@ function fivestar_nodeapi(&$node, $op, $teaser, $page) {
       break;
   }
 }
+
+
+/**
+ * Implementation of hook_link()
+ *
+ * Add a "rate" link to node teaser.
+ */
+function fivestar_link($type, $node = NULL, $teaser = FALSE) {
+  $links = array();
+  if ($type == "node" && $teaser) {
+    if (variable_get('fivestar_position_teaser_'. $node->type, 'above') == "link") {
+      $links['rate'] = array(
+        'title' => t('Rate'),
+        'href' => 'node/'. $node->nid,
+        'fragment' => 'fivestar-form-node-'. $node->nid,
+        'attributes' => array('title' => t('Rate this @type', array('@type', node_get_types('name', $node->type)))),
+      );
+    }
+  }
+  return $links;
+}
+
 
 function fivestar_block($op = 'list', $delta = 0, $edit = array()) {
   global $user;
