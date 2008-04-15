@@ -37,15 +37,7 @@ if (Drupal.jsEnabled) {
     });
 
     // Setup radio buttons.
-    $(radios).change(function() {
-      var thisRadio = this;
-      $(colorRadios).each(function() {
-        var widgetName = this.value.replace(/.*?\/([^\/]+)\.css/, '$1');
-        var fivestarWidget = document.getElementById('fivestar-preview-' + widgetName);
-        $('.star, .star a, .cancel, .cancel a', fivestarWidget).css('background-image', '');
-      });
-      changeType();
-    });
+    $(radios).change(changeRadio).click(changeRadio);
 
     // Setup color display select.
     $(typeSelect).change(changeType);
@@ -55,6 +47,19 @@ if (Drupal.jsEnabled) {
     $('*', $('#placeholder .farbtastic')).bind('mouseup', function() {
       preview();
     });
+
+    /**
+     * Change the current widget receiving the dynamic color updates.
+     */
+    function changeRadio() {
+      var thisRadio = this;
+      $(colorRadios).each(function(){
+        var widgetName = this.value.replace(/.*?\/([^\/]+)\.css/, '$1');
+        var fivestarWidget = document.getElementById('fivestar-preview-' + widgetName);
+        $('.star, .star a, .cancel, .cancel a', fivestarWidget).css('background-image', '');
+      });
+      changeType();
+    }
 
     /**
      * Show or hide the second set of colors.
