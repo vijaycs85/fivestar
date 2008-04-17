@@ -3,7 +3,7 @@
 
 // Get the current schema so that updates that have already run for 5 don't get
 // run a second time when upgrading to 6.
-define('FIVESTAR_VERSION', db_result(db_query("SELECT schema_version FROM {system} WHERE type = 'module' && name = 'fivestar'")));
+define('FIVESTAR_VERSION', db_result(db_query("SELECT schema_version FROM {system} WHERE type = 'module' AND name = 'fivestar'")));
 
 function fivestar_schema() {
   $schema['fivestar_comment'] = array(
