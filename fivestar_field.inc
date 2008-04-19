@@ -21,7 +21,11 @@ function fivestar_field_info() {
 function fivestar_field_settings($op, $field) {
   switch ($op) {
     case 'form':
-      $form['multiple'] = array(); // Multiple not supported
+      // Multiple is not supported with Fivestar.
+      $form['multiple'] = array(
+        '#type' => 'value',
+        '#value' => 0,
+      );
       $form['stars'] = array(
         '#type' => 'select',
         '#title' => t('Number of Options'),
@@ -111,6 +115,7 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
           else {
             _fivestar_cast_vote('node', $items[$delta]['target'], $item['rating'], $items[$delta]['axis'], $node->uid);
           }
+          votingapi_recalculate_results('node', $items[$delta]['target']);
         }
       }
       break;
@@ -182,8 +187,8 @@ function fivestar_widget($op, &$node, $field, &$items) {
       $form[$field['field_name']][0]['rating'] = array(
         '#type' => 'fivestar',
         '#title' => $field['widget']['label'],
-        '#default_value' => $items[0]['rating'],
-        '#stars' => $field['stars'] ? $field['stars'] : 5,
+        '#default_value' => isset($items[0]['rating']) ? $items[0]['rating'] : NULL,
+        '#stars' => is_numeric($field['stars']) ? $field['stars'] : 5,
         '#allow_clear' => $field['widget']['allow_clear'],
         '#description' => $field['widget']['description'],
         '#weight' => $field['widget']['weight'],
