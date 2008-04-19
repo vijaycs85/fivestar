@@ -302,7 +302,7 @@
         }
         $container.addClass('fivestar-widget-' + (size + cancel - 1));
         // Attach the new widget and hide the existing widget.
-        $('select', $widget).after($container).hide();
+        $('select', $widget).after($container).css('display', 'none');
         return $container;
     };
 
@@ -368,6 +368,6 @@
 if (Drupal.jsEnabled) {
   $(document).ready(function() {
     $('div.fivestar-form-item').rating();
-    $('input.fivestar-submit').hide();
+    $('input.fivestar-submit').css('display', 'none');
   });
 }
