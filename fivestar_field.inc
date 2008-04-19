@@ -24,7 +24,11 @@ function fivestar_field_info() {
 function fivestar_field_settings($op, $field) {
   switch ($op) {
     case 'form':
-      $form['multiple'] = array(); // Multiple not supported
+      // Multiple is not supported with Fivestar.
+      $form['multiple'] = array(
+        '#type' => 'value',
+        '#value' => 0,
+      );
       $form['stars'] = array(
         '#type' => 'select',
         '#title' => t('Number of Options'),
@@ -74,11 +78,10 @@ function fivestar_field_settings($op, $field) {
     case 'save':
       return array('stars', 'dynamic_target', 'target', 'php', 'axis');
     case 'database columns':
-      $columns = array(
-        'target' => array('type' => 'int', 'default' => 'NULL'),
-        'rating' => array('type' => 'int', 'default' => 'NULL'),
+      return array(
+        'target' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE),
+        'rating' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE),
       );
-      return $columns;
   }
 }
   
@@ -87,12 +90,8 @@ function fivestar_field_settings($op, $field) {
  */
 function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
   $fieldname = $field['field_name'];
+
   switch ($op) {
-    case 'view':
-      foreach ($items as $delta => $item) {
-        $items[$delta]['view'] = content_format($field, $item);
-      }
-      return theme('field', $node, $field, $items, $teaser, $page);
     case 'insert':
     case 'update':
       foreach ($items as $delta => $item) {
@@ -106,16 +105,12 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
           // Use eval rather than drupal_eval to allow access to local variables.
           $items[$delta]['target'] = eval('?>'. $item['target']);
         }
-
-        if (is_numeric($items[$delta]['target'])) {
-          if ($item['rating'] == 0) {
-            votingapi_unset_vote('node', $items[$delta]['target'], $node->uid);
-          }
-          else {
-            _fivestar_cast_vote('node', $items[$delta]['target'], $item['rating'], $items[$delta]['axis'], $node->uid);
-          }
+        if (is_numeric($item['target'])) {
+          _fivestar_cast_vote('node', $item['target'], $item['rating'], $item['axis'], $node->uid);
+          votingapi_recalculate_results('node', $item['target']);
         }
       }
+      $items = array($item);
       break;
     case 'delete':
       foreach ($items as $delta => $item) {
@@ -129,10 +124,14 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
           // Use eval rather than drupal_eval to allow access to local variables.
           $items[$delta]['target'] = eval('?>'. $item['target']);
         }
-        if (is_numeric($items[$delta]['target'])) {
-          votingapi_unset_vote('node', $items[$delta]['target'], $node->uid);
+        if (is_numeric($item['target'])) {
+          _fivestar_cast_vote('node', $item['target'], 0, $item['axis'], $node->uid);
+          votingapi_recalculate_results('node', $item['target']);
         }
       }
+      break;
+    case 'sanitize':
+      $items[0]['stars'] = $field['stars'];
       break;
   }
 }
@@ -145,10 +144,12 @@ function fivestar_widget_info() {
     'radios' => array(
       'label' => t('Radio Buttons'),
       'field types' => array('fivestar'),
+      'multiple values' => CONTENT_HANDLE_MODULE,
     ),
     'stars' => array(
       'label' => t('Stars'),
       'field types' => array('fivestar'),
+      'multiple values' => CONTENT_HANDLE_MODULE,
     ),
   );
 }
@@ -176,36 +177,35 @@ function fivestar_widget_settings($op, $widget) {
 /**
  * Implementation of hook_widget().
  */
-function fivestar_widget($op, &$node, $field, &$items) {
-  switch ($op) {
-    case 'form':
-      $form = array();
-      
-      $form[$field['field_name']] = array('#tree' => TRUE);
-      $form[$field['field_name']][0]['rating'] = array(
-        '#type' => 'fivestar',
-        '#title' => $field['widget']['label'],
-        '#default_value' => $items[0]['rating'],
-        '#stars' => $field['stars'] ? $field['stars'] : 5,
-        '#allow_clear' => $field['widget']['allow_clear'],
-        '#description' => $field['widget']['description'],
-        '#weight' => $field['widget']['weight'],
-        '#auto_submit' => FALSE,
-        '#widget' => $field['widget']['type'],
-        '#required' => $field['required'],
-        '#labels_enable' => FALSE,
-      );
+function fivestar_widget(&$form, &$form_state, $field, $items) {
+  $element = array('#tree' => TRUE);
+  $element['rating'] = array(
+    '#type' => 'fivestar',
+    '#title' => $field['widget']['label'],
+    '#default_value' => isset($items[0]['rating']) ? $items[0]['rating'] : NULL,
+    '#stars' => is_numeric($field['stars']) ? $field['stars'] : 5,
+    '#allow_clear' => $field['widget']['allow_clear'],
+    '#description' => $field['widget']['description'],
+    '#weight' => $field['widget']['weight'],
+    '#auto_submit' => FALSE,
+    '#widget' => $field['widget']['type'],
+    '#required' => $field['required'],
+    '#labels_enable' => FALSE,
+  );
 
-      $form[$field['field_name']][0]['target'] = array(
-        '#type' => 'value',
-        '#value' => $field['target'],
-      );
-      $form[$field['field_name']][0]['axis'] = array(
-        '#type' => 'value',
-        '#value' => $field['axis'],
-      );
-      return $form;
-  }
+  $element['target'] = array(
+    '#type' => 'value',
+    '#value' => $field['target'],
+  );
+  $element['axis'] = array(
+    '#type' => 'value',
+    '#value' => $field['axis'],
+  );
+
+  // CCK likes to always have a 2D array for form elements.
+  $element = array($element);
+
+  return $element;
 }
       
 /**
@@ -249,4 +249,37 @@ function fivestar_field_formatter($field, $item, $formatter, $node) {
     default:
       return theme('fivestar_static', $item['rating'], $field['stars']);
   }
+}
+
+/**
+ * Theme function for 'default' fivestar field formatter.
+ */
+function theme_fivestar_formatter_default($element) {
+  if (!isset($element['#item']['rating'])) {
+    $element['#item']['rating'] = 0;
+  }
+
+  return theme('fivestar_static', $element['#item']['rating'], $element['#item']['stars']);
+}
+
+/**
+ * Theme function for 'default' fivestar field formatter.
+ */
+function theme_fivestar_formatter_rating($element) {
+  if (!isset($element['#item']['rating'])) {
+    $element['#item']['rating'] = 0;
+  }
+
+  return theme('fivestar_static', $element['#item']['rating'], $element['#field']['stars']);
+}
+
+/**
+ * Theme function for 'default' fivestar field formatter.
+ */
+function theme_fivestar_formatter_percentage($element) {
+  if (!isset($element['#item']['rating'])) {
+    $element['#item']['rating'] = 0;
+  }
+
+  return round(100/$element['#item']['rating'], 1)/$element['#field']['stars'];
 }

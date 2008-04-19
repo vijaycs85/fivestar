@@ -121,7 +121,16 @@ function fivestar_theme() {
     // fivestar_color.inc.
     'fivestar_color_form' => array(
       'arguments' => array('form' => NULL),
-      
+    ),
+    // fivestar_field.inc.
+    'fivestar_formatter_default' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'fivestar_formatter_rating' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'fivestar_formatter_percentage' => array(
+      'arguments' => array('element' => NULL),
     ),
   );
 }
@@ -670,6 +679,7 @@ function theme_fivestar_preview_wrapper($content, $type = 'direct') {
 function fivestar_vote($type, $cid, $value, $tag = 'vote') {
 
   $result = _fivestar_cast_vote($type, $cid, $value, $tag, NULL, TRUE);
+  votingapi_recalculate_results($type, $cid);
 
   if ($type == 'node') {
     $node = node_load($cid);
@@ -739,10 +749,8 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $res
     else {
       $votes = $criteria += array('value' => $value, 'uid' => $uid);
       votingapi_set_votes($votes, $user_votes);
-      return fivestar_get_votes($type, $cid, $tag, $uid);
-      unset($votes['user']);
-      return $votes;
     }
+    return fivestar_get_votes($type, $cid, $tag, $uid);
   }
 }
 
@@ -921,8 +929,8 @@ function fivestar_block($op = 'list', $delta = 0, $edit = array()) {
           if (_fivestar_validate_target('node', $node->nid)) {
             $block['subject'] = t('Rate This');
             $block['content'] = fivestar_widget_form($node);
+            return $block;
           }
-          return $block;
         }
       }
       break;
@@ -968,9 +976,9 @@ function fivestar_form(&$form_state, $content_type, $content_id) {
   $votes = fivestar_get_votes($content_type, $content_id);
 
   $values = array(
-    'user' => $votes['user']['value'],
-    'average' => $votes['average']['value'],
-    'count' => $votes['count']['value'],
+    'user' => isset($votes['user']['value']) ? $votes['user']['value'] : NULL,
+    'average' => isset($votes['average']['value']) ? $votes['average']['value'] : NULL,
+    'count' => isset($votes['count']['value']) ? $votes['count']['value'] : NULL,
   );
 
   $settings = array(
@@ -1201,6 +1209,7 @@ function fivestar_form_submit($form, &$form_state) {
   if ($form_state['values']['form_id'] == 'fivestar_form_'. $form_state['values']['content_type'] .'_'. $form_state['values']['content_id']) {
     // Cast the vote.
     _fivestar_cast_vote($form_state['values']['content_type'], $form_state['values']['content_id'], $form_state['values']['vote']);
+    votingapi_recalculate_results($form_state['values']['content_type'], $form_state['values']['content_id']);
 
     // Set a message that the vote was received.
     if ($form_state['values']['vote'] === '0') {
@@ -1332,6 +1341,7 @@ function theme_fivestar_static($rating, $stars = 5) {
 
 function theme_fivestar_summary($user_rating, $average_rating, $votes, $stars = 5, $feedback = TRUE) {
   $output = '';
+  $div_class = '';
   if (isset($user_rating)) {
     $div_class = isset($votes) ? 'user-count' : 'user';
     $user_stars = round(($user_rating * $stars) / 100, 1);
@@ -1502,7 +1512,7 @@ function fivestar_expand($element) {
   $label_class = $element['#labels_enable'] ? ' fivestar-labels-hover' : '';
 
   $element['#id'] = 'edit-vote-'. $fivestar_id;
-  $element['#prefix'] = '<div class="fivestar-form-item '. $element['#attributes']['class'] . $label_class .'">';
+  $element['#prefix'] = '<div class="fivestar-form-item '. (isset($element['#attributes']['class']) ? $element['#attributes']['class'] : '') . $label_class .'">';
   $element['#suffix'] = '</div>';
 
   // Add validation function that considers a 0 value as empty.

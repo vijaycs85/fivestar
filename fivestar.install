@@ -22,11 +22,35 @@ function fivestar_schema() {
 
 function fivestar_install() {
   drupal_install_schema('fivestar');
+  if (module_exists('content')) {
+    content_notify('install', 'fivestar');
+  }
 }
 
 function fivestar_uninstall() {
   drupal_uninstall_schema('fivestar');
   db_query("DELETE FROM {variable} WHERE name LIKE 'fivestar_%'");
+  if (module_exists('content')) {
+    content_notify('uninstall', 'fivestar');
+  }
+}
+
+/**
+* Implementation of hook_enable().
+*/
+function fivestar_enable() {
+  if (module_exists('content')) {
+    content_notify('enable', 'fivestar');
+  }
+}
+
+/**
+* Implementation of hook_disable().
+*/
+function fivestar_disable() {
+  if (module_exists('content')) {
+    content_notify('disable', 'fivestar');
+  }
 }
 
 /**
@@ -111,5 +135,18 @@ function fivestar_update_6101() {
     }
   }
 
+  return $ret;
+}
+
+/**
+ * Set Fivestar weight to -1 so that it can load before content.module.
+ */
+function fivestar_update_6102() {
+  $ret = array();
+
+  // This update will already be run as fivestar_update_5701 on Drupal 5.
+  if (FIVESTAR_VERSION >= 6100) {
+    $ret[] = update_sql("UPDATE {system} SET weight = -1 WHERE type = 'module' AND name = 'fivestar'");
+  }
   return $ret;
 }
