@@ -875,8 +875,8 @@ function fivestar_block($op = 'list', $delta = 0, $edit = array()) {
           if (_fivestar_validate_target('node', $node->nid)) {
             $block['subject'] = t('Rate This');
             $block['content'] = fivestar_widget_form($node);
+            return $block;
           }
-          return $block;
         }
       }
       break;
@@ -1296,6 +1296,7 @@ function theme_fivestar_static($rating, $stars = 5) {
 
 function theme_fivestar_summary($user_rating, $average_rating, $votes, $stars = 5, $feedback = TRUE) {
   $output = '';
+  $div_class = '';
   if (isset($user_rating)) {
     $div_class = isset($votes) ? 'user-count' : 'user';
     $user_stars = round(($user_rating * $stars) / 100, 1);
@@ -1466,7 +1467,7 @@ function fivestar_expand($element) {
   $label_class = $element['#labels_enable'] ? ' fivestar-labels-hover' : '';
 
   $element['#id'] = 'edit-vote-'. $fivestar_id;
-  $element['#prefix'] = '<div class="fivestar-form-item '. $element['#attributes']['class'] . $label_class .'">';
+  $element['#prefix'] = '<div class="fivestar-form-item '. (isset($element['#attributes']['class']) ? $element['#attributes']['class'] : '') . $label_class .'">';
   $element['#suffix'] = '</div>';
 
   // Add validation function that considers a 0 value as empty.

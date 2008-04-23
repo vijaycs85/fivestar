@@ -109,12 +109,7 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
         }
 
         if (is_numeric($items[$delta]['target'])) {
-          if ($item['rating'] == 0) {
-            votingapi_unset_vote('node', $items[$delta]['target'], $node->uid);
-          }
-          else {
-            _fivestar_cast_vote('node', $items[$delta]['target'], $item['rating'], $items[$delta]['axis'], $node->uid);
-          }
+          _fivestar_cast_vote('node', $items[$delta]['target'], $item['rating'], $items[$delta]['axis'], $node->uid);
           votingapi_recalculate_results('node', $items[$delta]['target']);
         }
       }
@@ -132,7 +127,8 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
           $items[$delta]['target'] = eval('?>'. $item['target']);
         }
         if (is_numeric($items[$delta]['target'])) {
-          votingapi_unset_vote('node', $items[$delta]['target'], $node->uid);
+          _fivestar_cast_vote('node', $items[$delta]['target'], 0, $items[$delta]['axis'], $node->uid);
+          votingapi_recalculate_results('node', $items[$delta]['target']);
         }
       }
       break;
