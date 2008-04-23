@@ -876,6 +876,7 @@ function fivestar_nodeapi(&$node, $op, $teaser, $page) {
               );
               break;
             } // Fall through to static if not allowed to rate.
+            $position .= '_static';
           case 'above_static':
           case 'below_static':
             $stars = variable_get('fivestar_stars_'. $node->type, 5);
