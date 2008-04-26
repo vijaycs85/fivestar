@@ -263,7 +263,7 @@
             feedbackTimerId = setTimeout(function() { clearTimeout(feedbackTimerId); feedbackTimerId = 0; $summary.html(returnObj.result.summary[returnObj.display.text]); }, 2000);
           }
           // Update the current star currentValue to the previous average.
-          if (returnObj.vote.value == 0 && starDisplay == 'average') {
+          if (returnObj.vote.value == 0 && (starDisplay == 'average' || starDisplay == 'smart')) {
             currentValue = returnObj.result.average;
             event.reset();
           }
