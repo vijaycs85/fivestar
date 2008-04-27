@@ -112,7 +112,7 @@ function fivestar_comment(&$comment, $op) {
       if ($fivestar_status != FIVESTAR_COMMENT_DISABLED) {
         $comment = (object)$comment; // Comment module is inconsistent about comment data structures.
         if ($comment->fivestar_rating) {
-          fivestar_comment_insert($comment->cid, $comment->nid, $commnt->uid, $comment->fivestar_rating);
+          fivestar_comment_insert($comment->cid, $comment->nid, $comment->uid, $comment->fivestar_rating);
         }
         $comment = (array)$comment;
       }
@@ -122,10 +122,10 @@ function fivestar_comment(&$comment, $op) {
         $current_rating = fivestar_comment_load($comment->cid, $comment->nid);
         if ($comment->fivestar_rating) {
           if (isset($current_rating['value'])) {
-            fivestar_comment_update($comment->cid, $comment->nid, $commnt->uid, $comment->fivestar_rating);
+            fivestar_comment_update($comment->cid, $comment->nid, $comment->uid, $comment->fivestar_rating);
           }
           else {
-            fivestar_comment_insert($comment->cid, $comment->nid, $commnt->uid, $comment->fivestar_rating);
+            fivestar_comment_insert($comment->cid, $comment->nid, $comment->uid, $comment->fivestar_rating);
           }
         }
         elseif ($fivestar_status != FIVESTAR_COMMENT_DISABLED && isset($current_rating['value'])) {
@@ -160,7 +160,7 @@ function fivestar_comment_load($cid, $nid, $reset = FALSE) {
  */
 function fivestar_comment_update($cid, $nid, $uid, $value) {
   $vote = _fivestar_cast_vote('node', $nid, $value, 'vote', $uid);
-  db_query('UPDATE {fivestar_comment} SET value = %d, vote_id = %d WHERE cid = %d', $value, $vote['vote_id'], $cid);
+  db_query('UPDATE {fivestar_comment} SET value = %d, vote_id = %d WHERE cid = %d', $value, $vote['user']['vote_id'], $cid);
 }
 
 /**
@@ -168,7 +168,7 @@ function fivestar_comment_update($cid, $nid, $uid, $value) {
  */
 function fivestar_comment_insert($cid, $nid, $uid, $value) {
   $vote = _fivestar_cast_vote('node', $nid, $value, 'vote', $uid);
-  db_query('INSERT INTO {fivestar_comment} (cid, value) VALUES (%d, %d)', $cid, $vote['vote_id'], $value);
+  db_query('INSERT INTO {fivestar_comment} (cid, value) VALUES (%d, %d)', $cid, $vote['user']['vote_id'], $value);
 }
 
 /**
