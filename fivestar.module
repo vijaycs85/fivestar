@@ -732,13 +732,13 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL) {
         votingapi_delete_vote($old_vote);
       }
       else {
-        votingapi_change_vote($old_vote, $value);
+        $vote = votingapi_change_vote($old_vote, $value);
       }
     }
     elseif ($value != 0) {
       $vote = votingapi_add_vote($type, $cid, $value, 'percent', $tag, $uid);
     }
-    return votingapi_recalculate_results($type, $cid);
+    return $vote;
   }
   else {
     return array();

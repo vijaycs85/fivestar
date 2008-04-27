@@ -112,7 +112,7 @@ function fivestar_comment(&$comment, $op) {
       if ($fivestar_status != FIVESTAR_COMMENT_DISABLED) {
         $comment = (object)$comment; // Comment module is inconsistent about comment data structures.
         if ($comment->fivestar_rating) {
-          fivestar_comment_insert($comment->cid, $comment->nid, $commnt->uid, $comment->fivestar_rating);
+          fivestar_comment_insert($comment->cid, $comment->nid, $comment->uid, $comment->fivestar_rating);
         }
         $comment = (array)$comment;
       }
@@ -122,10 +122,10 @@ function fivestar_comment(&$comment, $op) {
         $current_rating = fivestar_comment_load($comment->cid, $comment->nid);
         if ($comment->fivestar_rating) {
           if (isset($current_rating['value'])) {
-            fivestar_comment_update($comment->cid, $comment->nid, $commnt->uid, $comment->fivestar_rating);
+            fivestar_comment_update($comment->cid, $comment->nid, $comment->uid, $comment->fivestar_rating);
           }
           else {
-            fivestar_comment_insert($comment->cid, $comment->nid, $commnt->uid, $comment->fivestar_rating);
+            fivestar_comment_insert($comment->cid, $comment->nid, $comment->uid, $comment->fivestar_rating);
           }
         }
         elseif ($fivestar_status != FIVESTAR_COMMENT_DISABLED && isset($current_rating['value'])) {
