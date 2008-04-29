@@ -273,6 +273,7 @@ function fivestar_form_alter($form_id, &$form) {
 
   // Add comment form modifications.
   if (module_exists('comment')) {
+    include_once(drupal_get_path('module', 'fivestar') .'/fivestar_comment.inc');
     fivestar_comment_form_alter($form_id, $form);
   }
 }
