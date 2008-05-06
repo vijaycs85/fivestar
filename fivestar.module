@@ -578,7 +578,8 @@ function theme_fivestar_preview_widget($css_file) {
  */
 function fivestar_preview_color() {
   $args = func_get_args();
-  $filename = array_pop($args);
+  // Remove query string if it gets passed in as argument.
+  $filename = preg_replace('/\?.*$/', '', array_pop($args));
   $type = array_pop($args);
   $widget = array_pop($args);
 
