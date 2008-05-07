@@ -10,8 +10,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Fivestar\n"
-"POT-Creation-Date: 2008-03-23 18:27+0000\n"
-"PO-Revision-Date: 2008-03-23 19:42-0000\n"
+"POT-Creation-Date: 2008-05-07 18:21+0100\n"
+"PO-Revision-Date: 2008-05-07 18:26-0000\n"
 "Last-Translator: introfini <introfini@gmail.com>\n"
 "Language-Team: Portuguese <introfini@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -20,6 +20,89 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-Language: Portuguese\n"
 "X-Poedit-Country: PORTUGAL\n"
+
+#: fivestar_color.inc:13
+msgid "Color scheme"
+msgstr "Esquema de cores"
+
+#: fivestar_color.inc:16
+msgid "A custom color widget must be selected to choose colors. Only the selected widget will be previewed."
+msgstr ""
+
+#: fivestar_color.inc:21;30
+msgid "Blue Lagoon (default)"
+msgstr "Azul lagoa"
+
+#: fivestar_color.inc:22
+msgid "Yellow"
+msgstr "Amarelo"
+
+#: fivestar_color.inc:23
+msgid "Red"
+msgstr "Vermelho"
+
+#: fivestar_color.inc:24
+msgid "Blue"
+msgstr "Azul"
+
+#: fivestar_color.inc:25
+msgid "Green"
+msgstr "Verde"
+
+#: fivestar_color.inc:26
+msgid "Custom"
+msgstr "Personalizado"
+
+#: fivestar_color.inc:44
+#, fuzzy
+msgid "Color display"
+msgstr "Exibição do resumo"
+
+#: fivestar_color.inc:45
+#, fuzzy
+msgid "Default display"
+msgstr "Exibição do resumo"
+
+#: fivestar_color.inc:45
+msgid "Solid color"
+msgstr "Cor sólida"
+
+#: fivestar_color.inc:45
+msgid "Gradient"
+msgstr "Gradiente"
+
+#: fivestar_color.inc:52
+msgid "Color set"
+msgstr "Palete de cores"
+
+#: fivestar_color.inc:59
+msgid "On colors"
+msgstr "Cores quando activo"
+
+#: fivestar_color.inc:61
+msgid "Hover colors"
+msgstr "Cores quando por cima"
+
+#: fivestar_color.inc:63
+msgid "Off colors"
+msgstr "Cores quando desligado"
+
+#: fivestar_color.inc:65
+msgid "Matte color"
+msgstr "Cor mate"
+
+#: fivestar_color.inc:97;156
+#, fuzzy
+msgid "none"
+msgstr "Nada"
+
+#: fivestar_color.inc:145
+msgid "The entered value %color is not a valid hex color."
+msgstr ""
+
+#: fivestar_color.inc:202
+msgid "Custom %name stars generated. You may need to clear your browser cache before the new stars are visible."
+msgstr ""
 
 #: fivestar_comment.inc:16
 msgid "Comment widget"
@@ -113,15 +196,15 @@ msgstr "Falso"
 msgid "Display a button to clear the user's current vote."
 msgstr "Exibe um botão para limpar o voto actual do utilizador"
 
-#: fivestar_field.inc:213
+#: fivestar_field.inc:214
 msgid "As Stars"
 msgstr "Como estrelas"
 
-#: fivestar_field.inc:217
+#: fivestar_field.inc:218
 msgid "Rating (i.e. 4.2/5)"
 msgstr "Pontuação (ex: 4.2/5)"
 
-#: fivestar_field.inc:221
+#: fivestar_field.inc:222
 msgid "Percentage (i.e. 92)"
 msgstr "Percentagem (ex: 92)"
 
@@ -235,170 +318,214 @@ msgid "Show widget title"
 msgstr "Mostrar o título do widget"
 
 #: fivestar.module:211
+msgid "Enable confirmations to inform a vote was saved or deleted."
+msgstr ""
+
+#: fivestar.module:218
 msgid "Allow users to undo their votes"
 msgstr "Permitir que os utilizadores anulem o seu voto"
 
-#: fivestar.module:218
+#: fivestar.module:225
 msgid "Teaser display"
 msgstr "Exibição do resumo"
 
-#: fivestar.module:221
-msgid "Rating widget above the teaser"
+#: fivestar.module:228
+#, fuzzy
+msgid "Clickable widget above teaser"
 msgstr "Widget de votação acima do teaser"
 
-#: fivestar.module:222
-msgid "Rating widget below the teaser"
+#: fivestar.module:229
+#, fuzzy
+msgid "Clickable widget below teaser"
 msgstr "Widget de votação abaixo do teaser"
 
-#: fivestar.module:223
-msgid "Static display above the teaser"
+#: fivestar.module:230
+#, fuzzy
+msgid "Static display above teaser"
 msgstr "Mostrar fixo  por cima do resumo"
 
-#: fivestar.module:224
-msgid "Static display below the teaser"
+#: fivestar.module:231
+#, fuzzy
+msgid "Static display below teaser"
 msgstr "Mostrar fixo debaixo do resumo"
 
-#: fivestar.module:225;238
+#: fivestar.module:232
+msgid "Teaser link to full node widget"
+msgstr ""
+
+#: fivestar.module:233;246
 msgid "<Hidden>"
 msgstr "<Escondido>"
 
-#: fivestar.module:231
+#: fivestar.module:239
 msgid "Full node display"
 msgstr "Exibição completa do nó"
 
-#: fivestar.module:234
-msgid "Above the node body"
+#: fivestar.module:242
+#, fuzzy
+msgid "Clickable widget above node body"
 msgstr "Acima do corpo do nó"
 
-#: fivestar.module:235
-msgid "Below the node body"
-msgstr "Abaixo do corpo do nó"
-
-#: fivestar.module:236
-msgid "Static display above the node body"
-msgstr "Acima do corpo do nó"
-
-#: fivestar.module:237
-msgid "Static display below the node body"
+#: fivestar.module:243
+#, fuzzy
+msgid "Clickable widget below node body"
 msgstr "Abaixo do corpo do nó"
 
 #: fivestar.module:244
+#, fuzzy
+msgid "Static display above node body"
+msgstr "Acima do corpo do nó"
+
+#: fivestar.module:245
+#, fuzzy
+msgid "Static display below node body"
+msgstr "Abaixo do corpo do nó"
+
+#: fivestar.module:252
 msgid "Direct rating widget preview"
 msgstr "Pré-visualização do widget de classificação directa"
 
-#: fivestar.module:379
+#: fivestar.module:390
 msgid "Widget display"
 msgstr "Exibição do Fivestar"
 
-#: fivestar.module:380
+#: fivestar.module:391
+msgid "Choose a widget set to be used on your site. Widgets supporting custom colors can be further customized by adjusting the color scheme."
+msgstr ""
+
+#: fivestar.module:419
 msgid "Default"
 msgstr "Padrão"
 
-#: fivestar.module:382
-msgid "Choose a widget set to be used on your site."
-msgstr "Escolha um modo de exibição a ser usado no seu site."
+#: fivestar.module:426
+msgid "Custom color widgets"
+msgstr "Widgets de cores personalizáveis "
 
-#: fivestar.module:387
+#: fivestar.module:439
 msgid "Anonymous vote interval"
 msgstr "Intervalo de cassificação para anónimos"
 
-#: fivestar.module:388
+#: fivestar.module:440
 msgid "Immediately"
 msgstr "Imediatamente"
 
-#: fivestar.module:388
+#: fivestar.module:440
 msgid "Never"
 msgstr "Nunca"
 
-#: fivestar.module:390
+#: fivestar.module:442
 msgid "Anonymous users may add another vote after this interval. Because the same IP addresses may be used by different people, allowing the same IP to vote again several days later may yield more votes."
 msgstr "Os utilizadores anónimos podem votar após este intervalo. Porque o mesmo IP pode ser utilizado por pessoas diferentes, permitir que votem mais tarde no tempo pode levar a mais votos. "
 
-#: fivestar.module:398
+#: fivestar.module:447
+msgid "Submit"
+msgstr "Enviar"
+
+#: fivestar.module:461
 msgid "Fivestar Settings"
 msgstr "Opções do Fivestar"
 
-#: fivestar.module:401;407
+#: fivestar.module:464;469;476
 msgid "Preview"
 msgstr "Pré-visualização"
 
-#: fivestar.module:447
-msgid "Fivestar Preview"
-msgstr "Visualização do Fivestar"
-
-#: fivestar.module:736
-msgid "Fivestar: Rate this node"
-msgstr "Fivestar: Votar neste nó"
-
-#: fivestar.module:744
-msgid "Rate This"
-msgstr "Votar"
-
-#: fivestar.module:847;853;975;980;985;1214
-msgid "Your rating"
-msgstr "A sua votação"
-
-#: fivestar.module:853;859;970;980;992;1214
-msgid "Average"
-msgstr "Média"
-
-#: fivestar.module:944
+#: fivestar.module:853;1079
 msgid "Rate"
 msgstr "Votar"
 
-#: fivestar.module:1025
+#: fivestar.module:856
+#, fuzzy
+msgid "Rate this @type"
+msgstr "Votar"
+
+#: fivestar.module:868
+msgid "Fivestar: Rate this node"
+msgstr "Fivestar: Votar neste nó"
+
+#: fivestar.module:876
+msgid "Rate This"
+msgstr "Votar"
+
+#: fivestar.module:980;986;1112;1117;1122;1375
+msgid "Your rating"
+msgstr "A sua votação"
+
+#: fivestar.module:986;992;1107;1117;1138;1376
+msgid "Average"
+msgstr "Média"
+
+#: fivestar.module:1171
 msgid "Your vote has been cleared."
 msgstr "O seu voto foi removido"
 
-#: fivestar.module:1028
+#: fivestar.module:1174
 msgid "Thank you for your vote."
 msgstr "Obrigado pela sua classificação."
 
-#: fivestar.module:1146
-msgid "No votes yet"
-msgstr "Sem votos"
-
-#: fivestar.module:1153
+#: fivestar.module:1302
 msgid "Your rating: <span>!stars</span>"
 msgstr "O seu voto: <span>!stars</span>"
 
-#: fivestar.module:1153
+#: fivestar.module:1302
 msgid "None"
 msgstr "Nada"
 
-#: fivestar.module:1161
+#: fivestar.module:1310
 msgid "Average: <span>!stars</span>"
 msgstr "Média: <span>!stars</span>"
 
-#: fivestar.module:1250
+#: fivestar.module:1325
+msgid "No votes yet"
+msgstr "Sem votos"
+
+#: fivestar.module:1377
+#, fuzzy
+msgid "Saving your vote..."
+msgstr "Obrigado pela sua classificação."
+
+#: fivestar.module:1378
+#, fuzzy
+msgid "Your vote has been saved."
+msgstr "O seu voto foi removido"
+
+#: fivestar.module:1379
+msgid "Deleting your vote..."
+msgstr "A eliminar o voto..."
+
+#: fivestar.module:1380
+#, fuzzy
+msgid "Your vote has been deleted."
+msgstr "O seu voto foi removido"
+
+#: fivestar.module:1424
 msgid "Select rating"
 msgstr "Votar"
 
-#: fivestar.module:1258
+#: fivestar.module:1432
 msgid "Cancel rating"
 msgstr "Pontuação actual"
 
-#: fivestar.module:1266
+#: fivestar.module:1440
 msgid "Give it @star/@count"
 msgstr "Dar @star/@count"
 
-#: fivestar.module:1306
+#: fivestar.module:1481
 msgid "!name field is required."
 msgstr "!name field é necessário."
 
-#: fivestar.module:1313
+#: fivestar.module:1488
 msgid "Fivestar Stars (display only)"
 msgstr "Estilo de exibição cinco estrelas"
 
-#: fivestar.module:1314
+#: fivestar.module:1489
 msgid "Fivestar Stars (clickable, no text)"
 msgstr "Estrelas Fivestar (clicáveis, sem texto)"
 
-#: fivestar.module:1315
+#: fivestar.module:1490
 msgid "Fivestar Stars (clickable, with text)"
 msgstr "Estrelas Fivestar (clicáveis, com texto)"
 
-#: fivestar.module:1167
+#: fivestar.module:1317;1321
 msgid "<span>1</span> vote"
 msgid_plural "<span>@count</span> votes"
 msgstr[0] "<span>1</span> voto"
@@ -424,6 +551,14 @@ msgstr "Um mecanismo para votação com cinco estrelas simples."
 msgid "Voting"
 msgstr "Votação"
 
+#~ msgid "Above the node body"
+#~ msgstr "Acima do corpo do nó"
+#~ msgid "Below the node body"
+#~ msgstr "Abaixo do corpo do nó"
+#~ msgid "Choose a widget set to be used on your site."
+#~ msgstr "Escolha um modo de exibição a ser usado no seu site."
+#~ msgid "Fivestar Preview"
+#~ msgstr "Visualização do Fivestar"
 #~ msgid "Five Star ratings"
 #~ msgstr "Pontuação cinco estrelas"
 #~ msgid "Nothing but the stars"
