@@ -912,7 +912,7 @@ function fivestar_link($type, $node = NULL, $teaser = FALSE) {
         'title' => t('Rate'),
         'href' => 'node/'. $node->nid,
         'fragment' => 'fivestar-form-node-'. $node->nid,
-        'attributes' => array('title' => t('Rate this @type', array('@type', node_get_types('name', $node->type)))),
+        'attributes' => array('title' => t('Rate this @type', array('@type' => node_get_types('name', $node->type)))),
       );
     }
   }
