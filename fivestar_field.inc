@@ -105,9 +105,9 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
           // Use eval rather than drupal_eval to allow access to local variables.
           $items[$delta]['target'] = eval('?>'. $item['target']);
         }
-        if (is_numeric($item['target'])) {
-          _fivestar_cast_vote('node', $item['target'], $item['rating'], $item['axis'], $node->uid);
-          votingapi_recalculate_results('node', $item['target']);
+        if (is_numeric($items[$delta]['target'])) {
+          _fivestar_cast_vote('node', $items[$delta]['target'], $item['rating'], $item['axis'], $node->uid);
+          votingapi_recalculate_results('node', $items[$delta]['target']);
         }
       }
       $items = array($item);
