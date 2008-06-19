@@ -11,7 +11,7 @@
  */
 function fivestar_field_info() {
   return array(
-    'fivestar' => array('label' => t('Fivestar Rating')),
+    'fivestar' => array('label' => t('Fivestar')),
   );
 }
 
@@ -76,8 +76,8 @@ function fivestar_field_settings($op, $field) {
       return array('stars', 'dynamic_target', 'target', 'php', 'axis');
     case 'database columns':
       $columns = array(
+        'rating' => array('type' => 'int', 'default' => 'NULL', 'sortable' => TRUE),
         'target' => array('type' => 'int', 'default' => 'NULL'),
-        'rating' => array('type' => 'int', 'default' => 'NULL'),
       );
       return $columns;
   }
