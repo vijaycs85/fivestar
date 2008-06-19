@@ -79,8 +79,8 @@ function fivestar_field_settings($op, $field) {
       return array('stars', 'dynamic_target', 'target', 'php', 'axis');
     case 'database columns':
       return array(
+        'rating' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE, 'sortable' => TRUE),
         'target' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE),
-        'rating' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE),
       );
   }
 }
