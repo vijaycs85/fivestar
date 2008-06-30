@@ -65,14 +65,11 @@ function fivestar_menu($may_cache) {
  * IS compatible with agressive caching, we just need a way to annouce that.
  */
 function fivestar_init() {
-  // ensure we are not serving a cached page
+  // Ensure we are not serving a cached page.
   if (function_exists('drupal_set_content')) {
     if (module_exists('content')) {
       include_once(drupal_get_path('module', 'fivestar') .'/fivestar_field.inc');
     }
-  }
-  if (module_exists('comment')) {
-    include_once(drupal_get_path('module', 'fivestar') .'/fivestar_comment.inc');
   }
 }
 
@@ -270,12 +267,6 @@ function fivestar_form_alter($form_id, &$form) {
 
     $form['#submit']['fivestar_node_type_form_submit'] = array();
   }
-
-  // Add comment form modifications.
-  if (module_exists('comment')) {
-    include_once(drupal_get_path('module', 'fivestar') .'/fivestar_comment.inc');
-    fivestar_comment_form_alter($form_id, $form);
-  }
 }
 
 /**
@@ -336,7 +327,7 @@ function theme_fivestar_node_type_form($form) {
   $output .= drupal_render($form['direct']);
 
   // Comment settings form.
-  if (module_exists('comment')) {
+  if (module_exists('fivestar_comment')) {
     $comment = '';
     $comment .= '<div id="fivestar-comment-form">';
     $comment .= drupal_render($form['comment']['fivestar_comment']);
@@ -344,7 +335,7 @@ function theme_fivestar_node_type_form($form) {
     $comment .= '<div id="fivestar-comment-preview">';
     $comment .= drupal_render($form['comment']['fivestar_comment_preview']);
     $comment .= '</div>';
-  
+
     $form['comment']['#children'] = $comment;
     $output .= drupal_render($form['comment']);
   }

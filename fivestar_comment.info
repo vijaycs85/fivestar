@@ -1,0 +1,5 @@
+; $Id$
+name = Fivestar Comments
+description = Rate nodes by leaving comments.
+dependencies = votingapi fivestar
+package = Voting

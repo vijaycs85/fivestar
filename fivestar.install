@@ -1,33 +1,15 @@
 <?php
 // $Id$
 
-function fivestar_install() {
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      db_query("CREATE TABLE {fivestar_comment} (
-        cid int NOT NULL default '0',
-        vote_id int(10) NOT NULL default '0',
-        value tinyint unsigned NOT NULL default '0',
-        PRIMARY KEY (cid),
-        INDEX (vote_id)
-      ) /*!40100 DEFAULT CHARACTER SET UTF8 */ ");
-      break;
+// Get the current schema so that updates that have already run for 5 don't get
+// run a second time when upgrading to 6.
+define('FIVESTAR_VERSION', db_result(db_query("SELECT schema_version FROM {system} WHERE type = 'module' AND name = 'fivestar'")));
 
-    case 'pgsql':
-      db_query("CREATE TABLE {fivestar_comment} (
-        cid integer NOT NULL default '0',
-        vote_id integer NOT NULL default '0',
-        value smallint NOT NULL default '0',
-        PRIMARY KEY (cid)
-      )");
-      db_query("CREATE INDEX {fivestar_comment}_vote_id_idx ON {fivestar_comment} (vote_id)");
-      break;
-  }
+function fivestar_install() {
+  // No install needed for Fivestar. Uses the VotingAPI tables.
 }
 
 function fivestar_uninstall() {
-  db_query("DROP TABLE {fivestar_comment}");
   db_query("DELETE FROM {variable} WHERE name LIKE 'fivestar_%'");
 }
 
@@ -35,28 +17,8 @@ function fivestar_uninstall() {
  * Add the fivestar comment tables.
  */
 function fivestar_update_1() {
-  $ret = array();
-
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      db_query("CREATE TABLE {fivestar_comment} (
-        cid int NOT NULL default '0',
-        value tinyint unsigned NOT NULL default '0',
-        PRIMARY KEY (cid)
-      ) /*!40100 DEFAULT CHARACTER SET UTF8 */ ");
-      break;
-
-    case 'pgsql':
-      db_query("CREATE TABLE {fivestar_comment} (
-        cid int NOT NULL default '0',
-        value smallint NOT NULL default '0',
-        PRIMARY KEY (cid)
-      )");
-      break;
-  }
-
-  return $ret;
+  // No longer needed. The tables are added by fivestar_commment_install().
+  return array();
 }
 
 /**
@@ -98,25 +60,29 @@ function fivestar_update_2() {
  * Add vote_id column to the fivestar_comment table.
  */
 function fivestar_update_5701() {
-  $ret = array();
+  // Moved to fivestar_commment_update_5100().
+  return array();
+}
 
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {fivestar_comment} ADD vote_id int(10) UNSIGNED NOT NULL DEFAULT '0' AFTER cid");
-      $ret[] = update_sql("ALTER TABLE {fivestar_comment} ADD INDEX vote_id (vote_id)");
-      break;
-
-    case 'pgsql':
-      $ret[] = update_sql("ALTER TABLE {fivestar_comment} ADD vote_id integer NOT NULL DEFAULT '0'");
-      $ret[] = update_sql("CREATE INDEX {fivestar_comment}_vote_id_idx ON {fivestar_comment} (vote_id)");
-      break;
+/**
+ * Move comment support to a separate module.
+ */
+function fivestar_update_5702() {
+  // Comment support was added in schema version 1.
+  if (FIVESTAR_VERSION > 0) {
+    // Enable the module, but don't run the install hook (tables already exist).
+    if (module_exists('comment')) {
+      module_rebuild_cache();
+      module_enable(array('fivestar_comment'));
+      $version = array_pop(drupal_get_schema_versions('fivestar_comment'));
+      drupal_set_installed_schema_version('fivestar_comment', $version);
+      module_rebuild_cache();
+    }
+    // If the comment table needs an update, run fivestar_comment_update_5100().
+    if (FIVESTAR_VERSION < 5701) {
+      module_load_install('fivestar_comment');
+      fivestar_comment_update_5100();
+    }
   }
-
-  $comments = db_query('SELECT fc.cid, fc.value, v.vote_id FROM {fivestar_comment} fc INNER JOIN {comments} c ON fc.cid = c.cid INNER JOIN {votingapi_vote} v ON fc.value = v.value AND c.nid = v.content_id AND c.uid = v.uid WHERE v.tag = "vote" AND v.value_type = "percent" AND v.content_type = "node"');
-  while ($comment = db_fetch_object($comments)) {
-    db_query('UPDATE {fivestar_comment} SET vote_id = %d WHERE cid = %d', $comment->vote_id, $comment->cid);
-  }
-
-  return $ret;
+  return array();
 }
