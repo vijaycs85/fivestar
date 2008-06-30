@@ -68,9 +68,6 @@ function fivestar_init() {
   if (module_exists('content')) {
     module_load_include('inc', 'fivestar', 'fivestar_field');
   }
-  if (module_exists('comment')) {
-    module_load_include('inc', 'fivestar', 'fivestar_comment');
-  }
 }
 
 /**
@@ -323,12 +320,6 @@ function fivestar_form_alter(&$form, &$form_state, $form_id) {
 
     $form['#submit'][] = 'fivestar_node_type_form_submit';
   }
-
-  // Add comment form modifications.
-  if (module_exists('comment')) {
-    module_load_include('inc', 'fivestar', 'fivestar_comment');
-    fivestar_comment_form_alter($form, $form_state, $form_id);
-  }
 }
 
 /**
@@ -389,7 +380,7 @@ function theme_fivestar_node_type_form($form) {
   $output .= drupal_render($form['direct']);
 
   // Comment settings form.
-  if (module_exists('comment')) {
+  if (module_exists('fivestar_comment')) {
     $comment = '';
     $comment .= '<div id="fivestar-comment-form">';
     $comment .= drupal_render($form['comment']['fivestar_comment']);
@@ -397,7 +388,7 @@ function theme_fivestar_node_type_form($form) {
     $comment .= '<div id="fivestar-comment-preview">';
     $comment .= drupal_render($form['comment']['fivestar_comment_preview']);
     $comment .= '</div>';
-  
+
     $form['comment']['#children'] = $comment;
     $output .= drupal_render($form['comment']);
   }

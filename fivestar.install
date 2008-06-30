@@ -6,18 +6,7 @@
 define('FIVESTAR_VERSION', db_result(db_query("SELECT schema_version FROM {system} WHERE type = 'module' AND name = 'fivestar'")));
 
 function fivestar_schema() {
-  $schema['fivestar_comment'] = array(
-    'fields' => array(
-      'cid' => array('type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE),
-      'vote_id' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
-      'value' => array('type' => 'int', 'size' => 'tiny', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
-    ),
-    'primary key' => array('cid'),
-    'indexes' => array(
-      'vote_id' => array('vote_id'),
-    ),
-  );
-  return $schema;
+  return array();
 }
 
 function fivestar_install() {
@@ -57,18 +46,8 @@ function fivestar_disable() {
  * Add the fivestar comment tables.
  */
 function fivestar_update_1() {
-  $ret = array();
-
-  $schema['fivestar_comment'] = array(
-    'fields' => array(
-      'cid' => array('type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE),
-      'value' => array('type' => 'int', 'size' => 'tiny', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
-    ),
-    'primary key' => array('cid'),
-  );
-  db_create_table($ret, 'fivestar_comment', $schema['fivestar_comment']);
-
-  return $ret;
+  // No longer needed. The tables are added by fivestar_commment_install().
+  return array();
 }
 
 /**
@@ -122,20 +101,8 @@ function fivestar_update_6100() {
  * Add vote_id column to the fivestar_comment table.
  */
 function fivestar_update_6101() {
-  $ret = array();
-
-  // This update will already be run as fivestar_update_5701 on Drupal 5.
-  if (FIVESTAR_VERSION >= 6100) {
-    db_add_field($ret, 'fivestar_comment', 'vote_id', array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0));
-    db_add_index($ret, 'fivestar_comment', 'vote_id', array('vote_id'));
-
-    $comments = db_query('SELECT fc.cid, fc.value, v.vote_id FROM {fivestar_comment} fc INNER JOIN {comments} c ON fc.cid = c.cid INNER JOIN {votingapi_vote} v ON fc.value = v.value AND c.nid = v.content_id AND c.uid = v.uid WHERE v.tag = "vote" AND v.value_type = "percent" AND v.content_type = "node"');
-    while ($comment = db_fetch_object($comments)) {
-      db_query('UPDATE {fivestar_comment} SET vote_id = %d WHERE cid = %d', $comment->vote_id, $comment->cid);
-    }
-  }
-
-  return $ret;
+  // Moved to fivestar_commment_update_6100().
+  return array();
 }
 
 /**
@@ -149,4 +116,27 @@ function fivestar_update_6102() {
     $ret[] = update_sql("UPDATE {system} SET weight = -1 WHERE type = 'module' AND name = 'fivestar'");
   }
   return $ret;
+}
+
+/**
+ * Move comment support to a separate module.
+ */
+function fivestar_update_6103() {
+  // Comment support was added in schema version 1.
+  if (FIVESTAR_VERSION >= 6100) {
+    // Enable the module, but don't run the install hook (tables already exist).
+    if (module_exists('comment')) {
+      module_rebuild_cache();
+      module_enable(array('fivestar_comment'));
+      $version = array_pop(drupal_get_schema_versions('fivestar_comment'));
+      drupal_set_installed_schema_version('fivestar_comment', $version);
+      module_rebuild_cache();
+    }
+    // If the comment table needs an update, run fivestar_comment_update_5100().
+    if (FIVESTAR_VERSION < 6101) {
+      module_load_install('fivestar_comment');
+      fivestar_comment_update_6100();
+    }
+  }
+  return array();
 }
