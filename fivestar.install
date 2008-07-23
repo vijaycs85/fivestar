@@ -1,10 +1,6 @@
 <?php
 // $Id$
 
-// Get the current schema so that updates that have already run for 5 don't get
-// run a second time when upgrading to 6.
-define('FIVESTAR_VERSION', db_result(db_query("SELECT schema_version FROM {system} WHERE type = 'module' AND name = 'fivestar'")));
-
 function fivestar_schema() {
   return array();
 }
@@ -40,6 +36,19 @@ function fivestar_disable() {
   if (module_exists('content')) {
     content_notify('disable', 'fivestar');
   }
+}
+
+/**
+ * Function to retrieve the current version to prevent duplicate updates.
+ */
+function fivestar_update_version() {
+  static $version;
+
+  if (!isset($version)) {
+    $version = db_result(db_query("SELECT schema_version FROM {system} WHERE type = 'module' AND name = 'fivestar'"));
+  }
+
+  return $version;
 }
 
 /**
@@ -112,7 +121,7 @@ function fivestar_update_6102() {
   $ret = array();
 
   // This update will already be run as fivestar_update_5701 on Drupal 5.
-  if (FIVESTAR_VERSION >= 6100) {
+  if (fivestar_update_version() >= 6100) {
     $ret[] = update_sql("UPDATE {system} SET weight = -1 WHERE type = 'module' AND name = 'fivestar'");
   }
   return $ret;
@@ -123,7 +132,7 @@ function fivestar_update_6102() {
  */
 function fivestar_update_6103() {
   // Comment support was added in schema version 1.
-  if (FIVESTAR_VERSION >= 6100) {
+  if (fivestar_update_version() >= 6100) {
     // Enable the module, but don't run the install hook (tables already exist).
     if (module_exists('comment')) {
       module_rebuild_cache();
@@ -133,7 +142,7 @@ function fivestar_update_6103() {
       module_rebuild_cache();
     }
     // If the comment table needs an update, run fivestar_comment_update_5100().
-    if (FIVESTAR_VERSION < 6101) {
+    if (fivestar_update_version() < 6101) {
       module_load_install('fivestar_comment');
       fivestar_comment_update_6100();
     }
@@ -146,7 +155,7 @@ function fivestar_update_6103() {
  */
 function fivestar_update_6104() {
   // Previously ran as fivestar_update_5703 on Drupal 5.
-  if (FIVESTAR_VERSION >= 6100) {
+  if (fivestar_update_version() >= 6100) {
     $result = db_query("SELECT field_name, global_settings FROM {content_node_field} WHERE type = 'fivestar'");
     while ($field = db_fetch_object($result)) {
       $settings = unserialize($field->global_settings);
