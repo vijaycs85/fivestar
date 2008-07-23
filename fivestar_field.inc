@@ -151,7 +151,17 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
       break;
   }
 }
-      
+
+/**
+ * Implementation of hook_content_is_empty().
+ */
+function fivestar_content_is_empty($item, $field) {
+  if (empty($item['rating'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
 /**
  * Implementation of hook_widget_info().
  */
