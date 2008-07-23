@@ -735,14 +735,16 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $res
     }
 
     // Get the user's current vote.
-    $criteria = array('content_type' => $type, 'content_id' => $cid, 'tag' => $tag);
-    $user_votes = votingapi_select_votes($criteria += array('uid' => $uid));
+    $criteria = array('content_type' => $type, 'content_id' => $cid, 'tag' => $tag, 'uid' => $uid);
+    // Get the unique identifier for the user (IP Address if anonymous).
+    $user_criteria = votingapi_current_user_identifier();
+    $user_votes = votingapi_select_votes($criteria + $user_criteria);
 
     if ($value == 0) {
       votingapi_delete_votes($user_votes);
     }
     else {
-      $votes = $criteria += array('value' => $value, 'uid' => $uid);
+      $votes = $criteria += array('value' => $value);
       votingapi_set_votes($votes, $user_votes);
     }
     return fivestar_get_votes($type, $cid, $tag, $uid);
