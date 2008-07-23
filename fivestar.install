@@ -1,16 +1,25 @@
 <?php
 // $Id$
 
-// Get the current schema so that updates that have already run for 5 don't get
-// run a second time when upgrading to 6.
-define('FIVESTAR_VERSION', db_result(db_query("SELECT schema_version FROM {system} WHERE type = 'module' AND name = 'fivestar'")));
-
 function fivestar_install() {
   // No install needed for Fivestar. Uses the VotingAPI tables.
 }
 
 function fivestar_uninstall() {
   db_query("DELETE FROM {variable} WHERE name LIKE 'fivestar_%'");
+}
+
+/**
+ * Function to retrieve the current version to prevent duplicate updates.
+ */
+function fivestar_update_version() {
+  static $version;
+
+  if (!isset($version)) {
+    $version = db_result(db_query("SELECT schema_version FROM {system} WHERE type = 'module' AND name = 'fivestar'"));
+  }
+
+  return $version;
 }
 
 /**
@@ -69,7 +78,7 @@ function fivestar_update_5701() {
  */
 function fivestar_update_5702() {
   // Comment support was added in schema version 1.
-  if (FIVESTAR_VERSION > 0) {
+  if (fivestar_update_version() > 0) {
     // Enable the module, but don't run the install hook (tables already exist).
     if (module_exists('comment')) {
       module_rebuild_cache();
@@ -79,7 +88,7 @@ function fivestar_update_5702() {
       module_rebuild_cache();
     }
     // If the comment table needs an update, run fivestar_comment_update_5100().
-    if (FIVESTAR_VERSION < 5701) {
+    if (fivestar_update_version() < 5701) {
       module_load_install('fivestar_comment');
       fivestar_comment_update_5100();
     }
