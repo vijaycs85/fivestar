@@ -30,6 +30,7 @@ function fivestar_menu() {
   $items = array();
   $items['admin/settings/fivestar'] = array(
     'title'             => 'Fivestar',
+    'description'       => 'Configuring site-wide rating widgets used for Fivestar rating.',
     'page callback'     => 'drupal_get_form',
     'page arguments'    => array('fivestar_settings'),
     'access callback'   => 'user_access',
