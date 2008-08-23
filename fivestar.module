@@ -31,7 +31,7 @@ function fivestar_menu($may_cache) {
     $items[] = array(
       'path'     => 'admin/settings/fivestar',
       'title'    => t('Fivestar'),
-      'description' => t('Configuring site-wide rating widgets used for Fivestar rating.'),
+      'description' => t('Configure site-wide widgets used for Fivestar rating.'),
       'callback' => 'drupal_get_form',
       'callback arguments' => array('fivestar_settings'),
       'type'     => MENU_NORMAL_ITEM,
