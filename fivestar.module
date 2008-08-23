@@ -940,7 +940,7 @@ function fivestar_form($content_type, $content_id) {
     'stars' => variable_get('fivestar_stars_'. $node->type, 5),
     'allow_clear' => variable_get('fivestar_unvote_'. $node->type, FALSE),
     'style' => variable_get('fivestar_style_'. $node->type, 'average'),
-    'text' => variable_get('fivestar_text_'. $node->type, 'combo'),
+    'text' => variable_get('fivestar_text_'. $node->type, 'dual'),
     'content_type' => $content_type,
     'content_id' => $content_id,
     'autosubmit' => TRUE,
@@ -1542,7 +1542,7 @@ function fivestar_views_widget_handler($op, $filter, $value, &$query, $summary) 
     // If the user has setup this content type to use smart stars, display
     // the smart version instead of just the average.
     'style' => variable_get('fivestar_style_'. $node_type, 'average') != 'smart' ? 'average' : 'smart',
-    'text' => $summary ? variable_get('fivestar_text_'. $node_type, 'combo') : 'none',
+    'text' => $summary ? variable_get('fivestar_text_'. $node_type, 'dual') : 'none',
     'content_type' => $content_type,
     'content_id' => $content_id,
     'autosubmit' => TRUE,
