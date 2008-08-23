@@ -633,6 +633,10 @@ function fivestar_vote($type, $cid, $value, $tag = 'vote') {
 
   _fivestar_cast_vote($type, $cid, $value, $tag);
   $result = votingapi_recalculate_results($type, $cid);
+  // Retrieve cached result if recalculation is not set to immediate.
+  if (!is_array($result)) {
+    $result = votingapi_get_voting_results($type, $cid);
+  }
 
   if ($type == 'node') {
     $node = node_load($cid);
