@@ -157,8 +157,8 @@ Creating a Fivestar Set
    use the top, middle, and bottom images for each state of the star.
    
    Top      -> Off
-   Middle   -> Hover
-   Bottom   -> On
+   Middle   -> On
+   Bottom   -> Hover
 
 4. Save your image as "star.png" in a new directory. The name of your directory will be the label
    for your set of stars, spaces are not allowed.
@@ -192,12 +192,12 @@ basic widget, you can make allow users to customize the colors in your Fivestar 
 
 2. Setup guides at 16 and 32 pixels on the y-axis and another grid at 16 pixels on the x-axis.
 
-3. Using the same method as a basic widget, create stars for Off, Hover, and On states on the right
+3. Using the same method as a basic widget, create stars for Off, On, and Hover states on the right
    side of your image. The stars on the right side of the image will be used as an *overlay*.
    While it's okay to use color for the overlay, you'll generally only use white and black to add
    highlights or shadows to the colors the end-user will choose from the Fivestar settings page.
 
-4. Create matching stars on the left side of the image (also for Off, Hover, and On states). The
+4. Create matching stars on the left side of the image (also for Off, On, and Hover states). The
    stars on the left side will be used as the *color mask*. The stars should be entirely black
    (transparency is okay).
 
