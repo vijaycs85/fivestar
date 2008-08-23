@@ -1515,15 +1515,15 @@ function fivestar_expand($element) {
   $element['#suffix'] = '</div>';
 
   // Add validation function that considers a 0 value as empty.
-  $element['#validate']['fivestar_validate'] = array();
+  $element['#element_validate'] = array('fivestar_validate');
 
   $fivestar_id++;
   return $element;
 }
 
-function fivestar_validate($form, &$form_state) {
-  if ($form['#required'] && (empty($form_state['values']['vote']) || $form_state['values']['vote'] == '-')) {
-    form_error($form, t('!name field is required.', array('!name' => $form['#title'])));
+function fivestar_validate($element, &$form_state) {
+  if ($element['#required'] && (empty($element['#value']) || $element['#value'] == '-')) {
+    form_error($element, t('!name field is required.', array('!name' => $element['#title'])));
   }
 }
 
