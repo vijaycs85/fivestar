@@ -41,7 +41,7 @@ function fivestar_comment_form_alter(&$form, &$form_state, $form_id) {
   }
 
   // Comment form. Do not allow ratings inside of threads.
-  if ($form_id == 'comment_form' && empty($form['pid']['#value'])) {
+  if ($form_id == 'comment_form' && empty($form['pid']['#value']) && user_access('rate content')) {
     $node = node_load($form['nid']['#value']);
     if (variable_get('fivestar_comment_'. $node->type, FIVESTAR_COMMENT_DISABLED)) {
       // Splice in the fivestar right before the body.
