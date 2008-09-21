@@ -1314,11 +1314,11 @@ function theme_fivestar_summary($user_rating, $average_rating, $votes, $stars = 
   }
 
   if (isset($votes) && !(isset($user_rating) || isset($average_rating))) {
-    $output .= ' <span class="total-votes">'. format_plural($votes, '<span>1</span> vote', '<span>@count</span> votes') .'</span>';
+    $output .= ' <span class="total-votes">'. format_plural($votes, '<span>@count</span> vote', '<span>@count</span> votes') .'</span>';
     $div_class = 'count';
   }
   elseif (isset($votes)) {
-    $output .= ' <span class="total-votes">('. format_plural($votes, '<span>1</span> vote', '<span>@count</span> votes') .')</span>';
+    $output .= ' <span class="total-votes">('. format_plural($votes, '<span>@count</span> vote', '<span>@count</span> votes') .')</span>';
   }
 
   if ($votes === 0) {
