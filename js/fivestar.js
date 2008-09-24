@@ -367,7 +367,7 @@
   }
 })(jQuery);
 
-Drupal.behaviors.fivestar = function() {
-  $('div.fivestar-form-item').rating();
-  $('input.fivestar-submit').css('display', 'none');
+Drupal.behaviors.fivestar = function(context) {
+  $('div.fivestar-form-item', context).rating();
+  $('input.fivestar-submit', context).css('display', 'none');
 }
