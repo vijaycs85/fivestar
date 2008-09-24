@@ -470,6 +470,9 @@ function theme_fivestar_settings($form) {
     unset($form['widget']['fivestar_widget'][$widget_key]);
   }
 
+  // Add the new styles to the page.
+  drupal_set_html_head("<style type=\"text/css\" media=\"all\">\n". fivestar_get_inline_css() ."</style>");
+
   $form['widget']['fivestar_widget']['#attributes']['class'] .= ' clear-block';
   $form['widget']['fivestar_color_widget']['#attributes']['class'] .= ' fivestar-color-widgets clear-block';
 
@@ -486,7 +489,7 @@ function theme_fivestar_preview_widget($css_file) {
     $css = preg_replace('/((div)?\.fivestar-widget)/', 'div.fivestar-widgets $1', $css);
     // Update relative URLs with absolute locations.
     $css = preg_replace('/url\(\.\.\/(.*?)\)/', 'url('. base_path() . drupal_get_path('module', 'fivestar') .'/$1)', $css);
-    drupal_set_html_head("<style type=\"text/css\" media=\"all\">\n". $css ."</style>");
+    fivestar_add_inline_css('default', $css);
     $default_css_added = TRUE;
   }
 
@@ -499,7 +502,7 @@ function theme_fivestar_preview_widget($css_file) {
     $css = preg_replace('/((div)?\.fivestar-widget)/', 'div#fivestar-preview-'. $widget_name .' $1', $css);
     // Update relative URLs with absolute locations.
     $css = preg_replace('/url\((.*?)\)/', 'url('. base_path() . $widget_path .'/$1)', $css);
-    drupal_set_html_head('<style type="text/css" media="all">'. $css .'</style>');
+    fivestar_add_inline_css($widget_name, $css);
   }
 
   $form = array();
@@ -1395,6 +1398,32 @@ function fivestar_add_js() {
     drupal_add_js(array('fivestar' => $settings), 'setting');
     $js_added = TRUE;
   }
+}
+
+
+/**
+ * Add Inline CSS to the page, only used on admin/settings/fivestar page.
+ */
+function fivestar_add_inline_css($widget_key = NULL, $css = NULL, $reset = FALSE) {
+  static $inline_css;
+
+  if (!isset($inline_css) || $reset) {
+    $inline_css = array();
+  }
+
+  if (isset($widget_key) && isset($inline_css)) {
+    $inline_css[$widget_key] = $css;
+  }
+
+  return $inline_css;
+}
+
+/**
+ * Retrieve a list of all inline CSS to be added to the page.
+ */
+function fivestar_get_inline_css() {
+  $inline_css = fivestar_add_inline_css();
+  return implode("\n", $inline_css);
 }
 
 /**
