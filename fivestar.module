@@ -1605,12 +1605,19 @@ function fivestar_views_widget_normal_handler($value, $field, $columns) {
 
 function fivestar_views_widget_handler($value, $field, $columns, $summary) {
   if ($field->view->base_table == 'node') {
+
+    // Find the votingapi tag for this field.
+    foreach ($field->query->table_queue[$field->relationship]['join']->extra as $votingapi_setting) {
+      if ($votingapi_setting['field'] == 'tag') {
+        $tag = $votingapi_setting['value'];
+      }
+    }
+
     $content_type = 'node';
     $content_id = $columns->nid;
     $node_type = isset($columns->node_type) ? $query->node_type : db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $columns->nid));
 
-    // TODO: Find a reliable way of finding the current tag.
-    $votes = fivestar_get_votes($content_type, $content_id);
+    $votes = fivestar_get_votes($content_type, $content_id, $tag);
 
     $values = array(
       'user' => empty($votes['user']['value']) ? 0 : $votes['user']['value'],
@@ -1627,6 +1634,7 @@ function fivestar_views_widget_handler($value, $field, $columns, $summary) {
       'text' => $summary ? variable_get('fivestar_text_'. $node_type, 'dual') : 'none',
       'content_type' => $content_type,
       'content_id' => $content_id,
+      'tag' => $tag,
       'autosubmit' => TRUE,
       'title' => FALSE,
       'feedback_enable' => $summary ? variable_get('fivestar_feedback_'. $node_type, 1) : FALSE,
