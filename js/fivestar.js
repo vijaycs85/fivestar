@@ -233,7 +233,7 @@
             },
             vote: {
               id: $("vote id", data).text(),
-	      tag: $("vote tag", data).text(),
+              tag: $("vote tag", data).text(),
               type: $("vote type", data).text(),
               value: $("vote value", data).text()
             },
