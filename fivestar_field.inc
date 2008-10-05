@@ -250,7 +250,7 @@ function fivestar_field_formatter_info() {
  * node preview.
  */
 function fivestar_field_formatter($field, $item, $formatter, $node) {
-  if (!isset($item['rating'])) {
+  if (empty($item['rating'])) {
     $item['rating'] = 0;
   }
   if (empty($field['stars'])) {
