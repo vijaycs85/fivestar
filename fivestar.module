@@ -475,8 +475,8 @@ function fivestar_settings() {
   );
 
   $form['color'] = fivestar_color_form();
-  $form['#validate'][] = 'fivstar_color_form_validate';
-  $form['#submit'][] = 'fivstar_color_form_submit';
+  $form['#validate'][] = 'fivestar_color_form_validate';
+  $form['#submit'][] = 'fivestar_color_form_submit';
   $form['#submit'][] ='fivestar_settings_submit';
 
   $form['submit'] = array(
