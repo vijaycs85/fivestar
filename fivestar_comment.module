@@ -99,7 +99,7 @@ function fivestar_comment(&$comment, $op) {
       if ($fivestar_status != FIVESTAR_COMMENT_DISABLED) {
         if (!isset($comment->fivestar_rating)) {
           $current_rating = fivestar_comment_load($comment->cid, $comment->nid);
-          $comment->fivestar_rating = isset($current_rating['value']) ? $current_rating['value'] : NULL; 
+          $comment->fivestar_rating = isset($current_rating['value']) ? $current_rating['value'] : NULL;
         }
         $comment->fivestar_rating = $comment->fivestar_rating;
         $comment->fivestar_view = theme('fivestar_static', $comment->fivestar_rating, variable_get('fivestar_stars_'. $node->type, 5));

@@ -1,6 +1,11 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * Installation file for fivestar module.
+ */
+
 function fivestar_schema() {
   return array();
 }
@@ -21,8 +26,8 @@ function fivestar_uninstall() {
 }
 
 /**
-* Implementation of hook_enable().
-*/
+ * Implementation of hook_enable().
+ */
 function fivestar_enable() {
   if (module_exists('content')) {
     content_notify('enable', 'fivestar');
@@ -30,8 +35,8 @@ function fivestar_enable() {
 }
 
 /**
-* Implementation of hook_disable().
-*/
+ * Implementation of hook_disable().
+ */
 function fivestar_disable() {
   if (module_exists('content')) {
     content_notify('disable', 'fivestar');
@@ -96,7 +101,7 @@ function fivestar_update_2() {
 
 /**
  * Upgrade to Drupal 6 and VotingAPI 2.
- * 
+ *
  * Remove anonymous vote interval from Fivestar, now handled by VotingAPI.
  */
 function fivestar_update_6100() {

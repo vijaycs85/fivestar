@@ -23,6 +23,7 @@ function fivestar_help($path, $arg) {
 
 /**
  * Implementation of hook_menu().
+ *
  * Provides a callback url where votes can be submitted by the client-side
  * javascript.
  */
@@ -62,7 +63,7 @@ function fivestar_menu() {
 
 /**
  * Implementation of hook_init().
- * 
+ *
  * These includes do not need to be loaded for cached pages.
  */
 function fivestar_init() {
@@ -72,7 +73,8 @@ function fivestar_init() {
 }
 
 /**
- * Implementation of hook_perm (permissions).
+ * Implementation of hook_perm().
+ *
  * Exposes permissions for rating content, viewing aggregate ratings, and using PHP
  * snippets when configuring fivestar CCK fields.
  */
@@ -137,9 +139,9 @@ function fivestar_theme() {
 }
 
 /**
- * Implementation of hook_form_alter
+ * Implementation of hook_form_alter().
+ *
  * Adds fivestar enaable and position to the node-type configuration form.
- * 
  */
 function fivestar_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'node_type_form' && isset($form['identity']['type'])) {
@@ -182,7 +184,7 @@ function fivestar_form_alter(&$form, &$form_state, $form_id) {
       '#collapsed' => TRUE,
       '#description' => t('These star labels appear as the link title when javascript is enabled as well as the select list options when javascript is disabled.'),
     );
-    
+
     $form['fivestar']['labels']['fivestar_labels_enable'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display labels on mouse over'),
@@ -191,7 +193,7 @@ function fivestar_form_alter(&$form, &$form_state, $form_id) {
       '#weight' => -5,
       '#description' => t('When enabled, the star labels will dynamically appear underneath the stars as the user hovers over each star to provide a more descriptive qualitative meaning for each star value.'),
     );
-    
+
     // Create the Mouseover text forms for each of the rating options
     // This form depends on the number of stars, and these extra textfields will be hidden with javascript
     $star_count = variable_get('fivestar_stars_'. $form['#node_type']->type, 5);
@@ -281,11 +283,11 @@ function fivestar_form_alter(&$form, &$form_state, $form_id) {
         'above_static' => t('Static display above teaser'),
         'below_static' => t('Static display below teaser'),
         'link' => t('Teaser link to full node widget'),
-        'hidden' => t('<Hidden>'),
+        'hidden' => t('<hidden>'),
       ),
     );
 
-   $form['fivestar']['direct']['fivestar_position'] = array(
+    $form['fivestar']['direct']['fivestar_position'] = array(
       '#type' => 'select',
       '#title' => t('Full node display'),
       '#default_value' => variable_get('fivestar_position_'. $form['#node_type']->type, 'below'),
@@ -294,7 +296,7 @@ function fivestar_form_alter(&$form, &$form_state, $form_id) {
         'below' => t('Clickable widget below node body'),
         'above_static' => t('Static display above node body'),
         'below_static' => t('Static display below node body'),
-        'hidden' => t('<Hidden>'),
+        'hidden' => t('<hidden>'),
       ),
     );
 
@@ -436,7 +438,7 @@ function fivestar_settings() {
     '#title' => t('Widget display'),
     '#description' => t('Choose a widget set to be used on your site. Widgets supporting custom colors can be further customized by adjusting the color scheme.'),
     '#weight' => -2,
-   );
+  );
 
   $widgets = module_invoke_all('fivestar_widgets');
   $classic_widgets = array();
@@ -568,7 +570,7 @@ function theme_fivestar_preview_widget($css_file) {
 
 /**
  * Callback function for fivestar/preview/color.
- * 
+ *
  * Outputs a dynamically generated star or cancel png.
  */
 function fivestar_preview_color() {
@@ -664,7 +666,7 @@ function theme_fivestar_preview_wrapper($content, $type = 'direct') {
 
 /**
  * Callback function for fivestar/vote.
- * 
+ *
  * @param type
  *   A content-type to log the vote to. 'node' is the most common.
  * @param cid
@@ -805,10 +807,10 @@ function fivestar_get_votes($type, $cid, $tag = 'vote', $uid = NULL) {
 
 /**
  * Internal function to check that node-type accepts votes
- * 
+ *
  * @param text $type type of target (currently only node is supported)
  * @param text $id identifier within the type (in this case node-type)
- * 
+ *
  * @return boolean
  */
 function _fivestar_validate_target($type, $id) {
@@ -832,11 +834,11 @@ function _fivestar_validate_target($type, $id) {
 
 
 /**
- * Implementation of hook_fivestar_widgets.
- * 
+ * Implementation of hook_fivestar_widgets().
+ *
  * This hook allows other modules to create additional custom widgets for
  * the fivestar module.
- * 
+ *
  * @return array
  *   An array of key => value pairs suitable for inclusion as the #options in a
  *   select or radios form element. Each key must be the location of a css
@@ -856,8 +858,8 @@ function fivestar_fivestar_widgets() {
 }
 
 /**
- * Implementation of hook_nodeapi()
- * 
+ * Implementation of hook_nodeapi().
+ *
  * Adds the fievestar widget to the node view.
  */
 function fivestar_nodeapi(&$node, $op, $teaser, $page) {
@@ -900,7 +902,7 @@ function fivestar_nodeapi(&$node, $op, $teaser, $page) {
 
 
 /**
- * Implementation of hook_link()
+ * Implementation of hook_link().
  *
  * Add a "rate" link to node teaser.
  */
@@ -947,9 +949,10 @@ function fivestar_widget_form($node) {
 }
 
 /**
- * Implementation of hook_forms. This is necessary when multiple fivestar
- * forms appear on the same page, each requiring a separate form_id, but all
- * using the same underlying callbacks.
+ * Implementation of hook_forms().
+ *
+ * This is necessary when multiple fivestar forms appear on the same page, each
+ * requiring a separate form_id, but all using the same underlying callbacks.
  */
 function fivestar_forms($form_id, $args) {
   if (strpos($form_id, 'fivestar_form') !== FALSE) {
@@ -1001,7 +1004,7 @@ function fivestar_form(&$form_state, $content_type, $content_id) {
     'labels' => variable_get('fivestar_labels_'. $node->type, array()),
   );
 
-  return fivestar_custom_widget($form_state, $values, $settings);  
+  return fivestar_custom_widget($form_state, $values, $settings);
 }
 
 function fivestar_static($content_type, $content_id, $tag = 'vote', $node_type = NULL) {
@@ -1086,7 +1089,7 @@ function fivestar_custom_widget(&$form_state, $values, $settings) {
     '#redirect' => FALSE,
     '#theme' => 'fivestar_widget',
   );
-  $form['#submit'][] = 'fivestar_form_submit'; 
+  $form['#submit'][] = 'fivestar_form_submit';
 
   if (isset($settings['content_type'])) {
     $form['content_type'] = array(
@@ -1231,8 +1234,8 @@ function fivestar_form_submit($form, &$form_state) {
 }
 
 /**
- * Implementation of hook_elements
- * 
+ * Implementation of hook_elements().
+ *
  * Defines 'fivestar' form element type
  */
 function fivestar_elements() {
@@ -1310,7 +1313,7 @@ function theme_fivestar_widget($form) {
 /**
  * Display a plain HTML VIEW ONLY version of the widget
  * with the specified rating
- * 
+ *
  * @param $rating
  *   The desired rating to display out of 100 (i.e. 80 is 4 out of 5 stars)
  * @param $stars
@@ -1319,7 +1322,7 @@ function theme_fivestar_widget($form) {
  *   Allows multiple ratings per node
  * @return
  *   A themed HTML string representing the star widget
- * 
+ *
  */
 function theme_fivestar_static($rating, $stars = 5, $tag = 'vote') {
   // Add necessary CSS.
@@ -1624,7 +1627,7 @@ function fivestar_views_widget_handler($value, $field, $columns, $summary) {
       'average' => (int)$value,
       'count' => empty($votes['count']['value']) ? 0 : $votes['count']['value'],
     );
-  
+
     $settings = array(
       'stars' => variable_get('fivestar_stars_'. $node_type, 5),
       'allow_clear' => variable_get('fivestar_unvote_'. $node_type, FALSE),
@@ -1641,7 +1644,7 @@ function fivestar_views_widget_handler($value, $field, $columns, $summary) {
       'labels_enable' => $summary ? variable_get('fivestar_labels_enable_'. $node_type, 1) : FALSE,
       'labels' => $summary ? variable_get('fivestar_labels_'. $node_type, array()) : array(),
     );
-  
+
     return drupal_get_form('fivestar_custom_widget', $values, $settings);
   }
   else {

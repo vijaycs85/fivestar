@@ -1,6 +1,11 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * Installation file for Fivestar Comment module.
+ */
+
 function fivestar_comment_schema() {
   $schema['fivestar_comment'] = array(
     'fields' => array(

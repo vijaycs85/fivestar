@@ -101,7 +101,7 @@ function fivestar_field_settings($op, $field) {
       );
   }
 }
-  
+
 /**
  * Implementation of hook_field().
  */
@@ -231,7 +231,7 @@ function fivestar_widget(&$form, &$form_state, $field, $items) {
 
   return $element;
 }
-      
+
 /**
  * Implementation of hook_field_formatter_info().
  */
