@@ -368,7 +368,7 @@
 
   if (Drupal.jsEnabled) {
     $(document).ready(function() {
-      $('div.fivestar-form-item').rating();
+      $('div.fivestar-form-item:not(.fivestar-processed)', context).addClass('fivestar-processed').rating();
       $('input.fivestar-submit').css('display', 'none');
     });
   }
