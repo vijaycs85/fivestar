@@ -1590,12 +1590,20 @@ function fivestar_views_value_display_handler($value, $field, $columns) {
       $node_type = db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $columns->nid));
       $stars = variable_get('fivestar_stars_'. (!isset($node_type) ? 'default' : $node_type), 5);
     }
+
+    // Find the VotingAPI tag for this field.
+    foreach ($field->query->table_queue[$field->relationship]['join']->extra as $votingapi_setting) {
+      if ($votingapi_setting['field'] == 'tag') {
+        $tag = $votingapi_setting['value'];
+      }
+    }
   }
   else {
     $stars = 5;
+    $tag = 'vote';
   }
-  // TODO: Find a reliable way of determining the tag.
-  return theme('fivestar_static', $value, $stars, 'vote');
+
+  return theme('fivestar_static', $value, $stars, $tag);
 }
 
 function fivestar_views_widget_compact_handler($value, $field, $columns) {
@@ -1607,9 +1615,15 @@ function fivestar_views_widget_normal_handler($value, $field, $columns) {
 }
 
 function fivestar_views_widget_handler($value, $field, $columns, $summary) {
+
+  // If the user can't rate, use the display handler.
+  if (!user_access('rate content')) {
+    return fivestar_views_value_display_handler($value, $field, $columns);
+  }
+
   if ($field->view->base_table == 'node') {
 
-    // Find the votingapi tag for this field.
+    // Find the VotingAPI tag for this field.
     foreach ($field->query->table_queue[$field->relationship]['join']->extra as $votingapi_setting) {
       if ($votingapi_setting['field'] == 'tag') {
         $tag = $votingapi_setting['value'];
@@ -1618,7 +1632,7 @@ function fivestar_views_widget_handler($value, $field, $columns, $summary) {
 
     $content_type = 'node';
     $content_id = $columns->nid;
-    $node_type = isset($columns->node_type) ? $query->node_type : db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $columns->nid));
+    $node_type = isset($columns->node_type) ? $columns->node_type : db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $columns->nid));
 
     $votes = fivestar_get_votes($content_type, $content_id, $tag);
 
