@@ -367,7 +367,7 @@
   }
 
   Drupal.behaviors.fivestar = function(context) {
-    $('div.fivestar-form-item', context).rating();
+    $('div.fivestar-form-item:not(.fivestar-processed)', context).addClass('fivestar-processed').rating();
     $('input.fivestar-submit', context).css('display', 'none');
   }
 
