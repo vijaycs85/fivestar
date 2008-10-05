@@ -281,7 +281,7 @@ function theme_fivestar_formatter_rating($element) {
  * Theme function for 'percentage' fivestar field formatter.
  */
 function theme_fivestar_formatter_percentage($element) {
-  if (!isset($element['#item']['rating'])) {
+  if (empty($element['#item']['rating'])) {
     $element['#item']['rating'] = 0;
   }
   if (empty($element['#item']['stars'])) {
