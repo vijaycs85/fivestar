@@ -365,11 +365,12 @@
       document.execCommand('BackgroundImageCache', false, true);
     } catch(err) {}
   }
-})(jQuery);
 
-if (Drupal.jsEnabled) {
-  $(document).ready(function() {
-    $('div.fivestar-form-item').rating();
-    $('input.fivestar-submit').css('display', 'none');
-  });
-}
+  if (Drupal.jsEnabled) {
+    $(document).ready(function() {
+      $('div.fivestar-form-item').rating();
+      $('input.fivestar-submit').css('display', 'none');
+    });
+  }
+
+})(jQuery);
