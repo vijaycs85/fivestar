@@ -133,7 +133,7 @@ function theme_fivestar_color_form($form) {
 /**
  * Validate handler for color form.
  */
-function fivstar_color_form_validate($form_id, &$form_values) {
+function fivestar_color_form_validate($form_id, &$form_values) {
   if ($form_values['fivestar_color_type'] == 'default' || $form_values['fivestar_color_type'] == '') {
     form_set_value(array('#parents' => array('fivestar_color_type')), 'default');
     return;
@@ -150,7 +150,7 @@ function fivstar_color_form_validate($form_id, &$form_values) {
 /**
  * Submit handler for color change form.
  */
-function fivstar_color_form_submit($form_id, &$form_values) {
+function fivestar_color_form_submit($form_id, &$form_values) {
   $form = fivestar_settings();
 
   if ($form_values['matte'] == t('none')) {

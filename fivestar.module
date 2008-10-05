@@ -423,8 +423,8 @@ function fivestar_settings() {
 
   include_once(drupal_get_path('module', 'fivestar') .'/fivestar_color.inc');
   $form['color'] = fivestar_color_form();
-  $form['#validate']['fivstar_color_form_validate'] = array();
-  $form['#submit']['fivstar_color_form_submit'] = array();
+  $form['#validate']['fivestar_color_form_validate'] = array();
+  $form['#submit']['fivestar_color_form_submit'] = array();
   $form['#submit']['fivestar_settings_submit'] = array();
 
   $form['fivestar_anonymous_vote_interval'] = array(
