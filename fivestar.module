@@ -1559,6 +1559,11 @@ function fivestar_views_widget_normal_handler($op, $filter, $value, &$query) {
 function fivestar_views_widget_handler($op, $filter, $value, &$query, $summary) {
   global $user;
 
+  // If the user can't rate, use the display handler.
+  if (!user_access('rate content')) {
+    return fivestar_views_value_display_handler($op, $filter, $value, $query);
+  }
+
   $content_type = 'node';
   $content_id = $query->nid;
   $node_type = isset($query->node_type) ? $query->node_type : db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $query->nid));
