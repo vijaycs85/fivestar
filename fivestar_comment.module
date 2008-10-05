@@ -53,7 +53,8 @@ function fivestar_comment_form_alter($form_id, &$form) {
             $default_value = $current_rating['value'];
           }
           else {
-            $default_value = 0;
+            $votes = fivestar_get_votes('node', $form['nid']['#value']);
+            $default_value = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
           }
           $new_form['fivestar_rating'] = array(
             '#type' => 'fivestar',
