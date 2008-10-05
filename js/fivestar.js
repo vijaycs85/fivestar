@@ -365,9 +365,10 @@
       document.execCommand('BackgroundImageCache', false, true);
     } catch(err) {}
   }
-})(jQuery);
 
-Drupal.behaviors.fivestar = function(context) {
-  $('div.fivestar-form-item', context).rating();
-  $('input.fivestar-submit', context).css('display', 'none');
-}
+  Drupal.behaviors.fivestar = function(context) {
+    $('div.fivestar-form-item', context).rating();
+    $('input.fivestar-submit', context).css('display', 'none');
+  }
+
+})(jQuery);
