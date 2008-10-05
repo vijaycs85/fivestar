@@ -1,6 +1,11 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * Installation file for Fivestar Comment module.
+ */
+
 function fivestar_comment_install() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':

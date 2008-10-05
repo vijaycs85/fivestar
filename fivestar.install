@@ -1,6 +1,11 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * Installation file for fivestar module.
+ */
+
 function fivestar_install() {
   // No install needed for Fivestar. Uses the VotingAPI tables.
 }

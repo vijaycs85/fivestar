@@ -99,7 +99,7 @@ function fivestar_field_settings($op, $field) {
       return $columns;
   }
 }
-  
+
 /**
  * Implementation of hook_field().
  */
@@ -222,7 +222,7 @@ function fivestar_widget($op, &$node, $field, &$items) {
       return $form;
   }
 }
-      
+
 /**
  * Implementation of hook_field_formatter_info().
  */
