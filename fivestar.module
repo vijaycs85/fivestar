@@ -693,7 +693,7 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL) {
   $tag = empty($tag) ? 'vote' : $tag;
 
   // Bail out if the user's trying to vote on an invalid object.
-  if (!_fivestar_validate_target($type, $cid)) {
+  if (!fivestar_validate_target($type, $cid, $uid)) {
     return array();
   }
 
@@ -749,32 +749,61 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL) {
 }
 
 /**
- * Internal function to check that node-type accepts votes
+ * Check that an item being voted upon is a valid vote.
  *
- * @param text $type type of target (currently only node is supported)
- * @param text $id identifier within the type (in this case node-type)
+ * @param $type
+ *   Type of target (currently only node is supported).
+ * @param $id
+ *   Identifier within the type (in this case nid).
+ * @param $uid
+ *   The user trying to cast the vote.
  *
  * @return boolean
  */
-function _fivestar_validate_target($type, $id) {
-  switch ($type) {
-    case 'node':
-      if ($node = node_load($id)) {
-        if (variable_get('fivestar_'. $node->type, 0)) {
-          return TRUE;
-        }
-        else {
-          return FALSE;
-        }
-      }
-      else {
-        return FALSE;
-      }
-    default:
+function fivestar_validate_target($type, $id, $uid = NULL) {
+  if (!isset($account)) {
+    $uid = $GLOBALS['user']->uid;
+  }
+
+  $access = module_invoke_all('fivestar_access', $type, $id, $uid);
+  foreach ($access as $result) {
+    if ($result == TRUE) {
+      return TRUE;
+    }
+    if ($result === FALSE) {
       return FALSE;
+    }
   }
 }
 
+/**
+ * Implementation of hook_fivestar_access().
+ *
+ * This hook is called before every vote is cast through Fivestar. It allows
+ * modules to allow voting on any type of content, such as nodes, users, or
+ * comments, even though only nodes are supported by Fivestar directly.
+ *
+ * @param $type
+ *   Type of target (currently only node is supported).
+ * @param $id
+ *   Identifier within the type (in this case nid).
+ * @param $account
+ *   The user trying to cast the vote.
+ *
+ * @return boolean or NULL
+ *   Returns TRUE if voting is supported on this object.
+ *   Returns NULL if voting is not supported on this object by this module.
+ *   If needing to absolutely deny all voting on this object, regardless
+ *   of permissions defined in other modules, return FALSE. Note if all
+ *   modules return NULL, stating no preference, then access will be denied.
+ */
+function fivestar_fivestar_access($type, $id, $account) {
+  if ($type == 'node' && $node = node_load($id)) {
+    if (variable_get('fivestar_'. $node->type, 0)) {
+      return TRUE;
+    }
+  }
+}
 
 /**
  * Implementation of hook_fivestar_widgets().
@@ -876,7 +905,7 @@ function fivestar_block($op = 'list', $delta = 0, $edit = array()) {
       if (user_access('access content') && user_access('rate content')) {
         if (arg(0) == 'node' && is_numeric(arg(1)) && (arg(2) == '' || arg(2) == 'view')) {
           $node = node_load(arg(1));
-          if (_fivestar_validate_target('node', $node->nid)) {
+          if (fivestar_validate_target('node', $node->nid)) {
             $block['subject'] = t('Rate This');
             $block['content'] = fivestar_widget_form($node);
             return $block;
