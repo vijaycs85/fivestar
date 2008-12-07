@@ -1,63 +1,67 @@
-# $Id: de.po,v 1.1.2.1 2008/02/26 22:12:07 quicksketch Exp $
+# $Id$
 #
-# Deutsch translation of Drupal (general)
+# LANGUAGE translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  n/a
-#  fivestar.module,v 1.2.2.27 2007/10/21 04:50:50 quicksketch
-#  fivestar.info,v 1.1.4.1 2007/03/07 03:19:39 eaton
+#  fivestar_color.inc,v 1.1.4.7 2008/10/05 21:09:00 quicksketch
+#  fivestar_field.inc,v 1.3.2.12 2008/10/05 23:52:10 quicksketch
+#  fivestar.module,v 1.13.2.47 2008/10/21 05:34:45 quicksketch
+#  fivestar.info,v 1.3 2008/01/14 08:28:21 quicksketch
+#  fivestar_comment.module,v 1.1.2.4 2008/10/05 21:59:47 quicksketch
+#  fivestar_comment.info,v 1.1.2.1 2008/06/30 03:40:15 quicksketch
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "POT-Creation-Date: 2008-12-06 23:46+0100\n"
-"PO-Revision-Date: 2008-12-07 01:18+0100\n"
-"Last-Translator: Alexander Haß\n"
-"Language-Team: Deutsch <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: fivestar_color.inc:18
 msgid "Color scheme"
-msgstr "Farbschema"
+msgstr ""
 
 #: fivestar_color.inc:21
 msgid "A custom color widget must be selected to choose colors. Only the selected widget will be previewed."
-msgstr "Ein benutzerdefiniertes Steuerelement muss zur Auswahl von Farben ausgewählt werden. Nur das ausgewählte Steuerelement wird als Vorschau angezeigt."
+msgstr ""
 
 #: fivestar_color.inc:26;35
 msgid "Blue Lagoon (default)"
-msgstr "Blaue Lagune (Standard)"
+msgstr ""
 
 #: fivestar_color.inc:27
 msgid "Yellow"
-msgstr "Gelb"
+msgstr ""
 
 #: fivestar_color.inc:28
 msgid "Red"
-msgstr "Rot"
+msgstr ""
 
 #: fivestar_color.inc:29
 msgid "Blue"
-msgstr "Blau"
+msgstr ""
 
 #: fivestar_color.inc:30
 msgid "Green"
-msgstr "Grün"
+msgstr ""
 
 #: fivestar_color.inc:31
 msgid "Custom"
-msgstr "Benutzerdefiniert"
+msgstr ""
 
 #: fivestar_color.inc:49
 msgid "Color display"
-msgstr "Farbanzeige"
+msgstr ""
 
 #: fivestar_color.inc:50
 msgid "Default display"
-msgstr "Standardmäßige Anzeige"
+msgstr ""
 
 #: fivestar_color.inc:50
 msgid "Solid color"
@@ -65,15 +69,15 @@ msgstr ""
 
 #: fivestar_color.inc:50
 msgid "Gradient"
-msgstr "Verlauf"
+msgstr ""
 
 #: fivestar_color.inc:57
 msgid "Color set"
-msgstr "Farbauswahl"
+msgstr ""
 
 #: fivestar_color.inc:64
 msgid "On colors"
-msgstr "„An“-Farben"
+msgstr ""
 
 #: fivestar_color.inc:66
 msgid "Hover colors"
@@ -81,19 +85,19 @@ msgstr ""
 
 #: fivestar_color.inc:68
 msgid "Off colors"
-msgstr "„Aus“-Farben"
+msgstr ""
 
 #: fivestar_color.inc:70
 msgid "Matte color"
-msgstr "Matte Farbe"
+msgstr ""
 
 #: fivestar_color.inc:102;159
 msgid "none"
-msgstr "Keine"
+msgstr ""
 
 #: fivestar_color.inc:150
 msgid "The entered value %color is not a valid hex color."
-msgstr "Der eingegebene Wert %color ist keine gültige hexadezimale Farbe."
+msgstr ""
 
 #: fivestar_color.inc:205
 msgid "Custom %name stars generated. You may need to clear your browser cache before the new stars are visible."
@@ -101,27 +105,27 @@ msgstr ""
 
 #: fivestar_field.inc:15
 msgid "Fivestar Rating"
-msgstr "Fivestar Bewertung"
+msgstr ""
 
 #: fivestar_field.inc:16
 msgid "Store a rating for this piece of content."
-msgstr "Speichert eine Bewertung für diesen Teil des Inhaltes."
+msgstr ""
 
 #: fivestar_field.inc:34
 msgid "Number of Stars"
-msgstr "Anzahl von Sternen"
+msgstr ""
 
 #: fivestar_field.inc:34
 msgid "Number of Options"
-msgstr "Anzahl von Optionen"
+msgstr ""
 
 #: fivestar_field.inc:41
 msgid "Node Comment Parent"
-msgstr "Übergeordneter Beitragskommentar"
+msgstr ""
 
 #: fivestar_field.inc:47
 msgid "Node reference: @field"
-msgstr "Beitragsreferenz: @field"
+msgstr ""
 
 #: fivestar_field.inc:53
 msgid "No potential target fields are available for the %type type. Create a node reference field in this node type to make it easier to assign a vote to a node."
@@ -129,24 +133,23 @@ msgstr ""
 
 #: fivestar_field.inc:56
 msgid "<none>"
-msgstr "<Keine>"
+msgstr ""
 
 #: fivestar_field.inc:58
 msgid "Voting target"
-msgstr "Bewertungsziel"
+msgstr ""
 
 #: fivestar_field.inc:62
 msgid "The voting target will make the value of this field cast a vote on another node. Use node reference fields (part of CCK core) or <a href=\"http://drupal.org/project/nodecomment\">Node Comments</a> module to create advanced reviews. More information available on the <a href=\"http://drupal.org/handbook/modules/fivestar\">Fivestar handbook page</a>."
 msgstr ""
 
 #: fivestar_field.inc:68
-#, fuzzy
 msgid "Voting target PHP code"
-msgstr "PHP-Code für Bewertungsziel"
+msgstr ""
 
 #: fivestar_field.inc:74
 msgid "Code"
-msgstr "Code"
+msgstr ""
 
 #: fivestar_field.inc:77
 msgid "Advanced usage only: PHP code that returns a target node ID. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Note that executing incorrect PHP-code can break your Drupal site."
@@ -158,47 +161,47 @@ msgstr ""
 
 #: fivestar_field.inc:171
 msgid "Stars"
-msgstr "Sterne"
+msgstr ""
 
 #: fivestar_field.inc:176
 msgid "Select list"
-msgstr "Auswahlliste"
+msgstr ""
 
 #: fivestar_field.inc:192
 msgid "Allow user to clear value"
-msgstr "Benutzern das Löschen des Wertes erlauben"
+msgstr ""
 
 #: fivestar_field.inc:241
 msgid "As Stars"
-msgstr "Als Sterne"
+msgstr ""
 
 #: fivestar_field.inc:245
 msgid "Rating (i.e. 4.2/5)"
-msgstr "Bewertung (z.B. 4.2/5)"
+msgstr ""
 
 #: fivestar_field.inc:249
 msgid "Percentage (i.e. 92)"
-msgstr "Prozentzahl (z.B. 92)"
+msgstr ""
 
 #: fivestar.module:13
 msgid "This page is used to configure site-wide features of the fivestar module. To setup fivestar to rate content:"
-msgstr "Diese Seite wird verwendet, um die globalen Funktionen des Fivestar-Moduls zu konfigurieren. Damit Fivestar für die Bewertung von Inhalt verwendet werden kann muss:"
+msgstr ""
 
 #: fivestar.module:15
 msgid "Configure site-wide settings for fivestar below."
-msgstr "Die folgenden globalen Einstellungen für Fivestar konfigurieren."
+msgstr ""
 
 #: fivestar.module:16
 msgid "Go to <a href=\"!types\">admin/content/types</a> and edit the type you would like to rate."
-msgstr "Den zu bewertenden Inhaltstyp unter <a href=\"!types\">admin/content/types</a> bearbeiten."
+msgstr ""
 
 #: fivestar.module:17
 msgid "On the settings page for the content type, a set of options is available for fivestar, where you can enable rating for that type and set rating options."
-msgstr "Auf der Einstellungsseite für den Inhaltstyp befindet sich eine Reihe von Optionen für Fivestar. Dort kann die Bewertung für den Inhaltstyp aktiviert und die Bewertungsoptionen eingestellt werden."
+msgstr ""
 
 #: fivestar.module:155
 msgid "Fivestar ratings"
-msgstr "Fivestar Bewertung"
+msgstr ""
 
 #: fivestar.module:158
 msgid "To rate this content, enable Fivestar rating below. These settings will be used for both comments (if available) and direct rating."
@@ -206,15 +209,15 @@ msgstr ""
 
 #: fivestar.module:165
 msgid "Enable Fivestar rating"
-msgstr "Fivestar Bewertung aktivieren"
+msgstr ""
 
 #: fivestar.module:173
 msgid "Number of stars"
-msgstr "Anzahl von Sternen"
+msgstr ""
 
 #: fivestar.module:182
 msgid "Star Labels"
-msgstr "Beschriftungen der Sterne"
+msgstr ""
 
 #: fivestar.module:185
 msgid "These star labels appear as the link title when javascript is enabled as well as the select list options when javascript is disabled."
@@ -222,7 +225,7 @@ msgstr ""
 
 #: fivestar.module:190
 msgid "Display labels on mouse over"
-msgstr "Beschriftungen beim Überfahren mit der Maus anzeigen"
+msgstr ""
 
 #: fivestar.module:194
 msgid "When enabled, the star labels will dynamically appear underneath the stars as the user hovers over each star to provide a more descriptive qualitative meaning for each star value."
@@ -230,125 +233,123 @@ msgstr ""
 
 #: fivestar.module:214
 msgid "Star @star label"
-msgstr "Beschriftung von Stern @star"
+msgstr ""
 
 #: fivestar.module:214
 msgid "Cancel label"
-msgstr "Beschriftung von „Abbrechen“"
+msgstr ""
 
 #: fivestar.module:224
 msgid "Direct rating widget"
-msgstr "Direktes Bewertungssteuerlement"
+msgstr ""
 
 #: fivestar.module:226
 msgid "These settings allow you to display a rating widget to your users while they are viewing content of this type. Rating will immediately register a vote for that piece of content."
 msgstr ""
 
 #: fivestar.module:232
-#, fuzzy
 msgid "Star display style"
-msgstr "Darstellung von Stern"
+msgstr ""
 
 #: fivestar.module:235
 msgid "Display average vote value"
-msgstr "Durchschnittlichen Bewertungswert anzeigen"
+msgstr ""
 
 #: fivestar.module:236
 msgid "Display user vote value"
-msgstr "Bewertungswert des Benutzers anzeigen"
+msgstr ""
 
 #: fivestar.module:237;250
 msgid "User vote if available, average otherwise"
-msgstr "Benutzerbewertung soweit verfügbar, ansonsten Durchschnitt"
+msgstr ""
 
 #: fivestar.module:238;251
 msgid "Both user and average vote"
-msgstr "Benutzer und durchschnittliche Bewertung"
+msgstr ""
 
 #: fivestar.module:244
-#, fuzzy
 msgid "Text display style"
-msgstr "Darstellung von Text"
+msgstr ""
 
 #: fivestar.module:247
 msgid "Display no text beneath stars"
-msgstr "Keinen Text unterhalb der Sterne anzeigen"
+msgstr ""
 
 #: fivestar.module:248
 msgid "Current average in text"
-msgstr "Aktueller Durchschnitt im Text"
+msgstr ""
 
 #: fivestar.module:249
 msgid "User current vote in text"
-msgstr "Aktuelle Benutzerbewertung als Text"
+msgstr ""
 
 #: fivestar.module:257
 msgid "Show widget title"
-msgstr "Titel des Steuerelementes anzeigen"
+msgstr ""
 
 #: fivestar.module:264
 msgid "Enable feedback during vote saving and deletion"
-msgstr "Feedback beim Speichern und Löschen von Bewertungen aktivieren"
+msgstr ""
 
 #: fivestar.module:271
 msgid "Allow users to undo their votes"
-msgstr "Erlaubt Benutzern ihre Bewertungen zu löschen."
+msgstr ""
 
 #: fivestar.module:278
 msgid "Teaser display"
-msgstr "Steuerelement-Anzeige"
+msgstr ""
 
 #: fivestar.module:281
 msgid "Clickable widget above teaser"
-msgstr "Klickbares Steuerelement über dem Anrißtext"
+msgstr ""
 
 #: fivestar.module:282
 msgid "Clickable widget below teaser"
-msgstr "Klickbares Steuerelement unter dem Anrißtext"
+msgstr ""
 
 #: fivestar.module:283
 msgid "Static display above teaser"
-msgstr "Statische Anzeige über dem Anrißtext"
+msgstr ""
 
 #: fivestar.module:284
 msgid "Static display below teaser"
-msgstr "Statische Anzeige unter dem Anrißtext"
+msgstr ""
 
 #: fivestar.module:285
 msgid "Teaser link to full node widget"
-msgstr "Anrißtext-Link zum vollständigen Beitragsteuerelement"
+msgstr ""
 
 #: fivestar.module:286;299
 msgid "<hidden>"
-msgstr "<Versteckt>"
+msgstr ""
 
 #: fivestar.module:292
 msgid "Full node display"
-msgstr "Vollständige Beitragsanzeige"
+msgstr ""
 
 #: fivestar.module:295
 msgid "Clickable widget above node body"
-msgstr "Klickbares Steuerelement über dem Textkörper"
+msgstr ""
 
 #: fivestar.module:296
 msgid "Clickable widget below node body"
-msgstr "Klickbares Steuerelement unter dem Textkörper"
+msgstr ""
 
 #: fivestar.module:297
 msgid "Static display above node body"
-msgstr "Statische Anzeige über dem Textkörper"
+msgstr ""
 
 #: fivestar.module:298
 msgid "Static display below node body"
-msgstr "Statische Anzeige unter dem Textkörper"
+msgstr ""
 
 #: fivestar.module:305
 msgid "Direct rating widget preview"
-msgstr "Direkte Bewertungssteuerlement-Vorschau"
+msgstr ""
 
 #: fivestar.module:438
 msgid "Widget display"
-msgstr "Steuerelement-Anzeige"
+msgstr ""
 
 #: fivestar.module:439
 msgid "Choose a widget set to be used on your site. Widgets supporting custom colors can be further customized by adjusting the color scheme."
@@ -356,138 +357,133 @@ msgstr ""
 
 #: fivestar.module:467
 msgid "Default"
-msgstr "Standard"
+msgstr ""
 
 #: fivestar.module:474
 msgid "Custom color widgets"
-msgstr "Benutzerdefinierte Farbsteuerelemente"
+msgstr ""
 
 #: fivestar.module:486
 msgid "Save configuration"
-msgstr "Konfiguration speichern"
+msgstr ""
 
 #: fivestar.module:499
 msgid "Fivestar Settings"
-msgstr "Einstellungen für Fivestar"
+msgstr ""
 
 #: fivestar.module:502;507;514
 msgid "Preview"
-msgstr "Vorschau"
+msgstr ""
 
 #: fivestar.module:943;1163
 msgid "Rate"
-msgstr "Bewerten"
+msgstr ""
 
 #: fivestar.module:946
 msgid "Rate this @type"
-msgstr "Diese @type bewerten"
+msgstr ""
 
 #: fivestar.module:958
 msgid "Fivestar: Rate this node"
-msgstr "Fivestar: Diesen Beitrag bewerten"
+msgstr ""
 
 #: fivestar.module:966
 msgid "Rate This"
-msgstr "Dies bewerten"
+msgstr ""
 
 #: fivestar.module:1067;1075;1191;1201;1222;1467
 msgid "Average"
-msgstr "Durchschnitt"
+msgstr ""
 
 #: fivestar.module:1071;1075;1196;1201;1206;1466
 msgid "Your rating"
-msgstr "Eigene Bewertung"
+msgstr ""
 
 #: fivestar.module:1255
 msgid "Your vote has been cleared."
-msgstr "Die Bewertung wurde gelöscht."
+msgstr ""
 
 #: fivestar.module:1258
 msgid "Thank you for your vote."
-msgstr "Vielen Dank für die Bewertung."
+msgstr ""
 
 #: fivestar.module:1393
 msgid "Your rating: <span>!stars</span>"
-msgstr "Eigene Bewertung: <span>!stars</span>"
+msgstr ""
 
 #: fivestar.module:1393
 msgid "None"
-msgstr "Keine"
+msgstr ""
 
 #: fivestar.module:1401
 msgid "Average: <span>!stars</span>"
-msgstr "Durchschnitt: <span>!stars</span>"
+msgstr ""
 
 #: fivestar.module:1416
 msgid "No votes yet"
-msgstr "Noch keine Bewertungen vorhanden"
+msgstr ""
 
 #: fivestar.module:1468
 msgid "Saving your vote..."
-msgstr "Bewertung wird gespeichert..."
+msgstr ""
 
 #: fivestar.module:1469
 msgid "Your vote has been saved."
-msgstr "Die Bewertung wurde gespeichert."
+msgstr ""
 
 #: fivestar.module:1470
 msgid "Deleting your vote..."
-msgstr "Löschen der Bewertung..."
+msgstr ""
 
 #: fivestar.module:1471
 msgid "Your vote has been deleted."
-msgstr "Die Bewertung wurde gelöscht."
+msgstr ""
 
-# English seams to be unlogic
 #: fivestar.module:1541
-#, fuzzy
 msgid "Select rating"
-msgstr "Bewertung auswählen"
+msgstr ""
 
-# not literally
 #: fivestar.module:1549
-#, fuzzy
 msgid "Cancel rating"
-msgstr "Bewertung löschen"
+msgstr ""
 
 #: fivestar.module:1557
 msgid "Give it @star/@count"
-msgstr "Mit @star/@count bewerten"
+msgstr ""
 
 #: fivestar.module:1598
 msgid "!name field is required."
-msgstr "Das Feld !name ist erforderlich."
+msgstr ""
 
 #: fivestar.module:1605
 msgid "Fivestar Stars (display only)"
-msgstr "Fivestar Sterne (nur Anzeige)"
+msgstr ""
 
 #: fivestar.module:1606
 msgid "Fivestar Stars (clickable, no text)"
-msgstr "Fivestar Sterne (klickbar, kein Text)"
+msgstr ""
 
 #: fivestar.module:1607
 msgid "Fivestar Stars (clickable, with text)"
-msgstr "Fivestar Sterne (klickbar, mit Text)"
+msgstr ""
 
 #: fivestar.module:1408;1412
 msgid "<span>@count</span> vote"
 msgid_plural "<span>@count</span> votes"
-msgstr[0] "<span>@count</span> Bewertung"
-msgstr[1] "<span>@count</span> Bewertungen"
+msgstr[0] ""
+msgstr[1] ""
 
 #: fivestar.module:82
 msgid "rate content"
-msgstr "Inhalt bewerten"
+msgstr ""
 
 #: fivestar.module:82
 msgid "use PHP for fivestar target"
-msgstr "PHP für Fivestar-Ziel verwenden"
+msgstr ""
 
-#: fivestar.module:33
-#: fivestar.info:0
+#: fivestar.module:33 fivestar.info:0
 msgid "Fivestar"
-msgstr "Fivestar"
+msgstr ""
 
 #: fivestar.module:34
 msgid "Configure site-wide widgets used for Fivestar rating."
@@ -495,108 +491,57 @@ msgstr ""
 
 #: fivestar.module:0
 msgid "fivestar"
-msgstr "fivestar"
+msgstr ""
 
 #: fivestar_comment.module:16
-#, fuzzy
 msgid "Comment widget"
-msgstr "Steuerelement für Kommentar"
+msgstr ""
 
 #: fivestar_comment.module:17
 msgid "Enabling Fivestar for comments will display a rating widget when a user posts a comment. The rating of the comment will affect its parent content."
 msgstr ""
 
 #: fivestar_comment.module:22
-#, fuzzy
 msgid "Fivestar comment settings"
-msgstr "Einstellungen für Fivestar-Kommentare"
+msgstr ""
 
 #: fivestar_comment.module:24
 msgid "Disabled"
-msgstr "Deaktiviert"
+msgstr ""
 
 #: fivestar_comment.module:25
 msgid "Optional rating"
-msgstr "Optionale Bewertung"
+msgstr ""
 
 #: fivestar_comment.module:26
 msgid "Required rating"
-msgstr "Erforderliche Bewertung"
+msgstr ""
 
 #: fivestar_comment.module:32
-#, fuzzy
 msgid "Comment widget preview"
-msgstr "Steuerelement für Kommentarvorschau"
+msgstr ""
 
 #: fivestar_comment.module:61
 msgid "Rating"
-msgstr "Bewertung"
+msgstr ""
 
 #: fivestar_comment.module:0
 msgid "fivestar_comment"
-msgstr "fivestar_comment"
+msgstr ""
 
 #: fivestar.info:0
 msgid "A simple five-star voting widget for nodes."
-msgstr "Ein einfaches Fivestar-Bewertungssteuerelement für Beiträge."
+msgstr ""
 
-#: fivestar.info:0
-#: fivestar_comment.info:0
+#: fivestar.info:0 fivestar_comment.info:0
 msgid "Voting"
-msgstr "Bewertung"
+msgstr ""
 
 #: fivestar_comment.info:0
 msgid "Fivestar Comments"
-msgstr "Fivestar-Kommentare"
+msgstr ""
 
 #: fivestar_comment.info:0
 msgid "Rate nodes by leaving comments."
-msgstr "Beiträge durch Hinterlassen von Kommentaren bewerten."
-
-#~ msgid "The number of stars or radio buttons to display."
-#~ msgstr "Anzahl der Sterne oder Optionsfelder die angeziegt werden sollen."
-#~ msgid "Node ID"
-#~ msgstr "Beitrags-ID"
-#~ msgid "Radio Buttons"
-#~ msgstr "Optionsfelder"
-#~ msgid "Allow Clearing"
-#~ msgstr "Löschen zulassen"
-#~ msgid "True"
-#~ msgstr "Wahr"
-#~ msgid "False"
-#~ msgstr "Falsch"
-#~ msgid "Display a button to clear the user's current vote."
-#~ msgstr "Eine Schaltfläche anzeigen, um die derzeitige Stimme zu löschen."
-#~ msgid "Five Star ratings"
-#~ msgstr "Fivestar Bewertungen"
-#~ msgid "Nothing but the stars"
-#~ msgstr "Nichts ausser den Sternen"
-#~ msgid "Two sets of stars"
-#~ msgstr "Zwei Reihen von Sternen"
-#~ msgid "Widget location (teaser)"
-#~ msgstr "Position des Steuerelements (Anrisstext)"
-#~ msgid "Above the teaser body"
-#~ msgstr "Über dem Anrisstext"
-#~ msgid "Below the teaser body"
-#~ msgstr "Unter dem Anristext"
-#~ msgid "Widget location (full node)"
-#~ msgstr "Position des Steuerelements (Textkörper)"
-#~ msgid "Above the node body"
-#~ msgstr "Über dem Textkörper"
-#~ msgid "Below the node body"
-#~ msgstr "Unter dem Textkörper"
-#~ msgid "Choose a widget set to be used on your site."
-#~ msgstr ""
-#~ "Ein Steuerelement-Satz auswählen, welcher auf der Website verwendet "
-#~ "werden soll."
-#~ msgid "Fivestar Preview"
-#~ msgstr "Fivestar Vorschau"
-#~ msgid "Your vote"
-#~ msgstr "Eigene Bewertung"
-#~ msgid "Average: !stars (!votes !vote_text)"
-#~ msgstr "Durchschnitt: !stars (!votes !vote_text)"
-#~ msgid "vote"
-#~ msgid_plural "votes"
-#~ msgstr[0] "Bewertung"
-#~ msgstr[1] "Bewertungen"
+msgstr ""
 
