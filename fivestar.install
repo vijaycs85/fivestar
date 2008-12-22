@@ -105,6 +105,11 @@ function fivestar_update_2() {
  * Remove anonymous vote interval from Fivestar, now handled by VotingAPI.
  */
 function fivestar_update_6100() {
+  // If using CCK, make sure it has updated first.
+  if (function_exists('content_check_update') && ($abort = content_check_update('fivestar'))) {
+    return $abort;
+  }
+  
   $ret = array();
   variable_del('fivestar_anonymous_vote_interval');
   $ret[] = array('success' => TRUE, 'query' => "variable_del('fivestar_anonymous_vote_interval')");
@@ -160,7 +165,8 @@ function fivestar_update_6103() {
  */
 function fivestar_update_6104() {
   // Previously ran as fivestar_update_5703 on Drupal 5.
-  if (fivestar_update_version() >= 6100) {
+  // Also, don't run this update if CCK is not enabled.
+  if (fivestar_update_version() >= 6100 && module_exists('content')) {
     $result = db_query("SELECT field_name, global_settings FROM {content_node_field} WHERE type = 'fivestar'");
     while ($field = db_fetch_object($result)) {
       $settings = unserialize($field->global_settings);
