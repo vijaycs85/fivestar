@@ -106,25 +106,28 @@ function fivestar_update_5702() {
  * Update CCK target logic to rename "target" to "php_target".
  */
 function fivestar_update_5703() {
-  $result = db_query("SELECT field_name, global_settings FROM {node_field} WHERE type = 'fivestar'");
-  while ($field = db_fetch_object($result)) {
-    $settings = unserialize($field->global_settings);
-    if (!empty($settings['target'])) {
-      if (is_numeric($settings['target'])) {
-        // If previously a straight-integer, just add a "return" to the number.
-        $settings['php_target'] = 'return '. $settings['target'] .';';
+  // Only run if CCK exists.
+  if (module_exists('content')) {
+    $result = db_query("SELECT field_name, global_settings FROM {node_field} WHERE type = 'fivestar'");
+    while ($field = db_fetch_object($result)) {
+      $settings = unserialize($field->global_settings);
+      if (!empty($settings['target'])) {
+        if (is_numeric($settings['target'])) {
+          // If previously a straight-integer, just add a "return" to the number.
+          $settings['php_target'] = 'return '. $settings['target'] .';';
+        }
+        else {
+          // If already PHP code, remove the PHP brackets.
+          $php = trim($settings['target']);
+          $php = preg_replace('/^<\?(php)?/', '', $php);
+          $php = preg_replace('/\?>$/', '', $php);
+          $settings['php_target'] = $php;
+        }
       }
-      else {
-        // If already PHP code, remove the PHP brackets.
-        $php = trim($settings['target']);
-        $php = preg_replace('/^<\?(php)?/', '', $php);
-        $php = preg_replace('/\?>$/', '', $php);
-        $settings['php_target'] = $php;
-      }
+      unset($settings['target']);
+      unset($settings['php']);
+      db_query("UPDATE {node_field} SET global_settings = '%s' WHERE field_name = '%s'", serialize($settings), $field->field_name);
     }
-    unset($settings['target']);
-    unset($settings['php']);
-    db_query("UPDATE {node_field} SET global_settings = '%s' WHERE field_name = '%s'", serialize($settings), $field->field_name);
   }
   return array();
 }
