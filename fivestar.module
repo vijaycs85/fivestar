@@ -1329,7 +1329,7 @@ function theme_fivestar_widget($form) {
   }
 
   $class = 'fivestar-form';
-  $class .= '-'. (isset($form['vote']['#tag']) ? $form['tag']['#tag'] : 'vote');
+  $class .= '-'. (isset($form['vote']['#tag']) ? $form['vote']['#tag'] : 'vote');
   $class .= '-'. (isset($form['content_id']['#value']) ? $form['content_id']['#value'] : 0);
 
   $output  = '';
