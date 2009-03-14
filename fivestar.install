@@ -190,3 +190,23 @@ function fivestar_update_6104() {
   }
   return array();
 }
+
+/**
+ * Belated update for Drupal 6: Re-enable Fivestar CCK fields.
+ */
+function fivestar_update_6105() {
+  if ($abort = content_check_update('fivestar')) {
+    return $abort;
+  }
+
+  $ret = array();
+
+  // All CCK fields are disabled by Content module during the D6 upgrade.
+  // Re-enable the Fivestar fields.
+  module_load_include('inc', 'fivestar', 'fivestar_field');
+  content_associate_fields('fivestar');
+
+  $ret[] = array('success' => TRUE, 'query' => t('Re-enabled Fivestar CCK fields.'));
+
+  return $ret;
+}
