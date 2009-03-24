@@ -44,7 +44,7 @@
         }
         else if ($obj.is('.fivestar-average-stars')) {
           var starDisplay = 'average';
-          currentValue = $("input[@name=vote_average]", $obj).val();
+          currentValue = $("input[name=vote_average]", $obj).val();
         }
         else if ($obj.is('.fivestar-combo-stars')) {
           var starDisplay = 'combo';

@@ -12,7 +12,7 @@ if (Drupal.jsEnabled) {
     nodePreview.displayTextfields();
 
     // Enable comments if available.
-    $comment = $('input[@name=fivestar_comment]');
+    $comment = $('input[name=fivestar_comment]');
     if ($comment.size()) {
       var commentPreview = new fivestarPreview($('#fivestar-comment-preview .fivestar-preview')[0]);
     }
