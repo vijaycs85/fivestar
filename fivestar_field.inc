@@ -50,7 +50,7 @@ function fivestar_field_settings($op, $field) {
         drupal_set_message(t('No potential target fields are available for the %type type. Create a node reference field in this node type to make it easier to assign a vote to a node.', array('%type' => node_get_types('name', $field['type_name']))), 'warning');
       }
 
-      $dynamic_options = array('' => t('<none>')) + $dynamic_options;
+      $dynamic_options = array('' => '<'. t('none') .'>') + $dynamic_options;
       $form['dynamic_target'] = array(
         '#title' => t('Voting target'),
         '#type' => 'select',
