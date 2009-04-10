@@ -6,6 +6,17 @@ define('FIVESTAR_COMMENT_OPTIONAL', 1);
 define('FIVESTAR_COMMENT_REQUIRED', 2);
 
 /**
+ * Implementation of hook_theme().
+ */
+function fivestar_comment_theme() {
+  return array(
+    'fivestar_comment_view' => array(
+      'arguments' => array('comment' => NULL, 'fivestar' => NULL),
+    ),
+  );
+}
+
+/**
  * Form alter specification for comments.
  */
 function fivestar_comment_form_alter(&$form, &$form_state, $form_id) {
@@ -105,7 +116,8 @@ function fivestar_comment(&$comment, $op) {
         $comment->fivestar_rating = $comment->fivestar_rating;
         $comment->fivestar_view = theme('fivestar_static', $comment->fivestar_rating, variable_get('fivestar_stars_'. $node->type, 5));
         if ($comment->fivestar_rating) {
-          $comment->comment = $comment->fivestar_view . $comment->comment;
+          // Implement the theme in template.php to change the order:
+          $comment->comment = theme('fivestar_comment_view', $comment->comment, $comment->fivestar_view);
         }
       }
       break;
@@ -184,4 +196,8 @@ function fivestar_comment_delete($cid, $nid, $vote_id) {
   $vote['vote_id'] = $vote_id;
   votingapi_delete_votes(array($vote));
   votingapi_recalculate_results('node', $nid);
+}
+
+function theme_fivestar_comment_view($comment, $fivestar) {
+  return $fivestar . $comment;
 }
