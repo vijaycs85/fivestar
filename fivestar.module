@@ -283,7 +283,7 @@ function fivestar_form_alter(&$form, &$form_state, $form_id) {
         'above_static' => t('Static display above teaser'),
         'below_static' => t('Static display below teaser'),
         'link' => t('Teaser link to full node widget'),
-        'hidden' => t('<hidden>'),
+        'hidden' => '<'. t('hidden') .'>',
       ),
     );
 
@@ -296,7 +296,7 @@ function fivestar_form_alter(&$form, &$form_state, $form_id) {
         'below' => t('Clickable widget below node body'),
         'above_static' => t('Static display above node body'),
         'below_static' => t('Static display below node body'),
-        'hidden' => t('<hidden>'),
+        'hidden' => '<'. t('hidden') .'>',
       ),
     );
 
