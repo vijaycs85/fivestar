@@ -105,7 +105,8 @@ function fivestar_comment(&$comment, $op) {
         $comment->fivestar_rating = $comment->fivestar_rating;
         $comment->fivestar_view = theme('fivestar_static', $comment->fivestar_rating, variable_get('fivestar_stars_'. $node->type, 5));
         if ($comment->fivestar_rating) {
-          $comment->comment = $comment->fivestar_view . $comment->comment;
+          // Implement the theme in template.php to change the order:
+          $comment->comment = theme('fivestar_comment_view', $comment->comment, $comment->fivestar_view);
         }
       }
       break;
@@ -186,4 +187,8 @@ function fivestar_comment_delete($cid, $nid, $vote_id) {
   $vote->vote_id = $vote_id;
   votingapi_delete_vote($vote);
   votingapi_recalculate_results('node', $nid);
+}
+
+function theme_fivestar_comment_view($comment, $fivestar) {
+  return $fivestar . $comment;
 }
