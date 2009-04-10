@@ -204,6 +204,7 @@ function fivestar_color_form_submit($form_id, &$form_values) {
   variable_set('fivestar_colors', $form_values['fivestar_colors']);
   variable_set('fivestar_color_type', $form_values['fivestar_color_type']);
 
+  drupal_clear_css_cache();
   drupal_set_message(t('Custom %name stars generated. You may need to clear your browser cache before the new stars are visible.', array('%name' => t($widget))));
 }
 
