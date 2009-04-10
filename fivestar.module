@@ -148,13 +148,13 @@ function fivestar_form_alter($form_id, &$form) {
     for ($n = 0; $n <= 10; $n++) {
       if ($star_count == 5 && $n <= 5) {
         // If the default 5 stars are chosen, then use these five default label values.
-        $default_labels = array('Cancel rating', 'Poor', 'Okay', 'Good', 'Great', 'Awesome');
+        $default_labels = array(t('Cancel rating'), t('Poor'), t('Okay'), t('Good'), t('Great'), t('Awesome'));
       }
       elseif ($n == 0) {
-        $default_labels[$n] = 'Cancel rating';
+        $default_labels[$n] = t('Cancel rating');
       }
       else {
-        $default_labels[$n] = 'Give it @star/@count';
+        $default_labels[$n] = t('Give it @star/@count');
       }
       $form['fivestar']['labels']['fivestar_label_'. $n] = array(
         '#type' => 'textfield',
