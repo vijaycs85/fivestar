@@ -105,55 +105,63 @@ function fivestar_field_settings($op, $field) {
  */
 function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
   $fieldname = $field['field_name'];
+
   switch ($op) {
-    case 'view':
-      foreach ($items as $delta => $item) {
-        $items[$delta]['view'] = content_format($field, $item);
-      }
-      return theme('field', $node, $field, $items, $teaser, $page);
     case 'insert':
     case 'update':
       foreach ($items as $delta => $item) {
-        if (!empty($field['php_target'])) {
-          // Use eval rather than drupal_eval to allow access to local variables.
-          $items[$delta]['target'] = eval($field['php_target']);
-        }
-        elseif ($field['dynamic_target'] && !empty($node->$field['dynamic_target'])) {
-          if (is_array($node->$field['dynamic_target']) && is_numeric($node->{$field['dynamic_target']}[0]['nid'])) {
-            $items[$delta]['target'] = $node->{$field['dynamic_target']}[0]['nid'];
-          }
-          elseif (is_numeric($node->$field['dynamic_target'])) {
-            $items[$delta]['target'] = $node->$field['dynamic_target'];
-          }
-        }
+        $target = fivestar_field_target($node, $field, $item);
 
-        if (is_numeric($items[$delta]['target'])) {
-          _fivestar_cast_vote('node', $items[$delta]['target'], $items[$delta]['rating'], $items[$delta]['axis'], $node->uid);
-          votingapi_recalculate_results('node', $items[$delta]['target']);
+        if (is_numeric($target)) {
+          $rating = $node->status ? $items[$delta]['rating'] : 0;
+          _fivestar_cast_vote('node', $target, $rating, $items[$delta]['axis'], $node->uid);
+          votingapi_recalculate_results('node', $target);
         }
       }
       break;
     case 'delete':
       foreach ($items as $delta => $item) {
-        if ($field['dynamic_target'] && !empty($node->$field['dynamic_target'])) {
-          $items[$delta]['target'] = $node->$field['dynamic_target'];
-        }
-        elseif (is_numeric($item['target'])) {
-          $items[$delta]['target'] = $item['target'];
-        }
-        elseif ($field['php'] && strpos($item['target'], '<?php') === 0) {
-          // Use eval rather than drupal_eval to allow access to local variables.
-          $items[$delta]['target'] = eval('?>'. $item['target']);
-        }
-        if (is_numeric($items[$delta]['target'])) {
-          _fivestar_cast_vote('node', $items[$delta]['target'], 0, $items[$delta]['axis'], $node->uid);
-          votingapi_recalculate_results('node', $items[$delta]['target']);
+        $target = fivestar_field_target($node, $field, $item);
+
+        if (is_numeric($target)) {
+          _fivestar_cast_vote('node', $target, 0, $items[$delta]['axis'], $node->uid);
+          votingapi_recalculate_results('node', $target);
         }
       }
       break;
+    case 'view':
+      foreach ($items as $delta => $item) {
+        $items[$delta]['view'] = content_format($field, $item);
+      }
+      return theme('field', $node, $field, $items, $teaser, $page);
   }
 }
-      
+
+/**
+ * Helper function to find the nid that should be rated when a field is changed.
+ */
+function fivestar_field_target($node, $field, $item) {
+  $target = FALSE;
+
+  if (!empty($field['php_target'])) {
+    // Use eval rather than drupal_eval to allow access to local variables.
+    $target = eval($field['php_target']);
+  }
+  elseif ($field['dynamic_target'] && !empty($node->$field['dynamic_target'])) {
+    if (is_array($node->$field['dynamic_target']) && is_numeric($node->{$field['dynamic_target']}[0]['nid'])) {
+      $target = $node->{$field['dynamic_target']}[0]['nid'];
+    }
+    elseif (is_numeric($node->$field['dynamic_target'])) {
+      $target = $node->$field['dynamic_target'];
+    }
+  }
+  elseif (isset($item['target'][0]['nid'])) {
+    $target = $item['target'][0]['nid'];
+  }
+
+  return $target;
+}
+
 /**
  * Implementation of hook_widget_info().
  */
