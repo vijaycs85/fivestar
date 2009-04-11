@@ -114,7 +114,7 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
 
         if (is_numeric($target)) {
           $rating = $node->status ? $items[$delta]['rating'] : 0;
-          _fivestar_cast_vote('node', $target, $rating, $items[$delta]['axis'], $node->uid);
+          _fivestar_cast_vote('node', $target, $rating, $items[$delta]['axis'], $node->uid, TRUE);
           votingapi_recalculate_results('node', $target);
         }
       }
@@ -124,7 +124,7 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
         $target = fivestar_field_target($node, $field, $item);
 
         if (is_numeric($target)) {
-          _fivestar_cast_vote('node', $target, 0, $items[$delta]['axis'], $node->uid);
+          _fivestar_cast_vote('node', $target, 0, $items[$delta]['axis'], $node->uid, TRUE);
           votingapi_recalculate_results('node', $target);
         }
       }
