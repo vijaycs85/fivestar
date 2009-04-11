@@ -788,8 +788,8 @@ function fivestar_get_votes($type, $cid, $tag = 'vote', $uid = NULL) {
       $votes['count'] = $result;
     }
   }
-  if ($user->uid) {
-    $user_vote = votingapi_select_votes($criteria += array('uid' => $user->uid));
+  if ($uid) {
+    $user_vote = votingapi_select_votes($criteria += array('uid' => $uid));
     if ($user_vote) {
       $votes['user'] = $user_vote[0];
       $votes['user']['function'] = 'user';
@@ -1013,9 +1013,9 @@ function fivestar_form(&$form_state, $content_type, $content_id) {
   $votes = fivestar_get_votes($content_type, $content_id);
 
   $values = array(
-    'user' => isset($votes['user']['value']) ? $votes['user']['value'] : NULL,
-    'average' => isset($votes['average']['value']) ? $votes['average']['value'] : NULL,
-    'count' => isset($votes['count']['value']) ? $votes['count']['value'] : NULL,
+    'user' => isset($votes['user']['value']) ? $votes['user']['value'] : 0,
+    'average' => isset($votes['average']['value']) ? $votes['average']['value'] : 0,
+    'count' => isset($votes['count']['value']) ? $votes['count']['value'] : 0,
   );
 
   $settings = array(
@@ -1415,7 +1415,7 @@ function theme_fivestar_summary($user_rating, $average_rating, $votes, $stars = 
   if ($votes === 0) {
     $output = '<span class="empty">'. t('No votes yet') .'</span>';
   }
-
+dvm(func_get_args());
   $output = '<div class="fivestar-summary fivestar-summary-'. $div_class . ($feedback ? ' fivestar-feedback-enabled' : '') .'">'. $output .'</div>';
   return $output;
 }
@@ -1666,9 +1666,9 @@ function fivestar_views_widget_handler($value, $field, $columns, $summary) {
     $votes = fivestar_get_votes($content_type, $content_id, $tag);
 
     $values = array(
-      'user' => empty($votes['user']['value']) ? 0 : $votes['user']['value'],
-      'average' => (int)$value,
-      'count' => empty($votes['count']['value']) ? 0 : $votes['count']['value'],
+      'user' => isset($votes['user']['value']) ? $votes['user']['value'] : 0,
+      'average' => isset($votes['average']['value']) ? $votes['average']['value'] : 0,
+      'count' => isset($votes['count']['value']) ? $votes['count']['value'] : 0,
     );
 
     $settings = array(
