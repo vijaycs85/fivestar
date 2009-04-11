@@ -688,12 +688,12 @@ function fivestar_vote($type, $cid, $tag, $value) {
  * Internal function to handle vote casting, flood control, XSS, IP based
  * voting, etc...
  */
-function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL) {
+function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $skip_validation = FALSE) {
   global $user;
   $tag = empty($tag) ? 'vote' : $tag;
 
   // Bail out if the user's trying to vote on an invalid object.
-  if (!fivestar_validate_target($type, $cid, $uid)) {
+  if (!$skip_validation && !fivestar_validate_target($type, $cid, $uid)) {
     return array();
   }
 
@@ -966,9 +966,9 @@ function fivestar_form($content_type, $content_id) {
   }
 
   $values = array(
-    'average' => $current_avg->value,
-    'user' => $user_vote->value,
-    'count' => $current_count->value,
+    'average' => (int)$current_avg->value,
+    'user' => (int)$user_vote->value,
+    'count' => (int)$current_count->value,
   );
 
   $settings = array(
@@ -1607,8 +1607,8 @@ function fivestar_views_widget_handler($op, $filter, $value, &$query, $summary) 
 
   $values = array(
     'average' => (int)$value,
-    'user' => $user_vote->value,
-    'count' => $current_count->value,
+    'user' => (int)$user_vote->value,
+    'count' => (int)$current_count->value,
   );
 
   $settings = array(
