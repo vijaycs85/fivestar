@@ -727,13 +727,13 @@ function fivestar_vote($type, $cid, $tag, $value) {
  * Internal function to handle vote casting, flood control, XSS, IP based
  * voting, etc...
  */
-function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $result = FALSE) {
+function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $result = FALSE, $skip_validation = FALSE) {
   global $user;
   $tag = empty($tag) ? 'vote' : $tag;
   $uid = empty($uid) ? $user->uid : $uid;
 
   // Bail out if the user's trying to vote on an invalid object.
-  if (!fivestar_validate_target($type, $cid, $uid)) {
+  if (!$skip_validation && !fivestar_validate_target($type, $cid, $uid)) {
     return array();
   }
 
@@ -1415,7 +1415,7 @@ function theme_fivestar_summary($user_rating, $average_rating, $votes, $stars = 
   if ($votes === 0) {
     $output = '<span class="empty">'. t('No votes yet') .'</span>';
   }
-dvm(func_get_args());
+
   $output = '<div class="fivestar-summary fivestar-summary-'. $div_class . ($feedback ? ' fivestar-feedback-enabled' : '') .'">'. $output .'</div>';
   return $output;
 }
