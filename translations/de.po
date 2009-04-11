@@ -1,4 +1,4 @@
-# $Id: de.po,v 1.1.2.3 2008/12/07 00:31:45 hass Exp $
+# $Id: de.po,v 1.1.2.5 2008/12/11 13:53:30 hass Exp $
 #
 # Deutsch translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
@@ -10,8 +10,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-12-06 23:46+0100\n"
-"PO-Revision-Date: 2008-12-11 14:53+0100\n"
+"POT-Creation-Date: 2009-04-11 03:09+0200\n"
+"PO-Revision-Date: 2009-04-11 03:28+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: Deutsch <EMAIL@ADDRESS>\n"
 "MIME-Version: 1.0\n"
@@ -89,6 +89,7 @@ msgid "Matte color"
 msgstr "Matte Farbe"
 
 #: fivestar_color.inc:102;159
+#: fivestar_field.inc:56
 msgid "none"
 msgstr "Keine"
 
@@ -96,7 +97,7 @@ msgstr "Keine"
 msgid "The entered value %color is not a valid hex color."
 msgstr "Der eingegebene Wert %color ist keine gültige hexadezimale Farbe."
 
-#: fivestar_color.inc:205
+#: fivestar_color.inc:206
 msgid "Custom %name stars generated. You may need to clear your browser cache before the new stars are visible."
 msgstr "Benutzerdefinierte %name-Sterne wurden erstellt. Eventuell kann das Leeren des Browser-Caches erforderlich sein, bevor die neuen Sterne sichtbar werden."
 
@@ -128,10 +129,6 @@ msgstr "Beitragsreferenz: @field"
 msgid "No potential target fields are available for the %type type. Create a node reference field in this node type to make it easier to assign a vote to a node."
 msgstr ""
 
-#: fivestar_field.inc:56
-msgid "<none>"
-msgstr "<Keine>"
-
 #: fivestar_field.inc:58
 msgid "Voting target"
 msgstr "Bewertungsziel"
@@ -158,27 +155,27 @@ msgstr "Nur für erweiterte Verwendung: PHP-Code, der eine Beitrags-ID zurückgi
 msgid "The axis this rating will affect. Enter a property on which that this rating will affect, such as <em>quality</em>, <em>satisfaction</em>, <em>overall</em>, etc. If no axis is entered, the default axis <em>vote</em> will be used. Warning: changing this value will not update existing votes to the new axis."
 msgstr "Der Aspekt auf den diese Bewertung zutrifft. Dazu muss eine Eigenschaft für diese Bewertung angegeben werden, wie <em>Qualität</em>, <em>Zufriedenheit</em>, <em>Allgemein</em>. Sollte kein Aspekt angegeben werden, wird der Standardaspekt <em>Bewertung</em> verwendet. Achtung: die Änderung dieses Wertes aktualisiert nicht die vorhandenen Bewertungen bezüglich dem neuen Aspekt."
 
-#: fivestar_field.inc:171
+#: fivestar_field.inc:181
 msgid "Stars"
 msgstr "Sterne"
 
-#: fivestar_field.inc:176
+#: fivestar_field.inc:186
 msgid "Select list"
 msgstr "Auswahlliste"
 
-#: fivestar_field.inc:192
+#: fivestar_field.inc:202
 msgid "Allow user to clear value"
 msgstr "Benutzern das Löschen des Wertes erlauben"
 
-#: fivestar_field.inc:241
+#: fivestar_field.inc:251
 msgid "As Stars"
 msgstr "Als Sterne"
 
-#: fivestar_field.inc:245
+#: fivestar_field.inc:255
 msgid "Rating (i.e. 4.2/5)"
 msgstr "Bewertung (z.B. 4.2/5)"
 
-#: fivestar_field.inc:249
+#: fivestar_field.inc:259
 msgid "Percentage (i.e. 92)"
 msgstr "Prozentzahl (z.B. 92)"
 
@@ -229,6 +226,41 @@ msgstr "Beschriftungen beim Überfahren mit der Maus anzeigen"
 #: fivestar.module:194
 msgid "When enabled, the star labels will dynamically appear underneath the stars as the user hovers over each star to provide a more descriptive qualitative meaning for each star value."
 msgstr "Sobald aktiviert, erscheinen die Stern-Beschriftungen dynamisch unterhalb der Sterne, wenn der Benutzer mit der Maus über einem Stern fährt, so dass eine aussagekräftige Bedeutung für jeden Sternwert erscheint."
+
+# not literally
+#: fivestar.module:204;207;1549
+#, fuzzy
+msgid "Cancel rating"
+msgstr "Bewertung löschen"
+
+#: fivestar.module:204
+#, fuzzy
+msgid "Poor"
+msgstr "Mangelhaft"
+
+#: fivestar.module:204
+#, fuzzy
+msgid "Okay"
+msgstr "Ausreichend"
+
+#: fivestar.module:204
+#, fuzzy
+msgid "Good"
+msgstr "Befriedigend"
+
+#: fivestar.module:204
+#, fuzzy
+msgid "Great"
+msgstr "Gut"
+
+#: fivestar.module:204
+#, fuzzy
+msgid "Awesome"
+msgstr "Sehr gut"
+
+#: fivestar.module:210;1557
+msgid "Give it @star/@count"
+msgstr "Mit @star/@count bewerten"
 
 #: fivestar.module:214
 msgid "Star @star label"
@@ -321,8 +353,8 @@ msgid "Teaser link to full node widget"
 msgstr "Anrisstext-Link zum vollständigen Beitragsteuerelement"
 
 #: fivestar.module:286;299
-msgid "<hidden>"
-msgstr "<Versteckt>"
+msgid "hidden"
+msgstr "Versteckt"
 
 #: fivestar.module:292
 msgid "Full node display"
@@ -446,16 +478,6 @@ msgstr "Die Bewertung wurde gelöscht."
 msgid "Select rating"
 msgstr "Bewertung auswählen"
 
-# not literally
-#: fivestar.module:1549
-#, fuzzy
-msgid "Cancel rating"
-msgstr "Bewertung löschen"
-
-#: fivestar.module:1557
-msgid "Give it @star/@count"
-msgstr "Mit @star/@count bewerten"
-
 #: fivestar.module:1598
 msgid "!name field is required."
 msgstr "Das Feld !name ist erforderlich."
@@ -499,44 +521,48 @@ msgstr "Die Websiteweiten-Steuerelemente für die Fivestar-Bewertungen konfiguri
 msgid "fivestar"
 msgstr "fivestar"
 
-#: fivestar_comment.module:16
+#: fivestar_comment.module:27
 #, fuzzy
 msgid "Comment widget"
 msgstr "Steuerelement für Kommentar"
 
-#: fivestar_comment.module:17
+#: fivestar_comment.module:28
 msgid "Enabling Fivestar for comments will display a rating widget when a user posts a comment. The rating of the comment will affect its parent content."
 msgstr "Das Aktivieren von Fivestar für Kommentare führt zur Anzeige eines Bewertungs-Steuerelementes, wenn ein Benutzer einen Kommentar speichert. Die Bewertung des Kommentars betrifft auch den übergeordneten Inhalt."
 
-#: fivestar_comment.module:22
+#: fivestar_comment.module:33
 #, fuzzy
 msgid "Fivestar comment settings"
 msgstr "Einstellungen für Fivestar-Kommentare"
 
-#: fivestar_comment.module:24
+#: fivestar_comment.module:35
 msgid "Disabled"
 msgstr "Deaktiviert"
 
-#: fivestar_comment.module:25
+#: fivestar_comment.module:36
 msgid "Optional rating"
 msgstr "Optionale Bewertung"
 
-#: fivestar_comment.module:26
+#: fivestar_comment.module:37
 msgid "Required rating"
 msgstr "Erforderliche Bewertung"
 
-#: fivestar_comment.module:32
+#: fivestar_comment.module:43
 #, fuzzy
 msgid "Comment widget preview"
 msgstr "Steuerelement für Kommentarvorschau"
 
-#: fivestar_comment.module:61
+#: fivestar_comment.module:72
 msgid "Rating"
 msgstr "Bewertung"
 
 #: fivestar_comment.module:0
 msgid "fivestar_comment"
 msgstr "fivestar_comment"
+
+#: fivestar.install:209
+msgid "Re-enabled Fivestar CCK fields."
+msgstr "Fivestar-CCK-Felder wurden wieder aktiviert."
 
 #: fivestar.info:0
 msgid "A simple five-star voting widget for nodes."
@@ -554,4 +580,7 @@ msgstr "Fivestar-Kommentare"
 #: fivestar_comment.info:0
 msgid "Rate nodes by leaving comments."
 msgstr "Beiträge durch Hinterlassen von Kommentaren bewerten."
+
+#~ msgid "<none>"
+#~ msgstr "<Keine>"
 
