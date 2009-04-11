@@ -3,18 +3,19 @@
 # LANGUAGE translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  fivestar_color.inc,v 1.1.4.7 2008/10/05 21:09:00 quicksketch
-#  fivestar_field.inc,v 1.3.2.12 2008/10/05 23:52:10 quicksketch
-#  fivestar.module,v 1.13.2.47 2008/10/21 05:34:45 quicksketch
+#  fivestar_color.inc,v 1.1.4.8 2009/04/10 18:21:03 quicksketch
+#  fivestar_field.inc,v 1.3.2.14 2009/04/10 19:45:06 quicksketch
+#  fivestar.module,v 1.13.2.51 2009/04/10 19:45:06 quicksketch
 #  fivestar.info,v 1.3 2008/01/14 08:28:21 quicksketch
-#  fivestar_comment.module,v 1.1.2.4 2008/10/05 21:59:47 quicksketch
+#  fivestar_comment.module,v 1.1.2.5 2009/04/10 17:50:58 quicksketch
+#  fivestar.install,v 1.5.2.11 2009/03/14 00:15:08 quicksketch
 #  fivestar_comment.info,v 1.1.2.1 2008/06/30 03:40:15 quicksketch
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-12-06 23:46+0100\n"
+"POT-Creation-Date: 2009-04-11 03:09+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -91,7 +92,7 @@ msgstr ""
 msgid "Matte color"
 msgstr ""
 
-#: fivestar_color.inc:102;159
+#: fivestar_color.inc:102;159 fivestar_field.inc:56
 msgid "none"
 msgstr ""
 
@@ -99,7 +100,7 @@ msgstr ""
 msgid "The entered value %color is not a valid hex color."
 msgstr ""
 
-#: fivestar_color.inc:205
+#: fivestar_color.inc:206
 msgid "Custom %name stars generated. You may need to clear your browser cache before the new stars are visible."
 msgstr ""
 
@@ -131,10 +132,6 @@ msgstr ""
 msgid "No potential target fields are available for the %type type. Create a node reference field in this node type to make it easier to assign a vote to a node."
 msgstr ""
 
-#: fivestar_field.inc:56
-msgid "<none>"
-msgstr ""
-
 #: fivestar_field.inc:58
 msgid "Voting target"
 msgstr ""
@@ -159,27 +156,27 @@ msgstr ""
 msgid "The axis this rating will affect. Enter a property on which that this rating will affect, such as <em>quality</em>, <em>satisfaction</em>, <em>overall</em>, etc. If no axis is entered, the default axis <em>vote</em> will be used. Warning: changing this value will not update existing votes to the new axis."
 msgstr ""
 
-#: fivestar_field.inc:171
+#: fivestar_field.inc:181
 msgid "Stars"
 msgstr ""
 
-#: fivestar_field.inc:176
+#: fivestar_field.inc:186
 msgid "Select list"
 msgstr ""
 
-#: fivestar_field.inc:192
+#: fivestar_field.inc:202
 msgid "Allow user to clear value"
 msgstr ""
 
-#: fivestar_field.inc:241
+#: fivestar_field.inc:251
 msgid "As Stars"
 msgstr ""
 
-#: fivestar_field.inc:245
+#: fivestar_field.inc:255
 msgid "Rating (i.e. 4.2/5)"
 msgstr ""
 
-#: fivestar_field.inc:249
+#: fivestar_field.inc:259
 msgid "Percentage (i.e. 92)"
 msgstr ""
 
@@ -229,6 +226,34 @@ msgstr ""
 
 #: fivestar.module:194
 msgid "When enabled, the star labels will dynamically appear underneath the stars as the user hovers over each star to provide a more descriptive qualitative meaning for each star value."
+msgstr ""
+
+#: fivestar.module:204;207;1549
+msgid "Cancel rating"
+msgstr ""
+
+#: fivestar.module:204
+msgid "Poor"
+msgstr ""
+
+#: fivestar.module:204
+msgid "Okay"
+msgstr ""
+
+#: fivestar.module:204
+msgid "Good"
+msgstr ""
+
+#: fivestar.module:204
+msgid "Great"
+msgstr ""
+
+#: fivestar.module:204
+msgid "Awesome"
+msgstr ""
+
+#: fivestar.module:210;1557
+msgid "Give it @star/@count"
 msgstr ""
 
 #: fivestar.module:214
@@ -320,7 +345,7 @@ msgid "Teaser link to full node widget"
 msgstr ""
 
 #: fivestar.module:286;299
-msgid "<hidden>"
+msgid "hidden"
 msgstr ""
 
 #: fivestar.module:292
@@ -443,14 +468,6 @@ msgstr ""
 msgid "Select rating"
 msgstr ""
 
-#: fivestar.module:1549
-msgid "Cancel rating"
-msgstr ""
-
-#: fivestar.module:1557
-msgid "Give it @star/@count"
-msgstr ""
-
 #: fivestar.module:1598
 msgid "!name field is required."
 msgstr ""
@@ -493,40 +510,44 @@ msgstr ""
 msgid "fivestar"
 msgstr ""
 
-#: fivestar_comment.module:16
+#: fivestar_comment.module:27
 msgid "Comment widget"
 msgstr ""
 
-#: fivestar_comment.module:17
+#: fivestar_comment.module:28
 msgid "Enabling Fivestar for comments will display a rating widget when a user posts a comment. The rating of the comment will affect its parent content."
 msgstr ""
 
-#: fivestar_comment.module:22
+#: fivestar_comment.module:33
 msgid "Fivestar comment settings"
 msgstr ""
 
-#: fivestar_comment.module:24
+#: fivestar_comment.module:35
 msgid "Disabled"
 msgstr ""
 
-#: fivestar_comment.module:25
+#: fivestar_comment.module:36
 msgid "Optional rating"
 msgstr ""
 
-#: fivestar_comment.module:26
+#: fivestar_comment.module:37
 msgid "Required rating"
 msgstr ""
 
-#: fivestar_comment.module:32
+#: fivestar_comment.module:43
 msgid "Comment widget preview"
 msgstr ""
 
-#: fivestar_comment.module:61
+#: fivestar_comment.module:72
 msgid "Rating"
 msgstr ""
 
 #: fivestar_comment.module:0
 msgid "fivestar_comment"
+msgstr ""
+
+#: fivestar.install:209
+msgid "Re-enabled Fivestar CCK fields."
 msgstr ""
 
 #: fivestar.info:0
