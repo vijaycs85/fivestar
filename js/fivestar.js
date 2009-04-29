@@ -15,7 +15,7 @@
  * Create a degradeable star rating interface out of a simple form structure.
  * Returns a modified jQuery object containing the new interface.
  *   
- * @example jQuery('form.rating').rating();
+ * @example jQuery('form.rating').fivestar();
  * @cat plugin
  * @type jQuery 
  *
@@ -350,7 +350,7 @@
     /**
      * Set up the plugin
      */
-    $.fn.rating = function() {
+    $.fn.fivestar = function() {
       var stack = [];
       this.each(function() {
           var ret = buildRating($(this));
@@ -368,7 +368,7 @@
 
   if (Drupal.jsEnabled) {
     $(document).ready(function() {
-      $('div.fivestar-form-item:not(.fivestar-processed)').addClass('fivestar-processed').rating();
+      $('div.fivestar-form-item:not(.fivestar-processed)').addClass('fivestar-processed').fivestar();
       $('input.fivestar-submit').css('display', 'none');
     });
   }
