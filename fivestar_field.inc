@@ -111,22 +111,17 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'insert':
     case 'update':
-      foreach ($items as $delta => $item) {
-        $target = fivestar_field_target($node, $field, $item);
-
-        if (is_numeric($target)) {
-          $rating = $node->status ? $items[$delta]['rating'] : 0;
-          _fivestar_cast_vote('node', $target, $rating, $items[$delta]['axis'], $node->uid, FALSE, TRUE);
-          votingapi_recalculate_results('node', $target);
-        }
-      }
-      break;
     case 'delete':
       foreach ($items as $delta => $item) {
+        if ($node->status == 0 || $op == 'delete') {
+          $rating = 0;
+        } else {
+          $rating = $items[$delta]['rating'];
+        }
         $target = fivestar_field_target($node, $field, $item);
 
         if (is_numeric($target)) {
-          _fivestar_cast_vote('node', $target, 0, $items[$delta]['axis'], $node->uid, FALSE, TRUE);
+          _fivestar_cast_vote('node', $target, $rating, $field['axis'], $node->uid, FALSE, TRUE);
           votingapi_recalculate_results('node', $target);
         }
       }
