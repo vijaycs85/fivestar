@@ -188,7 +188,7 @@ function fivestar_widget_settings($op, $widget) {
       $form['allow_clear'] = array(
         '#type' => 'checkbox',
         '#title' => t('Allow user to clear value'),
-        '#default_value' => $widget['allow_clear'] ? $widget['allow_clear'] : 1,
+        '#default_value' => isset($widget['allow_clear']) ? $widget['allow_clear'] : 1,
       );
       return $form;
     case 'save':
