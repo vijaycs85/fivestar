@@ -643,6 +643,16 @@ function theme_fivestar_preview_wrapper($content, $type = 'direct') {
  *  javascript code.
  */
 function fivestar_vote($type, $cid, $tag, $value) {
+  drupal_set_header("Content-Type: text/xml");
+  $output = '';
+  $output .= '<?xml version="1.0" encoding="UTF-8"?>';
+
+  // Rebuild the #auto_submit_path that was used as the token seed.
+  $path = preg_replace('/\/'. $value .'$/', '', $_GET['q']);
+  if (!isset($_GET['token']) || !fivestar_check_token($_GET['token'], $path)) {
+    $output .= '<xml><error>'. t('Invalid token') .'</error></xml>';
+    exit($output);
+  }
 
   _fivestar_cast_vote($type, $cid, $value, $tag);
   $result = votingapi_recalculate_results($type, $cid);
@@ -657,8 +667,6 @@ function fivestar_vote($type, $cid, $tag, $value) {
   $stars = variable_get('fivestar_stars_'. (!isset($node) ? 'default' : $node->type), 5);
   $feedback_enable = variable_get('fivestar_feedback_'. (!isset($node) ? 'default' : $node->type), 1);
 
-  $output = '';
-  $output .= '<?xml version="1.0" encoding="UTF-8"?>';
   $output .= '<xml><result>';
 
   if (count($result)) {
@@ -924,6 +932,20 @@ function fivestar_block($op = 'list', $delta = 0, $edit = array()) {
 
 function fivestar_widget_form($node) {
   return drupal_get_form('fivestar_form_node_'. $node->nid, 'node', $node->nid);
+}
+
+/**
+ * Get a private token used to protect links from spoofing - CSRF.
+ */
+function fivestar_get_token($seed) {
+  return drupal_get_token($seed);
+}
+
+/**
+ * Check to see if a token value matches the specified node.
+ */
+function fivestar_check_token($token, $seed) {
+  return drupal_get_token($seed) == $token;
 }
 
 /**
@@ -1473,10 +1495,16 @@ function fivestar_expand($element) {
   }
 
   if ($element['#auto_submit'] && !empty($element['#auto_submit_path'])) {
-    $element['auto_submit_path'] =  array(
+    $element['auto_submit_path'] = array(
       '#type' => 'hidden',
       '#value' => url($element['#auto_submit_path']),
       '#attributes' => array('class' => 'fivestar-path'),
+      '#id' => 'edit-auto-submit-path-'. $fivestar_id,
+    );
+    $element['auto_submit_token'] = array(
+      '#type' => 'hidden',
+      '#value' => fivestar_get_token($element['#auto_submit_path']),
+      '#attributes' => array('class' => 'fivestar-token'),
       '#id' => 'edit-auto-submit-path-'. $fivestar_id,
     );
   }
