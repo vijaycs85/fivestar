@@ -70,6 +70,12 @@ function fivestar_init() {
   if (module_exists('content')) {
     module_load_include('inc', 'fivestar', 'fivestar_field');
   }
+
+  // Add necessary CSS and JS.
+  // TODO: These shouldn't be loaded on every page, but block caching omits
+  // CSS and JS files that would be otherwise added.
+  fivestar_add_js();
+  fivestar_add_css();
 }
 
 /**
@@ -1286,14 +1292,6 @@ function fivestar_elements() {
  * Theme the fivestar form element by adding necessary css and javascript.
  */
 function theme_fivestar($element) {
-  // Add necessary CSS.
-  fivestar_add_css();
-
-  // Add necessary javascript.
-  if ($element['#widget'] == 'stars' ) {
-    fivestar_add_js();
-  }
-
   if (empty($element['#description'])) {
     if ($element['#feedback_enable']) {
       $element['#description'] = '<div class="fivestar-summary fivestar-feedback-enabled">&nbsp;</div>';
@@ -1354,9 +1352,6 @@ function theme_fivestar_widget($form) {
  *
  */
 function theme_fivestar_static($rating, $stars = 5, $tag = 'vote') {
-  // Add necessary CSS.
-  fivestar_add_css();
-
   $output = '';
   $output .= '<div class="fivestar-widget-static fivestar-widget-static-'. $tag .' fivestar-widget-static-'. $stars .' clear-block">';
   $numeric_rating = $rating/(100/$stars);
