@@ -128,7 +128,16 @@
               $obj.removeClass('fivestar-user-stars').addClass('fivestar-average-stars');
             }
             // Submit the form if needed.
-            $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + 0, success: voteHook }); });
+            $("input.fivestar-path", $obj).each(function() {
+              var token = $("input.fivestar-token", $obj).val();
+              $.ajax({
+                type: 'GET',
+                data: { token: token },
+                dataType: 'xml',
+                url: this.value + '/' + 0,
+                success: voteHook
+              });
+            });
             return false;
         });
         $stars.click(function(){
@@ -152,7 +161,16 @@
               $obj.removeClass('fivestar-average-stars').addClass('fivestar-user-stars');
             }
             // Submit the form if needed.
-            $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + currentValue, success: voteHook }); });
+            $("input.fivestar-path", $obj).each(function () {
+              var token = $("input.fivestar-token", $obj).val();
+              $.ajax({
+                type: 'GET',
+                data: { token: token },
+                dataType: 'xml',
+                url: this.value + '/' + currentValue,
+                success: voteHook
+              });
+            });
             return false;
         });
 
