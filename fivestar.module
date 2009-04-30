@@ -72,13 +72,13 @@ function fivestar_init() {
     if (module_exists('content')) {
       include_once(drupal_get_path('module', 'fivestar') .'/fivestar_field.inc');
     }
-  }
 
-  // Add necessary CSS and JS.
-  // TODO: These shouldn't be loaded on every page, but block caching omits
-  // CSS and JS files that would be otherwise added.
-  fivestar_add_js();
-  fivestar_add_css();
+    // Add necessary CSS and JS.
+    // TODO: These shouldn't be loaded on every page, but block caching omits
+    // CSS and JS files that would be otherwise added.
+    fivestar_add_js();
+    fivestar_add_css();
+  }
 }
 
 /**
