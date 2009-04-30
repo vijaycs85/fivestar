@@ -1553,7 +1553,7 @@ function fivestar_expand($element) {
       '#type' => 'hidden',
       '#value' => fivestar_get_token($element['#auto_submit_path']),
       '#attributes' => array('class' => 'fivestar-token'),
-      '#id' => 'edit-auto-submit-path-'. $fivestar_id,
+      '#id' => 'edit-auto-submit-token-'. $fivestar_id,
     );
   }
 
