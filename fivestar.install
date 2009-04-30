@@ -195,11 +195,16 @@ function fivestar_update_6104() {
  * Belated update for Drupal 6: Re-enable Fivestar CCK fields.
  */
 function fivestar_update_6105() {
+  $ret = array();
+
+  if (!module_exists('content')) {
+    $ret[] = array('success' => TRUE, 'query' => t('CCK is not installed. No update ran.'));
+    return $ret;
+  }
+
   if ($abort = content_check_update('fivestar')) {
     return $abort;
   }
-
-  $ret = array();
 
   // All CCK fields are disabled by Content module during the D6 upgrade.
   // Re-enable the Fivestar fields.
