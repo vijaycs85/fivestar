@@ -202,7 +202,7 @@ function fivestar_widget($op, &$node, $field, &$items) {
       $form[$field['field_name']] = array('#tree' => TRUE);
       $form[$field['field_name']][0]['rating'] = array(
         '#type' => 'fivestar',
-        '#title' => $field['widget']['label'],
+        '#title' => t($field['widget']['label']),
         '#default_value' => isset($items[0]['rating']) ? $items[0]['rating'] : NULL,
         '#stars' => is_numeric($field['stars']) ? $field['stars'] : 5,
         '#allow_clear' => $field['widget']['allow_clear'],
