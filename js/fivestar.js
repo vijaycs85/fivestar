@@ -198,7 +198,7 @@
                 .filter('.hover').removeClass('hover').end();
               // Update the description text.
               if (summaryHover && !feedbackTimerId) {
-                var cancelText = $("select option", $obj)[0].text;
+                var cancelText = $("select option", $obj)[1].text;
                 $summary.html(($cancel.size() && cancelText != 0) ? cancelText : '&nbsp');
                 if (!voteChanged) {
                   $('label', $obj).html(cancelTitle);
