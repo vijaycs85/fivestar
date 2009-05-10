@@ -203,7 +203,7 @@ fivestarPreview.prototype.update = function() {
         response = Drupal.parseJson(response);
       }
       $(self.preview).html(response.data).hide();
-      $('div.fivestar-form-item', self.preview).rating();
+      $('div.fivestar-form-item', self.preview).fivestar();
       $('input.fivestar-submit', self.preview).hide();
       $(self.preview).show();
     };
