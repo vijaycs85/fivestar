@@ -75,16 +75,17 @@
             .mouseout(function(){
                 event.drain();
                 event.reset();
-            })
+            });
+        $stars.children()
             .focus(function(){
                 event.drain();
-                event.fill(this)
+                event.fill(this.parentNode)
             })
             .blur(function(){
                 event.drain();
                 event.reset();
-            });
-        
+            }).end();
+
         // Cancel button events.
         $cancel
             .mouseover(function(){
@@ -94,16 +95,17 @@
             .mouseout(function(){
                 event.reset();
                 $(this).removeClass('on')
-            })
+            });
+        $cancel.children()
             .focus(function(){
                 event.drain();
-                $(this).addClass('on')
+                $(this.parentNode).addClass('on')
             })
             .blur(function(){
                 event.reset();
-                $(this).removeClass('on')
-            });
-        
+                $(this.parentNode).removeClass('on')
+            }).end();
+
         // Click events.
         $cancel.click(function(){
             currentValue = 0;
