@@ -710,7 +710,7 @@ function fivestar_vote($type, $cid, $tag, $value) {
 
   if (count($result)) {
     foreach ($result as $data) {
-      if ($data['tag'] == $tag) {
+      if (isset($data['tag']) && $data['tag'] == $tag) {
         $output .= '<'. $data['function'] .'>'. $data['value'] .'</'. $data['function'] .'>';
         $summary[$data['tag']][$data['function']] = $data['value'];
       }
