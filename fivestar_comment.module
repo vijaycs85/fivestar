@@ -172,7 +172,7 @@ function fivestar_comment_update($cid, $nid, $uid, $value) {
 function fivestar_comment_insert($cid, $nid, $uid, $value) {
   $vote = _fivestar_cast_vote('node', $nid, $value, 'vote', $uid);
   votingapi_recalculate_results('node', $nid);
-  db_query('INSERT INTO {fivestar_comment} (cid, value) VALUES (%d, %d)', $cid, $vote->vote_id, $value);
+  db_query('INSERT INTO {fivestar_comment} (cid, vote_id, value) VALUES (%d, %d)', $cid, $vote->vote_id, $value);
 }
 
 /**
