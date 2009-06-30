@@ -1645,6 +1645,7 @@ function fivestar_views_widget_handler($op, $filter, $value, &$query, $summary) 
     'content_id' => $content_id,
     'autosubmit' => TRUE,
     'title' => FALSE,
+    'tag' => 'vote',
     'feedback_enable' => $summary ? variable_get('fivestar_feedback_'. $node_type, 1) : FALSE,
     'labels_enable' => $summary ? variable_get('fivestar_labels_enable_'. $node_type, 1) : FALSE,
     'labels' => $summary ? variable_get('fivestar_labels_'. $node_type, array()) : array(),
