@@ -861,7 +861,8 @@ function fivestar_nodeapi(&$node, $op, $teaser, $page) {
         switch ($position) {
           case 'above':
           case 'below':
-            if (user_access('rate content')) {
+            global $user;
+            if (user_access('rate content') && fivestar_validate_target($node->type, $node->nid, $user->uid)) {
               $node->content['fivestar_widget'] = array(
                 '#value' => fivestar_widget_form($node),
                 '#weight' => $position == 'above' ? -10 : 50,
