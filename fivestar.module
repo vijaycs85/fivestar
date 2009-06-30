@@ -775,7 +775,7 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $ski
  * @return boolean
  */
 function fivestar_validate_target($type, $id, $uid = NULL) {
-  if (!isset($account)) {
+  if (!isset($uid)) {
     $uid = $GLOBALS['user']->uid;
   }
 
@@ -801,8 +801,8 @@ function fivestar_validate_target($type, $id, $uid = NULL) {
  *   Type of target (currently only node is supported).
  * @param $id
  *   Identifier within the type (in this case nid).
- * @param $account
- *   The user trying to cast the vote.
+ * @param $uid
+ *   The user ID trying to cast the vote.
  *
  * @return boolean or NULL
  *   Returns TRUE if voting is supported on this object.
@@ -811,7 +811,7 @@ function fivestar_validate_target($type, $id, $uid = NULL) {
  *   of permissions defined in other modules, return FALSE. Note if all
  *   modules return NULL, stating no preference, then access will be denied.
  */
-function fivestar_fivestar_access($type, $id, $account) {
+function fivestar_fivestar_access($type, $id, $uid) {
   if ($type == 'node' && $node = node_load($id)) {
     if (variable_get('fivestar_'. $node->type, 0)) {
       return TRUE;
