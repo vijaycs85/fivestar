@@ -861,8 +861,7 @@ function fivestar_nodeapi(&$node, $op, $teaser, $page) {
         switch ($position) {
           case 'above':
           case 'below':
-            global $user;
-            if (user_access('rate content') && fivestar_validate_target($node->type, $node->nid, $user->uid)) {
+            if (user_access('rate content') && fivestar_validate_target('node', $node->nid)) {
               $node->content['fivestar_widget'] = array(
                 '#value' => fivestar_widget_form($node),
                 '#weight' => $position == 'above' ? -10 : 50,
@@ -910,7 +909,6 @@ function fivestar_link($type, $node = NULL, $teaser = FALSE) {
 
 
 function fivestar_block($op = 'list', $delta = 0, $edit = array()) {
-  global $user;
   switch ($op) {
     case 'list':
       $blocks[0]['info'] = t('Fivestar: Rate this node');
