@@ -874,7 +874,7 @@ function fivestar_nodeapi(&$node, $op, $teaser, $page) {
           case 'below_static':
             $stars = variable_get('fivestar_stars_'. $node->type, 5);
             $node->content['fivestar_widget'] = array(
-              '#value' => fivestar_static('node', $node->nid, NULL, $node->type),
+              '#value' => fivestar_static('node', $node->nid, 'vote', $node->type),
               '#weight' => strpos($position, 'above') === 0 ? -10 : 50,
             );
             break;
