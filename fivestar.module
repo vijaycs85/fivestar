@@ -780,7 +780,8 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $ski
 
 function fivestar_get_votes($type, $cid, $tag = 'vote', $uid = NULL) {
   global $user;
-  if (empty($uid)) {
+
+  if (!isset($uid)) {
     $uid = $user->uid;
   }
 
@@ -1045,8 +1046,16 @@ function fivestar_form(&$form_state, $content_type, $content_id) {
     }
   }
 
+  $star_display = variable_get('fivestar_style_'. $node->type, 'average');
+  $text_display = variable_get('fivestar_text_'. $node->type, 'dual');
 
-  $votes = fivestar_get_votes($content_type, $content_id);
+  if ($star_display == 'average' && ($text_display == 'average' || $text_display == 'none')) {
+    // Save a query and don't retrieve the user vote unnecessarily.
+    $votes = fivestar_get_votes($content_type, $content_id, 'vote', 0);
+  }
+  else {
+    $votes = fivestar_get_votes($content_type, $content_id);
+  }
 
   $values = array(
     'user' => isset($votes['user']['value']) ? $votes['user']['value'] : 0,
@@ -1057,8 +1066,8 @@ function fivestar_form(&$form_state, $content_type, $content_id) {
   $settings = array(
     'stars' => variable_get('fivestar_stars_'. $node->type, 5),
     'allow_clear' => variable_get('fivestar_unvote_'. $node->type, FALSE),
-    'style' => variable_get('fivestar_style_'. $node->type, 'average'),
-    'text' => variable_get('fivestar_text_'. $node->type, 'dual'),
+    'style' => $star_display,
+    'text' => $text_display,
     'content_type' => $content_type,
     'content_id' => $content_id,
     'tag' => 'vote',
