@@ -697,8 +697,9 @@ function fivestar_vote($type, $cid, $tag, $value) {
     exit($output);
   }
 
-  $result = _fivestar_cast_vote($type, $cid, $value, $tag, NULL, TRUE);
+  _fivestar_cast_vote($type, $cid, $value, $tag, TRUE);
   votingapi_recalculate_results($type, $cid);
+  $result = fivestar_get_votes($type, $cid, $tag);
 
   if ($type == 'node') {
     $node = node_load($cid);
@@ -741,7 +742,7 @@ function fivestar_vote($type, $cid, $tag, $value) {
  * Internal function to handle vote casting, flood control, XSS, IP based
  * voting, etc...
  */
-function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $result = FALSE, $skip_validation = FALSE) {
+function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $skip_validation = FALSE) {
   global $user;
   $tag = empty($tag) ? 'vote' : $tag;
   $uid = empty($uid) ? $user->uid : $uid;
@@ -765,13 +766,16 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $res
 
     if ($value == 0) {
       votingapi_delete_votes($user_votes);
+      return $user_votes[0];
     }
     else {
       $votes = $criteria += array('value' => $value);
       votingapi_set_votes($votes, $user_votes);
+      return $votes[0];
     }
-    return fivestar_get_votes($type, $cid, $tag, $uid);
   }
+
+  return array();
 }
 
 function fivestar_get_votes($type, $cid, $tag = 'vote', $uid = NULL) {
