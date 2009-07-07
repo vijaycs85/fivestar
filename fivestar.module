@@ -697,7 +697,7 @@ function fivestar_vote($type, $cid, $tag, $value) {
     exit($output);
   }
 
-  _fivestar_cast_vote($type, $cid, $value, $tag, NULL, TRUE);
+  _fivestar_cast_vote($type, $cid, $value, $tag);
   votingapi_recalculate_results($type, $cid);
   $result = fivestar_get_votes($type, $cid, $tag);
 
