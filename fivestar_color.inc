@@ -101,7 +101,7 @@ function fivestar_color_form() {
  * Theme color form.
  */
 function theme_fivestar_color_form($form) {
-  if ($form['#access'] == FALSE) {
+  if (isset($form['#access']) && $form['#access'] == FALSE) {
     return '';
   }
 
