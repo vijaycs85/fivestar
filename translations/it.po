@@ -1,4 +1,3 @@
-# $Id$
 # Italian translation of Drupal (general)
 # Copyright 2009 Ludovico Fischer <livrerieATgmail.com>
 # Generated from files:

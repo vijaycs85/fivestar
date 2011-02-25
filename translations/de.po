@@ -1,4 +1,3 @@
-# $Id: de.po,v 1.1.2.5 2008/12/11 13:53:30 hass Exp $
 #
 # Deutsch translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
