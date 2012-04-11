@@ -757,6 +757,10 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $ski
     if ($value > 100) {
       $value = 100;
     }
+    // Lets not allow negative numbers.
+    if ($value < 0) {
+     $value = 0;
+    }
 
     // Get the user's current vote.
     $criteria = array('content_type' => $type, 'content_id' => $cid, 'tag' => $tag, 'uid' => $uid);
