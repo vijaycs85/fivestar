@@ -128,6 +128,7 @@ function fivestar_comment(&$comment, $op) {
         }
         $comment = (array)$comment;
       }
+      break;
     case 'update':
       if ($fivestar_status != FIVESTAR_COMMENT_DISABLED) {
         $comment = (object)$comment; // Comment module is inconsistent about comment data structures.
