@@ -1189,6 +1189,7 @@ function fivestar_custom_widget(&$form_state, $values, $settings) {
     );
   }
 
+  $settings += array('tag' => 'vote');
   $form['vote'] = array(
     '#type' => 'fivestar',
     '#stars' => $settings['stars'],
@@ -1202,7 +1203,7 @@ function fivestar_custom_widget(&$form_state, $values, $settings) {
     '#feedback_enable' => isset($settings['feedback_enable']) ? $settings['feedback_enable'] : TRUE,
     '#labels_enable' => isset($settings['labels_enable']) ? $settings['labels_enable'] : TRUE,
     '#labels' => isset($settings['labels']) ? $settings['labels'] : NULL,
-    '#tag' => isset($settings['tag']) ? $settings['tag'] : 'vote',
+    '#tag' => $settings['tag'],
   );
 
   $form['destination'] = array(
