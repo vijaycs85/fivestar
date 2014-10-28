@@ -28,81 +28,6 @@ function fivestar_field_info() {
   );
 }
 
-function fivestar_form_field_ui_field_edit_form_alter(&$form, $form_state) {
-  $field = $form['#field'];
-  $instance = $form['#instance'];
-  if ($field['type'] == 'fivestar') {
-    // Multiple values is not supported with Fivestar.
-    $form['field']['cardinality']['#access'] = FALSE;
-    $form['field']['cardinality']['#value'] = 1;
-    // Setting "default value" here is confusing and for all practical purposes
-    // with existing widgets provided by fivestar (and anything else available
-    // in contrib) meaningless.
-    $form['instance']['default_value_widget']['#access'] = FALSE;
-  }
-}
-
-/**
- * Implementation of hook_field_settings_form().
- */
-function fivestar_field_settings_form($field, $instance) {
-  $form['axis'] = array(
-    '#type' => 'select',
-    '#required' => TRUE,
-    '#title' => 'Voting Tag',
-    '#options' => fivestar_get_tags(),
-    '#description' => t('The tag this rating will affect. Enter a property on which that this rating will affect, such as <em>quality</em>, <em>satisfaction</em>, <em>overall</em>, etc.'),
-    '#default_value' => isset($field['settings']['axis']) ? $field['settings']['axis'] : '',
-    '#disabled' => field_has_data($field),
-  );
-
-  return $form;
-}
-
-function fivestar_field_instance_settings_form($field, $instance) {
-  $form = array();
-
-  $widget_title = ($instance['widget']['type'] == 'select') ? t('Number of options') : t('Number of stars');
-  $form['stars'] = array(
-    '#type' => 'select',
-    '#title' => check_plain($widget_title),
-    '#options' => drupal_map_assoc(range(1, 10)),
-    '#default_value' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
-  );
-
-  $form['allow_clear'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow users to cancel their ratings.'),
-    '#default_value' => isset($instance['settings']['allow_clear']) ? $instance['settings']['allow_clear'] : FALSE,
-    '#return_value' => 1,
-  );
-
-  $form['allow_revote'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow users to re-vote on already voted content.'),
-    '#default_value' => isset($instance['settings']['allow_revote']) ? $instance['settings']['allow_revote'] : TRUE,
-    '#return_value' => 1,
-  );
-
-  $form['allow_ownvote'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow users to vote on their own content.'),
-    '#default_value' => isset($instance['settings']['allow_ownvote']) ? $instance['settings']['allow_ownvote'] : TRUE,
-    '#return_value' => 1,
-  );
-
-  $options = fivestar_get_targets($field, $instance);
-  $form['target'] = array(
-    '#title' => t('Voting target'),
-    '#type' => 'select',
-    '#default_value' => (isset($instance['settings']['target']) && $instance['widget']['type'] != 'exposed') ? $instance['settings']['target'] : 'none',
-    '#options' => $options,
-    '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. Use the Parent Node Target when using fivestar with comments. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
-    '#access' => (count($options) > 1 && $instance['widget']['type'] != 'exposed'),
-  );
-
-  return $form;
-}
 
 /**
  * Implementation of hook_field_insert().
@@ -159,26 +84,6 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
   }
 }
 
-/**
- * Helper function to find the id that should be rated when a field is changed.
- */
-function _fivestar_field_target($entity, $field, $instance, $item, $langcode) {
-  if ($instance['widget']['type'] == 'exposed') {
-    return NULL;
-  }
-  if (isset($instance['settings']['target'])) {
-    $target = fivestar_get_targets($field, $instance, $instance['settings']['target'], $entity, $langcode);
-  }
-  else {
-    // If all else fails, default to voting on the instance the field is attached to.
-    list($id, $vid, $bundle) = entity_extract_ids($instance['entity_type'], $entity);
-    $target = array(
-      'entity_id' => $id,
-      'entity_type' => $instance['entity_type'],
-    );
-  }
-  return $target;
-}
 
 /**
  * Helper function to store a rating into the field storage.
@@ -515,7 +420,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
       'langcode' => $langcode,
     );
     // If microdata module is enabled, attach the microdata attributes.
-    $settings['microdata'] = module_exists('microdata') ? $entity->microdata[$field['field_name']] : array();
+    $settings['microdata'] = \Drupal::moduleHandler()->moduleExists('microdata') ? $entity->microdata[$field['field_name']] : array();
 
     $element[0] = drupal_get_form('fivestar_custom_widget', $values, $settings);
     // Our work here is done.
@@ -788,7 +693,7 @@ function fivestar_property_info_callback(&$info, $entity_type, $field, $instance
 function _fivestar_get_microdata_property_info($entity_type, $entity, $field, $instance) {
   // If microdata module is enabled, attach the microdata attributes the module
   // adds to the entity object.
-  if (module_exists('microdata')) {
+  if (\Drupal::moduleHandler()->moduleExists('microdata')) {
     $microdata = $entity->microdata[$field['field_name']];
   }
   // If microdata is not enabled, add empty arrays for each property so we
@@ -799,7 +704,7 @@ function _fivestar_get_microdata_property_info($entity_type, $entity, $field, $i
     );
     // If Entity API is enabled, we can use that to get the properties.
     // Otherwise, replicate the Entity API logic for getting the properties.
-    if (module_exists('entity')) {
+    if (\Drupal::moduleHandler()->moduleExists('entity')) {
       $entity_info = entity_get_all_property_info($entity_type);
     }
     else {

@@ -7,6 +7,6 @@ dependencies:
   - votingapi
 configure:
   admin/config/content/fivestar
-files
+files:
   - test/fivestar.base.test
   - test/fivestar.field.test
