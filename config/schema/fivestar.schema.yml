@@ -1,0 +1,9 @@
+# Schema for the configuration files of the Fivestar module.
+
+fivestar.settings:
+  type: mapping
+  label: 'Action settings'
+  mapping:
+    tags:
+      type: label
+      label: 'Tags'
