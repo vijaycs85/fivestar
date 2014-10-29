@@ -112,7 +112,6 @@ function _fivestar_variables() {
  * Internal function to handle vote casting, flood control, XSS, IP based
  * voting, etc...
  */
-
 function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL, $skip_validation = FALSE, $vote_source = NULL) {
   global $user;
   $tag = empty($tag) ? 'vote' : $tag;

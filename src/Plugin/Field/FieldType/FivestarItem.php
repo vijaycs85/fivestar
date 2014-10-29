@@ -7,8 +7,10 @@
 
 namespace Drupal\fivestar\Plugin\Field\FieldType;
 
+use Drupal\Component\Utility\String;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Language\Language;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -91,8 +93,8 @@ class FivestarItem extends FieldItemBase {
     $widget_title = ($instance['widget']['type'] == 'select') ? t('Number of options') : t('Number of stars');
     $element['stars'] = array(
       '#type' => 'select',
-      '#title' => check_plain($widget_title),
-      '#options' => drupal_map_assoc(range(1, 10)),
+      '#title' => String::checkPlain($widget_title),
+      '#options' =>  array_combine(range(1, 10), range(1, 10)),
       '#default_value' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
     );
 
@@ -117,7 +119,7 @@ class FivestarItem extends FieldItemBase {
       '#return_value' => 1,
     );
 
-    $options = fivestar_get_targets($field, $instance);
+    $options = $this->fivestar_get_targets($field, $instance);
     $element['target'] = array(
       '#title' => t('Voting target'),
       '#type' => 'select',
@@ -128,7 +130,6 @@ class FivestarItem extends FieldItemBase {
     );
 
     return $element;
-
   }
 
   /**
@@ -155,6 +156,7 @@ class FivestarItem extends FieldItemBase {
   protected function fieldOperations($op = NULL) {
     $entity = $this->getEntity();
     $entity_type = $entity->getEntityType();
+    $langcode = $this->getLangcode();
 
     foreach ($items as $delta => $item) {
       if ((isset($entity->status) && !$entity->status) || $op == 'delete') {
@@ -163,7 +165,7 @@ class FivestarItem extends FieldItemBase {
       else {
         $rating = (isset($items[$delta]['rating'])) ? $items[$delta]['rating'] : 0;
       }
-      $target = _fivestar_field_target($entity, $field, $instance, $item, $langcode);
+      $target = $this->_fivestar_field_target($entity, $field, $instance, $langcode);
       if (!empty($target)) {
         if ($entity_type == 'comment' && $op == 'delete') {
           $target['vote_source'] = $entity->hostname;
@@ -172,7 +174,7 @@ class FivestarItem extends FieldItemBase {
           $target['vote_source'] = NULL;
         }
         _fivestar_cast_vote($target['entity_type'], $target['entity_id'], $rating, $field['settings']['axis'], $entity->uid, TRUE, $target['vote_source']);
-        votingapi_recalculate_results($target['entity_type'], $target['entity_id']);
+        // votingapi_recalculate_results($target['entity_type'], $target['entity_id']);
       }
       // The original callback is only called for a single updated field, but the Field API
       // then updates all fields of the entity. For an update, the Field API first deletes
@@ -192,7 +194,7 @@ class FivestarItem extends FieldItemBase {
   /**
    * Helper function to find the id that should be rated when a field is changed.
    */
-  function _fivestar_field_target($entity, $field, $instance, $item, $langcode) {
+  function _fivestar_field_target($entity, $field, $instance, $langcode) {
     if ($instance['widget']['type'] == 'exposed') {
       return NULL;
     }
@@ -209,7 +211,7 @@ class FivestarItem extends FieldItemBase {
   }
 
 
-  function fivestar_get_targets($field, $instance, $key = FALSE, $entity = FALSE, $langcode = LANGUAGE_NONE) {
+  function fivestar_get_targets($field, $instance, $key = FALSE, $entity = FALSE, $langcode = Language::LANGCODE_NOT_SPECIFIED) {
     $options = array();
     $targets = \Drupal::moduleHandler()->invokeAll('fivestar_target_info', array($field, $instance));
     if ($key == FALSE) {
