@@ -2,11 +2,7 @@ name: Fivestar
 description: Enables fivestar ratings on content, users, etc.
 type: module
 package: Voting
-core: 7.x
+core: 8.x
 dependencies:
-  - votingapi
-configure:
-  admin/config/content/fivestar
-files:
-  - test/fivestar.base.test
-  - test/fivestar.field.test
+#  - votingapi
+configure: fivestar.admin_overview

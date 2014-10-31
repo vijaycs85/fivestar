@@ -21,8 +21,8 @@ use Drupal\Core\Form\FormStateInterface;
  *   id = "fivestar",
  *   label = @Translation("Fivestar Rating"),
  *   description = @Translation("Store a rating for this piece of content."),
- *   default_widget = "exposed",
- *   default_formatter = "fivestar_formatter_default"
+ *   default_widget = "fivestar_exposed",
+ *   default_formatter = "fivestar_default"
  * )
  */
 class FivestarItem extends FieldItemBase {
@@ -74,7 +74,7 @@ class FivestarItem extends FieldItemBase {
       '#required' => TRUE,
       '#title' => 'Voting Tag',
       '#options' => fivestar_get_tags(),
-      '#description' => t('The tag this rating will affect. Enter a property on which that this rating will affect, such as <em>quality</em>, <em>satisfaction</em>, <em>overall</em>, etc.'),
+      '#description' => $this->t('The tag this rating will affect. Enter a property on which that this rating will affect, such as <em>quality</em>, <em>satisfaction</em>, <em>overall</em>, etc.'),
       '#default_value' => $this->getSetting('axis'),
       '#disabled' => $has_data,
     );
@@ -90,43 +90,49 @@ class FivestarItem extends FieldItemBase {
 
     $settings = $this->getSettings();
 
-    $widget_title = ($instance['widget']['type'] == 'select') ? t('Number of options') : t('Number of stars');
+    $field = $this->getFieldDefinition();
+
+    // $widget_title = ($instance['widget']['type'] == 'select') ? $this->t('Number of options') : $this->t('Number of stars');
+    $widget_title = $this->t('Number of stars');
     $element['stars'] = array(
       '#type' => 'select',
       '#title' => String::checkPlain($widget_title),
       '#options' =>  array_combine(range(1, 10), range(1, 10)),
-      '#default_value' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
+      '#default_value' => isset($settings['stars']) ? $settings['stars'] : 5,
     );
 
     $element['allow_clear'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Allow users to cancel their ratings.'),
-      '#default_value' => isset($instance['settings']['allow_clear']) ? $instance['settings']['allow_clear'] : FALSE,
+      '#title' => $this->t('Allow users to cancel their ratings.'),
+      '#default_value' => isset($settings['allow_clear']) ? $settings['allow_clear'] : FALSE,
       '#return_value' => 1,
     );
 
     $element['allow_revote'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Allow users to re-vote on already voted content.'),
-      '#default_value' => isset($instance['settings']['allow_revote']) ? $instance['settings']['allow_revote'] : TRUE,
+      '#title' => $this->t('Allow users to re-vote on already voted content.'),
+      '#default_value' => isset($settings['allow_revote']) ? $settings['allow_revote'] : TRUE,
       '#return_value' => 1,
     );
 
     $element['allow_ownvote'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Allow users to vote on their own content.'),
-      '#default_value' => isset($instance['settings']['allow_ownvote']) ? $instance['settings']['allow_ownvote'] : TRUE,
+      '#title' => $this->t('Allow users to vote on their own content.'),
+      '#default_value' => isset($settings['allow_ownvote']) ? $settings['allow_ownvote'] : TRUE,
       '#return_value' => 1,
     );
-
-    $options = $this->fivestar_get_targets($field, $instance);
+    // FIXME: Vijay
+    // $options = $this->fivestar_get_targets($field, $instance);
+    $options = array();
     $element['target'] = array(
-      '#title' => t('Voting target'),
+      '#title' => $this->t('Voting target'),
       '#type' => 'select',
-      '#default_value' => (isset($instance['settings']['target']) && $instance['widget']['type'] != 'exposed') ? $instance['settings']['target'] : 'none',
+      // FIXME: Vijay
+      // '#default_value' => (isset($settings['target']) && $instance['widget']['type'] != 'exposed') ? $settings['target'] : 'none',
       '#options' => $options,
-      '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. Use the Parent Node Target when using fivestar with comments. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
-      '#access' => (count($options) > 1 && $instance['widget']['type'] != 'exposed'),
+      '#description' => $this->t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. Use the Parent Node Target when using fivestar with comments. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
+      // FIXME: Vijay
+      // '#access' => (count($options) > 1 && $instance['widget']['type'] != 'exposed'),
     );
 
     return $element;
@@ -157,6 +163,8 @@ class FivestarItem extends FieldItemBase {
     $entity = $this->getEntity();
     $entity_type = $entity->getEntityType();
     $langcode = $this->getLangcode();
+    // FIXME: Vijay
+    return;
 
     foreach ($items as $delta => $item) {
       if ((isset($entity->status) && !$entity->status) || $op == 'delete') {
@@ -165,7 +173,8 @@ class FivestarItem extends FieldItemBase {
       else {
         $rating = (isset($items[$delta]['rating'])) ? $items[$delta]['rating'] : 0;
       }
-      $target = $this->_fivestar_field_target($entity, $field, $instance, $langcode);
+      // FIXME: Vijay
+      // $target = $this->_fivestar_field_target($entity, $field, $instance, $langcode);
       if (!empty($target)) {
         if ($entity_type == 'comment' && $op == 'delete') {
           $target['vote_source'] = $entity->hostname;
@@ -173,7 +182,8 @@ class FivestarItem extends FieldItemBase {
         else {
           $target['vote_source'] = NULL;
         }
-        _fivestar_cast_vote($target['entity_type'], $target['entity_id'], $rating, $field['settings']['axis'], $entity->uid, TRUE, $target['vote_source']);
+        // FIXME: Vijay
+        // _fivestar_cast_vote($target['entity_type'], $target['entity_id'], $rating, $field['settings']['axis'], $entity->uid, TRUE, $target['vote_source']);
         // votingapi_recalculate_results($target['entity_type'], $target['entity_id']);
       }
       // The original callback is only called for a single updated field, but the Field API

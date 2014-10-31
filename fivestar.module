@@ -7,6 +7,7 @@
 
 include_once dirname(__FILE__) . '/includes/fivestar.field.inc';
 
+use Drupal\Component\Utility\Unicode;
 /**
  * Implementation of hook_help().
  */
@@ -336,9 +337,9 @@ function fivestar_form_comment_form_alter(&$form, &$form_state, $form_id) {
  * Implements hook_form_FORM_ID_alter().
  */
 function fivestar_form_field_ui_field_edit_form_alter(&$form, $form_state) {
+  /** @var Drupal\field\FieldStorageConfigInterface $field */
   $field = $form['#field'];
-  $instance = $form['#instance'];
-  if ($field['type'] == 'fivestar') {
+  if ($field->getType() == 'fivestar') {
     // Multiple values is not supported with Fivestar.
     $form['field']['cardinality']['#access'] = FALSE;
     $form['field']['cardinality']['#value'] = 1;
@@ -363,7 +364,7 @@ function fivestar_form_field_ui_field_edit_form_alter(&$form, $form_state) {
 function fivestar_fivestar_widgets() {
   $widgets = &drupal_static(__FUNCTION__);
   if (!isset($widgets)) {
-    $cache = cache_get(__FUNCTION__);
+    $cache = \Drupal::cache()->get(__FUNCTION__);
     if ($cache) {
       $widgets = $cache->data;
     }
@@ -374,10 +375,10 @@ function fivestar_fivestar_widgets() {
     $files = file_scan_directory($widgets_directory, '/\.css$/');
     foreach ($files as $file) {
       if (strpos($file->filename, '-rtl.css') === FALSE) {
-        $widgets[$file->uri] = drupal_ucfirst(str_replace('-color', '', $file->name));
+        $widgets[$file->uri] = Unicode::ucfirst(str_replace('-color', '', $file->name));
       }
     }
-    cache_set(__FUNCTION__, $widgets);
+    \Drupal::cache()->set(__FUNCTION__, $widgets);
   }
   return $widgets;
 }
