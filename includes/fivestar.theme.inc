@@ -20,7 +20,7 @@ function theme_fivestar_preview_widget($variables) {
     '#attributes' => array(),
     '#title_display' => 'before',
   );
-  $form_state = form_state_defaults();
+  $form_state = \Drupal::formBuilder()->getFormStateDefaults();
   $form_state['values'] = array();
   $form_state['process_input'] = array();
   $form_state['complete form'] = array();
@@ -47,8 +47,14 @@ function theme_fivestar_preview_widget($variables) {
     'feedbackDeletingVote' => t('Deleting your vote...'),
     'feedbackVoteDeleted' => t('Your vote has been deleted.'),
   );
-
-  drupal_add_js(array('fivestar' => $settings), 'setting');
+  $form['#attached'][] = array(
+    'js' => array(
+      array(
+        'type' => 'setting',
+        'data' => $settings
+      )
+    )
+  );
 
   $form = form_builder('fivestar_preview', $form, $form_state);
 

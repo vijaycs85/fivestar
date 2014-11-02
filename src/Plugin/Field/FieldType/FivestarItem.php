@@ -90,8 +90,6 @@ class FivestarItem extends FieldItemBase {
 
     $settings = $this->getSettings();
 
-    $field = $this->getFieldDefinition();
-
     // $widget_title = ($instance['widget']['type'] == 'select') ? $this->t('Number of options') : $this->t('Number of stars');
     $widget_title = $this->t('Number of stars');
     $element['stars'] = array(
@@ -136,6 +134,14 @@ class FivestarItem extends FieldItemBase {
     );
 
     return $element;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isEmpty() {
+    $item = $this->getFieldDefinition()->getItemDefinition()->getSetting('rating');
+    return empty($item) || $item == '-';
   }
 
   /**

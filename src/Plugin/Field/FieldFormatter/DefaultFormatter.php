@@ -8,17 +8,14 @@
 namespace Drupal\fivestar\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 
 /**
- * Plugin implementation of the 'number_decimal' formatter.
- *
- * The 'Default' formatter is different for integer fields on the one hand, and
- * for decimal and float fields on the other hand, in order to be able to use
- * different settings.
+ * Plugin implementation of the 'fivestar_default' formatter.
  *
  * @FieldFormatter(
  *   id = "fivestar_default",
- *   label = @Translation("Default"),
+ *   label = @Translation("As Stars"),
  *   field_types = {
  *     "fivestar"
  *   },
@@ -43,6 +40,9 @@ class DefaultFormatter extends FivestarFormatterBase {
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
+    $class = get_class($this);
+    $settings = $this->getSettings();
+
     $elements = parent::settingsForm($form, $form_state);
     $elements['widget'] = array(
       '#tree' => TRUE,
@@ -59,11 +59,11 @@ class DefaultFormatter extends FivestarFormatterBase {
       '#options' => array('default' => $this->t('Default')) + $widgets,
       '#default_value' => isset($settings['widget']['fivestar_widget']) ? $settings['widget']['fivestar_widget'] : 'default',
       '#attributes' => array('class' => array('fivestar-widgets', 'clearfix')),
-      '#pre_render' => array('fivestar_previews_expand'),
+      '#pre_render' =>array(array($class, 'previewsExpand')),
       '#attached' => array('css' => array(drupal_get_path('module', 'fivestar') . '/css/fivestar-admin.css')),
     );
 
-    //if ($this-> == 'exposed') {
+    //if ($settings['exposed']) {
     $elements['expose'] = array(
       '#type' => 'checkbox',
       '#title' => $this->t('Allow voting on the entity.'),
@@ -125,6 +125,18 @@ class DefaultFormatter extends FivestarFormatterBase {
       '@text' => strtolower($settings['text'])));
 
     return $summary;
+  }
+
+  public static function previewsExpand($elements) {
+    foreach (Element::child($elements) as $css) {
+      $vars = array(
+        'css' => $css,
+        'name' => strtolower($elements[$css]['#title']),
+      );
+      $elements[$css]['#description'] = array('#type' => 'fivestar_preview_widget') + $vars;
+    }
+
+    return $elements;
   }
 
 }
